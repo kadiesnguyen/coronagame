@@ -2,6 +2,7 @@ export const LOAI_GAME = {
   KENO1P: "keno1p",
   KENO3P: "keno3p",
   KENO5P: "keno5p",
+  KENO10P: "keno10p",
   XUCXAC1P: "xucxac1p",
   XUCXAC3P: "xucxac3p",
   XOCDIA1P: "xocdia1p",
@@ -17,6 +18,8 @@ export const convertLoaiGame = (loaiGame) => {
       return "Keno 3p";
     case LOAI_GAME.KENO5P:
       return "Keno 5p";
+    case LOAI_GAME.KENO10P:
+      return "Keno 10p";
     case LOAI_GAME.XUCXAC1P:
       return "Xúc xắc 1p";
     case LOAI_GAME.XUCXAC3P:

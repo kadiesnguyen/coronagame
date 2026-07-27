@@ -11,10 +11,10 @@ const CountdownBox = styled(Box)(({ theme }) => ({
     background: "transparent",
   },
   "& div": {
-    background: "#efeff4",
-    border: "1px solid #fff",
+    background: "#162948",
+    border: "1px solid rgba(212,175,55,.45)",
     borderRadius: "5px",
-    color: "red",
+    color: "#e5c05b",
     fontSize: "2rem",
     fontWeight: "bold",
     padding: "0 5px",

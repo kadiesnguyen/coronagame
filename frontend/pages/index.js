@@ -5,8 +5,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import Layout from "../components/Layout";
 import HomeNotification from "../components/homePage/HomeNotification";
 // Import Swiper styles
-import Banner1 from "@/public/assets/images/banner1.jpg";
-import Banner2 from "@/public/assets/images/banner2.jpg";
+import Banner1 from "@/public/assets/images/banner-baccarat-quy-3.jpg";
+import Banner2 from "@/public/assets/images/banner-money-shower.jpg";
 import Keno1P from "@/public/assets/images/keno1p.png";
 import Keno3P from "@/public/assets/images/keno3p.png";
 import Keno5P from "@/public/assets/images/keno5p.png";
@@ -36,6 +36,12 @@ const LIST_GAME = [
     desc: "Đoán số để dành chiến thắng",
     img: Keno5P,
     link: "/games/keno5p",
+  },
+  {
+    title: "Keno10P",
+    desc: "Keno VIP 10 phút",
+    img: Keno5P,
+    link: "/games/keno10p",
   },
   {
     title: "Xúc Xắc 1P",
@@ -77,35 +83,42 @@ const LIST_GAME = [
 ];
 const LIST_SWIPER = [
   {
-    desc: "Megalott",
+    desc: "Corona Baccarat Tournament Quarter III",
     img: Banner1,
   },
   {
-    desc: "Megalott",
+    desc: "Corona Money Shower",
     img: Banner2,
   },
 ];
 
 const GameItem = styled(Box)(({ theme }) => ({
   marginTop: "10px",
-  background: "linear-gradient(124.32deg,#df2a2a 12.08%,#ee8d8d 85.02%)",
-  borderRadius: "10px",
-  padding: "10px",
+  background: "linear-gradient(145deg, #1a2f4d 0%, #162948 55%, #12243c 100%)",
+  border: "1px solid rgba(212, 175, 55, 0.28)",
+  borderRadius: "14px",
+  padding: "12px 14px",
   display: "flex",
   justifyContent: "space-between",
+  alignItems: "center",
   cursor: "pointer",
+  transition: "border-color .2s ease, transform .15s ease",
+  "&:hover": {
+    borderColor: "rgba(229, 192, 91, 0.7)",
+    transform: "translateY(-1px)",
+  },
   "& .desc": {
     display: "flex",
     flexDirection: "column",
 
     "& .title-game": {
-      color: theme.palette.text.primary,
+      color: "#fff",
       fontSize: "2rem",
       fontWeight: "bold",
       textTransform: "uppercase",
     },
     "& .desc-game": {
-      color: theme.palette.text.primary,
+      color: "#b8c0d4",
       fontSize: "1.5rem",
     },
   },

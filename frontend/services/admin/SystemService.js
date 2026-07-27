@@ -21,6 +21,14 @@ class SystemService {
     });
     return res;
   };
+  static getVipLevelsConfig = async () => {
+    const res = await api.get(`/v1/admin/he-thong/vip-levels`);
+    return res;
+  };
+  static updateVipLevelsConfig = async ({ vipLevels }) => {
+    const res = await api.put(`/v1/admin/he-thong/vip-levels`, { vipLevels });
+    return res;
+  };
 }
 
 export default SystemService;

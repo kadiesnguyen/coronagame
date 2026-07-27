@@ -129,6 +129,15 @@ class BullMQService {
               itemLichSuDatCuoc,
               tiLe,
             });
+          } else if (typeGame === LOAI_GAME.KENO10P) {
+            const gameKeno10pService = require("./game.keno10p.service");
+            await gameKeno10pService.traThuongWorker({
+              bangKetQua,
+              nguoiDung,
+              listCuoc,
+              itemLichSuDatCuoc,
+              tiLe,
+            });
           }
           console.log(`Job ${job.id} completed in ${Date.now() - startTime}ms`);
         } catch (error) {

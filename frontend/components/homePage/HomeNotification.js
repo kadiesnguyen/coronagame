@@ -14,14 +14,15 @@ const HomeNotification = () => {
             display: "flex",
             gap: "1rem",
             padding: "1rem",
-            backgroundColor: "#f1e7bd",
+            backgroundColor: "rgba(212,175,55,.12)",
+            border: "1px solid rgba(212,175,55,.35)",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
           <CampaignIcon
             sx={{
-              color: "#e97d4a",
+              color: "#e5c05b",
             }}
           />
           <Box
@@ -33,7 +34,7 @@ const HomeNotification = () => {
             <Typography
               id="scroll-text"
               sx={{
-                color: "#e97d4a",
+                color: "#e5c05b",
               }}
             >
               {item.tieuDe}

@@ -1,12 +1,13 @@
 import GameService from "@/services/GameService";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
-const useGetDetailedBetHistory = ({ typeGame = "keno1p", phien }) => {
+const useGetDetailedBetHistory = ({ typeGame = "keno1p", phien, vipLevel }) => {
   const getData = async () => {
     try {
       const response = await GameService.getDetailedUserBetGameHistory({
         typeGame,
         phien,
+        vipLevel,
       });
       const data = response.data.data;
       return data;
@@ -15,7 +16,7 @@ const useGetDetailedBetHistory = ({ typeGame = "keno1p", phien }) => {
     }
   };
 
-  const { data, error, isLoading, isError, refetch } = useQuery(["get-detailed-bet-history", { typeGame, phien }], () =>
+  const { data, error, isLoading, isError, refetch } = useQuery(["get-detailed-bet-history", { typeGame, phien, vipLevel }], () =>
     getData()
   );
   useEffect(() => {

@@ -23,48 +23,54 @@ const BoxContainer = styled(Box)(({ theme }) => ({
   padding: "2rem",
   marginTop: "1rem",
 
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "#162948",
+  border: "1px solid rgba(212,175,55,.25)",
   position: "relative",
   display: "flex",
   gap: "10px",
   flexDirection: "column",
-  color: theme.palette.text.secondary,
+  color: "#fff",
   "& .bet_state": {
-    borderBottom: "3px solid red",
+    borderBottom: "3px solid #d4af37",
     display: "inline-block",
     fontWeight: 700,
     margin: "0.1rem 0 0.3rem",
+    color: "#e5c05b",
   },
 }));
 const ItemCuoc = styled(Box)(({ theme }) => ({
   borderRadius: "10px",
   padding: "10px",
   cursor: "pointer",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "#101d33",
   position: "relative",
   display: "flex",
   gap: "10px",
   flexDirection: "column",
-  border: "1px solid #e5e5e5",
+  border: "1px solid rgba(255,255,255,.12)",
   alignItems: "center",
-  color: theme.palette.text.secondary,
+  color: "#fff",
   "& .loai_cuoc": {
     fontWeight: 700,
-    color: "red",
+    color: "#e5c05b",
   },
   "& .tien_cuoc": {
     fontWeight: 700,
-    color: "#fa8838",
+    color: "#e2c499",
   },
   "&.active-tien_cuoc": {
-    backgroundColor: "red",
+    backgroundColor: "#d4af37",
+    borderColor: "#e5c05b",
     "& .loai_cuoc": {
-      color: "#ffffff",
+      color: "#0b1528",
+    },
+    "& .tien_cuoc": {
+      color: "#0b1528",
     },
   },
 }));
 
-const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
+const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
   const boxDatCuocRef = useRef(null);
 
   const titleDatCuocRef = useRef(null);
@@ -72,6 +78,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
   const { data: detailedBetHistoryData, refetch: refetchDetailedBetHistory } = useGetDetailedBetHistory({
     typeGame: TYPE_GAME,
     phien,
+    vipLevel,
   });
 
   const { data: betPayoutPercentageData } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME });
@@ -79,6 +86,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
   const { refetch: refetchUserBetHistory } = useGetUserBetHistory({
     typeGame: TYPE_GAME,
     pageSize: USER_BET_GAME_HISTORY_PAGE_SIZE,
+    vipLevel,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isAllowResetBtn, setIsAllowResetBtn] = useState(false);
@@ -122,6 +130,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
         data: {
           phien,
           chiTietCuoc: chiTietCuocTemp,
+          ...(vipLevel ? { vipLevel } : {}),
         },
       });
       await refetchDetailedBetHistory();
@@ -238,7 +247,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
           flexDirection: "column",
           color: (theme) => theme.palette.text.secondary,
           "& .bet_state": {
-            borderBottom: "3px solid red",
+            borderBottom: "3px solid #d4af37",
             display: "inline-block",
             fontWeight: 700,
             margin: "0.1rem 0 0.3rem",

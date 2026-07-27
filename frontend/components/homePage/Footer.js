@@ -12,7 +12,8 @@ import { styled } from "@mui/material/styles";
 import Link from "next/link";
 import { useRouter } from "next/router";
 const FooterContainer = styled(Box)(({ theme }) => ({
-  background: "url(/assets/images/footer_background.png) no-repeat 50%/cover",
+  background: "linear-gradient(180deg, #101d33 0%, #0a1220 100%)",
+  borderTop: "1px solid rgba(212, 175, 55, 0.25)",
   maxWidth: "540px",
   position: "fixed",
   bottom: 0,
@@ -28,14 +29,16 @@ const FooterContainer = styled(Box)(({ theme }) => ({
 const FooterItem = styled(Box)(({ theme }) => ({
   cursor: "pointer",
   alignItems: "center",
-  color: "#949494",
+  color: "#b8c0d4",
   display: "flex",
   flex: "1 1",
   flexDirection: "column",
   gap: "0.11707rem",
   justifyContent: "center",
 
-  "&:hover": {},
+  "&:hover": {
+    color: "#e5c05b",
+  },
 }));
 const listItem = [
   {

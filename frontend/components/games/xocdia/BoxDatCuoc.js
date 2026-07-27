@@ -30,21 +30,25 @@ const ItemCuoc = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: "10px",
   flexDirection: "column",
-  border: "1px solid #e5e5e5",
+  border: "1px solid rgba(255,255,255,.12)",
   alignItems: "center",
   color: theme.palette.text.secondary,
   "& .loai_cuoc": {
     fontWeight: 700,
-    color: "red",
+    color: "#e5c05b",
   },
   "& .tien_cuoc": {
     fontWeight: 700,
     color: "#fa8838",
   },
   "&.active-tien_cuoc": {
-    backgroundColor: "red",
+    backgroundColor: "#d4af37",
+    borderColor: "#e5c05b",
     "& .loai_cuoc": {
-      color: "#ffffff",
+      color: "#0b1528",
+    },
+    "& .tien_cuoc": {
+      color: "#0b1528",
     },
   },
 }));
@@ -228,7 +232,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
           flexDirection: "column",
           color: (theme) => theme.palette.text.secondary,
           "& .bet_state": {
-            borderBottom: "3px solid red",
+            borderBottom: "3px solid #d4af37",
             display: "inline-block",
             fontWeight: 700,
             margin: "0.1rem 0 0.3rem",

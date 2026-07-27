@@ -9,7 +9,7 @@ const HuongDan = () => {
           boxShadow: "0 5px 5px #c5c5da40",
           marginTop: "20px",
           borderRadius: "15px",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#162948",
           color: (theme) => theme.palette.text.secondary,
         }}
       >

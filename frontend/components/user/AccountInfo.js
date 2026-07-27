@@ -40,9 +40,8 @@ const TransactionBox = styled(Box)(({ theme }) => ({
   left: "50%",
   transform: "translateX(-50%)",
   display: "flex",
-
-  background: "linear-gradient(180deg,#da4141,red)",
-
+  background: "linear-gradient(180deg, #e5c05b, #d4af37)",
+  color: "#0b1528",
   padding: "1rem",
   borderRadius: "1rem",
   fontSize: "1.5rem",
@@ -53,11 +52,17 @@ const TransactionBox = styled(Box)(({ theme }) => ({
     alignItems: "center",
     padding: "0 1.5rem",
     gap: "1rem",
+    color: "#0b1528",
+    "& svg": {
+      color: "#0b1528",
+    },
     "&:first-of-type": {
-      borderRight: "1px solid",
+      borderRight: "1px solid rgba(11, 21, 40, 0.25)",
     },
     "& p": {
       textWrap: "nowrap",
+      color: "#0b1528",
+      fontWeight: 600,
     },
   },
 }));
@@ -71,7 +76,7 @@ const SplitBorder = styled(Box)(({ theme }) => ({
   transform: "translate(-50%)",
   width: "100%",
   "& span": {
-    borderTop: "1rem solid #fff",
+    borderTop: "1rem solid #162948",
     display: "inline-block",
     position: "relative",
     top: "1rem",
@@ -134,11 +139,12 @@ const AccountInfo = ({ user }) => {
       <Box
         sx={{
           borderRadius: "2rem",
-          backgroundColor: "#fff",
+          backgroundColor: "#162948",
           border: (theme) => `2px solid ${theme.palette.color.primary}`,
           position: "relative",
           height: "30rem",
           marginTop: "3rem",
+          boxShadow: "0 8px 28px rgba(0,0,0,.35)",
         }}
       >
         <SplitBorder>
@@ -151,14 +157,14 @@ const AccountInfo = ({ user }) => {
         <TitleLeft />
         <TitleCenter>Tài khoản</TitleCenter>
         <TitleRight />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            paddingTop: "30px",
-            color: (theme) => theme.palette.color.secondary,
-          }}
-        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              paddingTop: "30px",
+              color: "#fff",
+            }}
+          >
           <Box
             sx={{
               display: "flex",
@@ -172,6 +178,7 @@ const AccountInfo = ({ user }) => {
                 "& img": {
                   borderRadius: "50%",
                   objectFit: "cover",
+                  border: "2px solid #d4af37",
                 },
               }}
             >
@@ -179,6 +186,7 @@ const AccountInfo = ({ user }) => {
                 style={{
                   borderRadius: "50%",
                   objectFit: "cover",
+                  border: "2px solid #d4af37",
                 }}
                 src={Avatar}
                 width={80}
@@ -186,10 +194,12 @@ const AccountInfo = ({ user }) => {
                 alt={user.taiKhoan}
               />
             </Box>
-            <Typography>{user.taiKhoan}</Typography>
+            <Typography sx={{ color: "#fff", mt: 1 }}>{user.taiKhoan}</Typography>
             <Typography
               sx={{
                 fontSize: "3rem",
+                color: "#fff",
+                fontWeight: 700,
               }}
             >
               <Money />

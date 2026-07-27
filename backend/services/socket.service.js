@@ -3,6 +3,7 @@ const AdminSocketService = require("./admin.socket.service");
 const GameKeno1PSocketService = require("./game.socket.service/game.keno1p.socket.service");
 const GameKeno3PSocketService = require("./game.socket.service/game.keno3p.socket.service");
 const GameKeno5PSocketService = require("./game.socket.service/game.keno5p.socket.service");
+const GameKeno10PSocketService = require("./game.socket.service/game.keno10p.socket.service");
 const GameXucXac1PSocketService = require("./game.socket.service/game.xucxac1p.socket.service");
 const GameXucXac3PSocketService = require("./game.socket.service/game.xucxac3p.socket.service");
 const GameXocDia1PSocketService = require("./game.socket.service/game.xocdia1p.socket.service");
@@ -82,6 +83,7 @@ class SocketService {
     new GameKeno1PSocketService(socket);
     new GameKeno3PSocketService(socket);
     new GameKeno5PSocketService(socket);
+    new GameKeno10PSocketService(socket);
 
     new GameXucXac1PSocketService(socket);
     new GameXucXac3PSocketService(socket);

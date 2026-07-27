@@ -8,12 +8,14 @@ class GameService {
     const res = await api.get(`/v1/games/${typeGame}/ti-le`);
     return res;
   };
-  static getDetailedUserBetGameHistory = async ({ typeGame, phien }) => {
-    const res = await api.get(`/v1/games/${typeGame}/lich-su/lich-su-cuoc/${phien}`);
+  static getDetailedUserBetGameHistory = async ({ typeGame, phien, vipLevel }) => {
+    const vipQuery = vipLevel ? `?vipLevel=${vipLevel}` : "";
+    const res = await api.get(`/v1/games/${typeGame}/lich-su/lich-su-cuoc/${phien}${vipQuery}`);
     return res;
   };
-  static getUserBetHistory = async ({ typeGame, pageSize, page }) => {
-    const res = await api.get(`/v1/games/${typeGame}/lich-su/lich-su-cuoc?results=${pageSize}&page=${page}`);
+  static getUserBetHistory = async ({ typeGame, pageSize, page, vipLevel }) => {
+    const vipQuery = vipLevel ? `&vipLevel=${vipLevel}` : "";
+    const res = await api.get(`/v1/games/${typeGame}/lich-su/lich-su-cuoc?results=${pageSize}&page=${page}${vipQuery}`);
     return res;
   };
 

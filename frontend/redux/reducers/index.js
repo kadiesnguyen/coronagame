@@ -3,6 +3,7 @@ import balanceReducer from "./balance";
 import gameKeno1PReducer from "./gameKeno1P";
 import gameKeno3PReducer from "./gameKeno3P";
 import gameKeno5PReducer from "./gameKeno5P";
+import gameKeno10PReducer from "./gameKeno10P";
 import gameXoSo3PReducer from "./gameXoSo3P";
 import gameXoSo5PReducer from "./gameXoSo5P";
 import gameXoSoMBReducer from "./gameXoSoMB";
@@ -16,6 +17,7 @@ const reducers = combineReducers({
   gameKeno1P: gameKeno1PReducer,
   gameKeno3P: gameKeno3PReducer,
   gameKeno5P: gameKeno5PReducer,
+  gameKeno10P: gameKeno10PReducer,
   gameXucXac1P: gameXucXac1PReducer,
   gameXucXac3P: gameXucXac3PReducer,
   gameXocDia1P: gameXocDia1PReducer,

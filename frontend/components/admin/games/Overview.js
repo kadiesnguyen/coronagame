@@ -23,6 +23,12 @@ const listGame = [
     introduce: "Xem và chỉnh sửa kết quả quay số",
   },
   {
+    title: "Keno 10P",
+    link: "/admin/games/keno10p",
+    icon: "https://i.imgur.com/G8qXjaI.png",
+    introduce: "Xem và chỉnh sửa kết quả quay số VIP",
+  },
+  {
     title: "Xúc Xắc 1P",
     link: "/admin/games/xucxac1p",
     icon: "https://i.imgur.com/Hd9zWRS.png",

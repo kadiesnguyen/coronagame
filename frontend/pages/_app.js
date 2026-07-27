@@ -12,7 +12,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "simplebar-react/dist/simplebar.min.css";
 
-import InstallPrompt from "@/components/pwa/InstallPrompt";
 import { Toaster } from "react-hot-toast";
 import RefreshTokenHandler from "../components/RefreshTokenHandler";
 import ThemeLayout from "../components/ThemeLayout";
@@ -43,7 +42,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                 <DefaultSeo {...NextSeoConfig} />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Component {...pageProps} />
-                  <InstallPrompt />
                 </LocalizationProvider>
                 <ToastContainer
                   position="top-center"

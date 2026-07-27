@@ -35,7 +35,7 @@ const DanhSachBank = ({ danhSachNganHang }) => {
                 boxShadow: "0 5px 5px #c5c5da40",
                 display: "flex",
                 borderRadius: "1.5rem",
-                backgroundColor: "#ffffff",
+                backgroundColor: "#162948",
                 justifyContent: "center",
                 cursor: "pointer",
               }}

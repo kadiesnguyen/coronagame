@@ -24,7 +24,7 @@ const ItemCuoc = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: "10px",
   flexDirection: "column",
-  border: "1px solid #e5e5e5",
+  border: "1px solid rgba(255,255,255,.12)",
   alignItems: "center",
   color: "#000000",
   "& .loai_cuoc": {
@@ -38,9 +38,13 @@ const ItemCuoc = styled(Box)(({ theme }) => ({
     },
   },
   "&.active-tien_cuoc": {
-    backgroundColor: "red",
+    backgroundColor: "#d4af37",
+    borderColor: "#e5c05b",
     "& .loai_cuoc": {
-      color: "#ffffff",
+      color: "#0b1528",
+    },
+    "& .tien_cuoc": {
+      color: "#0b1528",
     },
   },
 }));
@@ -318,7 +322,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
             <Typography
               component={"span"}
               sx={{
-                color: "red",
+                color: "#e5c05b",
               }}
             >
               {listSoCuoc.length}
@@ -327,7 +331,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
             <Typography
               component={"span"}
               sx={{
-                color: "red",
+                color: "#e5c05b",
               }}
             >
               {convertJSXMoney(tienCuoc * listSoCuoc.length)}

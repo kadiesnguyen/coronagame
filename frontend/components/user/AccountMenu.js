@@ -13,14 +13,20 @@ const AccountMenuItem = styled(Box)(({ theme }) => ({
   cursor: "pointer",
   display: "flex",
   gap: "1rem",
-  padding: "1rem",
-  borderBottom: "1px solid #ccc",
-  color: theme.palette.text.secondary,
+  alignItems: "center",
+  padding: "1.2rem 0.5rem",
+  borderBottom: "1px solid rgba(255,255,255,0.12)",
+  color: "#fff",
   "& svg": {
-    color: theme.palette.color.primary,
+    color: "#5fb3b3",
   },
   "& .title-menu": {
     fontSize: "1.7rem",
+    color: "#fff",
+  },
+  "&:hover": {
+    color: "#e5c05b",
+    "& .title-menu": { color: "#e5c05b" },
   },
 }));
 const listMenu = [

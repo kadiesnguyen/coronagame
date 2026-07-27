@@ -46,7 +46,8 @@ const Header = () => {
                   <Button
                     className="btn-login"
                     sx={{
-                      background: "linear-gradient(124.32deg, #ffce1f 12.08%, #ccd26d 85.02%)",
+                      background: "linear-gradient(124.32deg, #e5c05b 12.08%, #d4af37 85.02%)",
+                      color: "#0b1528",
                     }}
                   >
                     Đăng nhập
@@ -56,7 +57,8 @@ const Header = () => {
                   <Button
                     className="btn-register"
                     sx={{
-                      background: "linear-gradient(124.32deg, #50a1f2 12.08%, #85daff 85.02%)",
+                      background: "linear-gradient(124.32deg, #3a86ff 12.08%, #5aa0ff 85.02%)",
+                      color: "#fff",
                     }}
                   >
                     Đăng ký

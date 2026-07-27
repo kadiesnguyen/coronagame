@@ -14,18 +14,20 @@ const Layout = ({ children }) => {
       <Box
         className="App"
         sx={{
-          boxShadow: "0 0 6rem 0 hsla(0,0%,49%,.3)",
+          boxShadow: "0 0 4rem 0 rgba(0,0,0,.45)",
           margin: "0 auto",
           maxWidth: "540px",
           minHeight: "100vh",
+          background: "var(--bg)",
         }}
       >
         <Box
           className="main"
           sx={{
-            background: "#fff7f7",
+            background: "linear-gradient(180deg, #101d33 0%, #0b1528 40%, #0b1528 100%)",
             minHeight: "100vh",
             padding: "0 0.32rem 2rem",
+            color: "var(--text)",
           }}
         >
           <Header />

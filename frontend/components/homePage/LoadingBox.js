@@ -4,8 +4,9 @@ import { BsCheckSquare } from "react-icons/bs";
 import { Bars } from "react-loading-icons";
 const BoxLoading = styled(Box)({
   borderRadius: "20px",
-  backgroundColor: "#fff",
-  color: "black",
+  backgroundColor: "#162948",
+  color: "#fff",
+  border: "1px solid rgba(212,175,55,.35)",
   width: "200px",
   height: "200px",
   display: "flex",
@@ -15,11 +16,12 @@ const BoxLoading = styled(Box)({
 });
 const LoadingContent = styled(Typography)({
   fontWeight: "500",
-  opacity: "0.7",
+  opacity: "0.85",
+  color: "#b8c0d4",
 });
 const LoadingIconSuccess = styled(BsCheckSquare)({
   fontSize: "5rem",
-  color: "#41bf90",
+  color: "#e5c05b",
 });
 const LoadingBox = ({ isSuccess, isLoading }) => {
   return (
@@ -38,7 +40,7 @@ const LoadingBox = ({ isSuccess, isLoading }) => {
         <BoxLoading>
           {!isSuccess && (
             <>
-              <Bars fill="red" width={50} height={50} speed={0.75} />
+              <Bars fill="#d4af37" width={50} height={50} speed={0.75} />
               <LoadingContent>Loading...</LoadingContent>
             </>
           )}

@@ -17,9 +17,14 @@ const AccountBalance = () => {
         sx={{
           display: "flex",
           gap: "10px",
+          alignItems: "center",
+          color: "#fff",
+          "& svg": { color: "#e5c05b", cursor: "pointer" },
         }}
       >
-        <Typography component={"div"}>Số dư: {isDisplayBalance ? convertJSXMoney(balance) : "******"}</Typography>
+        <Typography component={"div"} sx={{ color: "#fff", fontWeight: 600 }}>
+          Số dư: {isDisplayBalance ? convertJSXMoney(balance) : "******"}
+        </Typography>
         {!isDisplayBalance && <VisibilityIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
         {isDisplayBalance && <VisibilityOffIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
       </Box>

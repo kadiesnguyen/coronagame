@@ -4,13 +4,14 @@ import { useInfiniteQuery } from "react-query";
 import { transformData } from "../utils/transformData";
 const ITEMS_OF_PAGE = 10;
 
-const useGetUserBetHistory = ({ typeGame = "keno1p", pageSize = ITEMS_OF_PAGE }) => {
+const useGetUserBetHistory = ({ typeGame = "keno1p", pageSize = ITEMS_OF_PAGE, vipLevel }) => {
   const getData = async (pageParam) => {
     try {
       const response = await GameService.getUserBetHistory({
         typeGame,
         pageSize,
         page: pageParam,
+        vipLevel,
       });
 
       const data = response.data;
@@ -21,7 +22,7 @@ const useGetUserBetHistory = ({ typeGame = "keno1p", pageSize = ITEMS_OF_PAGE })
   };
 
   const getListQuery = useInfiniteQuery(
-    ["get-user-bet-history", { typeGame, pageSize }],
+    ["get-user-bet-history", { typeGame, pageSize, vipLevel }],
     ({ pageParam = 1 }) => getData(pageParam),
     {
       getNextPageParam: (_lastPage, pages) => {

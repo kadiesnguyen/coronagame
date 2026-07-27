@@ -73,6 +73,17 @@ const heThongSchema = new mongoose.Schema(
             default: true,
           },
         },
+        keno10P: {
+          tiLeCLTX: {
+            type: mongoose.Types.Decimal128,
+            default: 1.98,
+            get: getTileValue,
+          },
+          autoGame: {
+            type: Boolean,
+            default: true,
+          },
+        },
       },
       xucXacConfigs: {
         xucXac1P: {
@@ -146,6 +157,20 @@ const heThongSchema = new mongoose.Schema(
             default: true,
           },
         },
+      },
+    },
+    vipLevels: {
+      vip1: {
+        minMoney: { type: Number, default: 0 },
+        maxMoney: { type: Number, default: 100000000 },
+      },
+      vip2: {
+        minMoney: { type: Number, default: 100000000 },
+        maxMoney: { type: Number, default: 1000000000 },
+      },
+      vip3: {
+        minMoney: { type: Number, default: 1000000000 },
+        maxMoney: { type: Number, default: null },
       },
     },
   },

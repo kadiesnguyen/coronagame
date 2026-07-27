@@ -1,18 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap");
 
+:root {
+  --bg: #0b1528;
+  --bg-elevated: #101d33;
+  --card: #162948;
+  --card-soft: #1a2f4d;
+  --gold: #d4af37;
+  --gold-light: #e5c05b;
+  --champagne: #e2c499;
+  --blue: #3a86ff;
+  --text: #ffffff;
+  --text-muted: #b8c0d4;
+  --border: rgba(212, 175, 55, 0.35);
+  --danger: #e85d5d;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
   font-family: "Noto Sans", "League Spartan", "Bebas Neue", "IBM Plex Sans", "Poppins", sans-serif;
   font-size: 62.5%;
-
+  background: var(--bg);
+  color: var(--text);
 }
 
-
-
 @media only screen and (max-width: 600px) {
-
   html,
   body {
     font-size: 55.5%;
@@ -34,15 +47,17 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-
+  background: #3a4a66;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: inherit;
+  background: var(--bg);
 }
 
 textarea {
   resize: vertical;
   font-family: "Noto Sans", "League Spartan", "Bebas Neue", "IBM Plex Sans", "Poppins", sans-serif;
+  background: var(--card);
+  color: var(--text);
 }

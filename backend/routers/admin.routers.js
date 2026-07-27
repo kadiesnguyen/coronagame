@@ -33,6 +33,7 @@ router.use("/games/keno1p", require("./admin.routers/game.keno.1p.admin.routers"
 router.use("/games/keno3p", require("./admin.routers/game.keno.3p.admin.routers"));
 // Keno 5P
 router.use("/games/keno5p", require("./admin.routers/game.keno.5p.admin.routers"));
+router.use("/games/keno10p", require("./admin.routers/game.keno.10p.admin.routers"));
 // USERS
 router.use("/users", require("./admin.routers/user.admin.routers"));
 

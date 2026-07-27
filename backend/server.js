@@ -13,6 +13,7 @@ const GameXocDia1PService = require("./services/game.xocdia1p.service");
 const GameKeno1PService = require("./services/game.keno1p.service");
 const GameKeno3PService = require("./services/game.keno3p.service");
 const GameKeno5PService = require("./services/game.keno5p.service");
+const GameKeno10PService = require("./services/game.keno10p.service");
 const GameXucXac1PService = require("./services/game.xucxac1p.service");
 const GameXucXac3PService = require("./services/game.xucxac3p.service");
 const GameXoSo3PService = require("./services/game.xoso3p.service");
@@ -112,11 +113,46 @@ const khoiTaoHeThongDB = async () => {
       {
         systemID: 1,
       },
-      {},
+      {
+        $setOnInsert: {
+          "gameConfigs.kenoConfigs.keno10P": {
+            tiLeCLTX: 1.98,
+            autoGame: true,
+          },
+          vipLevels: {
+            vip1: { minMoney: 0, maxMoney: 100000000 },
+            vip2: { minMoney: 100000000, maxMoney: 1000000000 },
+            vip3: { minMoney: 1000000000, maxMoney: null },
+          },
+        },
+      },
       {
         upsert: true,
         new: true,
         setDefaultsOnInsert: true,
+      }
+    );
+    await HeThong.updateOne(
+      { systemID: 1, vipLevels: { $exists: false } },
+      {
+        $set: {
+          vipLevels: {
+            vip1: { minMoney: 0, maxMoney: 100000000 },
+            vip2: { minMoney: 100000000, maxMoney: 1000000000 },
+            vip3: { minMoney: 1000000000, maxMoney: null },
+          },
+        },
+      }
+    );
+    await HeThong.updateOne(
+      { systemID: 1, "gameConfigs.kenoConfigs.keno10P": { $exists: false } },
+      {
+        $set: {
+          "gameConfigs.kenoConfigs.keno10P": {
+            tiLeCLTX: 1.98,
+            autoGame: true,
+          },
+        },
       }
     );
   } catch (err) {
@@ -137,6 +173,7 @@ setTimeout(() => {
   GameKeno1PService.startGame();
   GameKeno3PService.startGame();
   GameKeno5PService.startGame();
+  GameKeno10PService.startGame();
   // // Game Tài Xỉu
   GameXucXac1PService.startGame();
   GameXucXac3PService.startGame();

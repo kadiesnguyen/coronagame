@@ -52,6 +52,12 @@ const listGame = [
     introduce: "Cấu hình CSKH Live chat TawkTo",
   },
   {
+    title: "CẤU HÌNH VIP",
+    link: "/admin/settings/vip",
+    icon: "https://i.imgur.com/iSdVffh.png",
+    introduce: "Cấu hình ngưỡng số dư VIP cho Keno 10P",
+  },
+  {
     title: "YÊU CẦU RÚT TIỀN",
     link: "/admin/withdraw",
     icon: "https://i.imgur.com/rze2jG8.png",

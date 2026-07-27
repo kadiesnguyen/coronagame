@@ -55,7 +55,7 @@ const DetailedNotification = ({ id }) => {
               padding: "1rem",
               width: "100%",
               textAlign: "center",
-              backgroundColor: "#ffffff",
+              backgroundColor: "#162948",
             }}
           >
             <Typography

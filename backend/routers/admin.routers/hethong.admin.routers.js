@@ -7,5 +7,7 @@ router.route("/bot-telegram").get(authController.protect, authController.reStric
 router.route("/tawk-to").get(authController.protect, authController.reStrictTo("admin"), AdminController.getTawkToConfig);
 router.route("/bot-telegram").put(authController.protect, authController.reStrictTo("admin"), AdminController.updateBotTelegramConfig);
 router.route("/tawk-to").put(authController.protect, authController.reStrictTo("admin"), AdminController.updateTawkToConfig);
+router.route("/vip-levels").get(authController.protect, authController.reStrictTo("admin"), AdminController.getVipLevelsConfig);
+router.route("/vip-levels").put(authController.protect, authController.reStrictTo("admin"), AdminController.updateVipLevelsConfig);
 
 module.exports = router;

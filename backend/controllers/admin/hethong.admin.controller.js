@@ -9,6 +9,7 @@ const TelegramService = require("../../services/telegram.service");
 const { default: axios } = require("axios");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
+const { DEFAULT_VIP_LEVELS, normalizeVipLevels } = require("../../utils/vip");
 
 class HeThongAdminController {
   static getBotTelegramConfig = catchAsync(async (req, res, next) => {
@@ -109,6 +110,53 @@ class HeThongAdminController {
       metadata: {
         before: heThong.cskhConfigs.tawk,
         after: tawkToConfigs,
+      },
+    });
+    return new OkResponse({
+      message: "Cập nhật thành công",
+    }).send(res);
+  });
+  static getVipLevelsConfig = catchAsync(async (req, res, next) => {
+    const heThong = await HeThong.findOne({ systemID: 1 });
+    if (!heThong) {
+      throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
+    }
+    return new OkResponse({
+      data: normalizeVipLevels(heThong?.vipLevels ?? DEFAULT_VIP_LEVELS),
+    }).send(res);
+  });
+  static updateVipLevelsConfig = catchAsync(async (req, res, next) => {
+    const { vipLevels } = req.body;
+    if (!vipLevels || !_.isPlainObject(vipLevels)) {
+      throw new UnauthorizedError("Vui lòng nhập đầy đủ thông tin");
+    }
+    const normalized = normalizeVipLevels(vipLevels);
+    const heThong = await HeThong.findOneAndUpdate(
+      { systemID: 1 },
+      {
+        $set: {
+          "vipLevels.vip1.minMoney": normalized.vip1.minMoney,
+          "vipLevels.vip1.maxMoney": normalized.vip1.maxMoney,
+          "vipLevels.vip2.minMoney": normalized.vip2.minMoney,
+          "vipLevels.vip2.maxMoney": normalized.vip2.maxMoney,
+          "vipLevels.vip3.minMoney": normalized.vip3.minMoney,
+          "vipLevels.vip3.maxMoney": normalized.vip3.maxMoney,
+        },
+      },
+      { new: false }
+    );
+    if (!heThong) {
+      throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
+    }
+    await NhatKyHoatDong.insertNhatKyHoatDong({
+      taiKhoan: req.user.taiKhoan,
+      userId: req.user._id,
+      typeActivity: TYPE_ACTIVITY.ADMIN,
+      actionActivity: ACTION_ACTIVITY.ADMIN.SET_BOT_TELEGRAM,
+      description: `Set cấu hình VIP levels`,
+      metadata: {
+        before: heThong.vipLevels,
+        after: normalized,
       },
     });
     return new OkResponse({
