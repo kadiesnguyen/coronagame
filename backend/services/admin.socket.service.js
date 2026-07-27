@@ -16,12 +16,51 @@ class AdminSocketService {
     global._io.to(AdminSocketService.CONFIG.ROOM).emit(key, data);
   };
 
+  /** Rời hết phòng player — dùng khi connect / admin join / leave */
+  static leaveAllPlayerRooms = (socket) => {
+    if (!socket) return;
+    for (const room of GAME_PLAYER_ROOMS) {
+      socket.leave(room);
+    }
+  };
+
+  /**
+   * Join đúng 1 phòng game. Client cũ join all rooms → chỉ còn phòng cuối.
+   * Admin không vào phòng player (dùng admin_*).
+   * @returns {boolean} joined
+   */
+  static exclusiveJoinPlayerRoom = (socket, room) => {
+    if (!socket || !GAME_PLAYER_ROOMS.includes(room)) return false;
+    if (isAdminSocket(socket)) {
+      AdminSocketService.leaveAllPlayerRooms(socket);
+      return false;
+    }
+    for (const r of GAME_PLAYER_ROOMS) {
+      if (r !== room) socket.leave(r);
+    }
+    socket.join(room);
+    return true;
+  };
+
   static getGameRoomCounts = () => {
     const counts = {};
     const io = global._io;
     for (const room of GAME_PLAYER_ROOMS) {
       const set = io?.sockets?.adapter?.rooms?.get(room);
-      counts[room] = set ? set.size : 0;
+      if (!set || set.size === 0) {
+        counts[room] = 0;
+        continue;
+      }
+      // Unique user (không tính admin / socket rác)
+      const seen = new Set();
+      for (const sid of set) {
+        const sock = io.sockets.sockets.get(sid);
+        if (!sock || isAdminSocket(sock)) continue;
+        const user = sock.data?.user;
+        const uid = user?._id?.toString?.() || user?.taiKhoan || sid;
+        seen.add(String(uid));
+      }
+      counts[room] = seen.size;
     }
     return counts;
   };
@@ -86,6 +125,7 @@ class AdminSocketService {
       if (!isAdminSocket(this.socket)) {
         return;
       }
+      AdminSocketService.leaveAllPlayerRooms(this.socket);
       this.socket.join(AdminSocketService.CONFIG.ROOM);
 
       AdminSocketService.sendRoomAdmin({
@@ -95,6 +135,7 @@ class AdminSocketService {
       this.socket.emit(KEYS_SOCKET_ADMIN.GAME_ROOM_COUNTS, AdminSocketService.getGameRoomCounts());
       this.socket.emit(KEYS_SOCKET_ADMIN.GAME_BET_ALERTS, AdminSocketService.getGameBetAlerts());
       AdminSocketService.ensureRoomCountBroadcast();
+      AdminSocketService.broadcastGameRoomCounts();
     });
 
     this.socket.on(KEYS_SOCKET_ADMIN.GET_GAME_ROOM_COUNTS, () => {

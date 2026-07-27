@@ -5,12 +5,19 @@ const getKetQua = (ketQua) => {
   const results = {
     T: false,
     X: false,
+    C: false,
+    L: false,
   };
   const tongXucXac = ketQua.reduce((a, b) => a + b, 0);
   if (tongXucXac < 11) {
-    results["X"] = true;
+    results.X = true;
   } else {
-    results["T"] = true;
+    results.T = true;
+  }
+  if (tongXucXac % 2 === 0) {
+    results.C = true;
+  } else {
+    results.L = true;
   }
   return results;
 };
@@ -20,18 +27,28 @@ const randomXucXacTheoLoai = ({ loai = "X" }) => {
   if (loai === "X") {
     if (tongXucXac <= 10) {
       return ketQua;
-    } else {
-      return randomXucXacTheoLoai({ loai });
     }
-  } else if (loai === "T") {
+    return randomXucXacTheoLoai({ loai });
+  }
+  if (loai === "T") {
     if (tongXucXac > 10) {
       return ketQua;
-    } else {
-      return randomXucXacTheoLoai({ loai });
     }
-  } else {
-    return ketQua;
+    return randomXucXacTheoLoai({ loai });
   }
+  if (loai === "C") {
+    if (tongXucXac % 2 === 0) {
+      return ketQua;
+    }
+    return randomXucXacTheoLoai({ loai });
+  }
+  if (loai === "L") {
+    if (tongXucXac % 2 !== 0) {
+      return ketQua;
+    }
+    return randomXucXacTheoLoai({ loai });
+  }
+  return ketQua;
 };
 const convertChiTietCuoc = (chiTietCuoc, loaiCuoc) => {
   if (chiTietCuoc === "batky" && loaiCuoc === "2SO") {

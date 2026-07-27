@@ -6,7 +6,7 @@ import { useContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const GAME_ROOM_PATH =
-  /^\/admin\/games\/(keno1p|keno3p|keno5p|keno10p|xucxac1p|xucxac3p|xocdia1p|xoso3p|xoso5p|xosomb)(?:\/|$)/;
+  /^\/admin\/games\/(keno1p|keno3p|keno5p|keno10p|xucxac1p|xucxac3p|xucxac5p|xucxac10p|xocdia1p|xoso3p|xoso5p|xosomb)(?:\/|$)/;
 
 const useRegisterAdminSocket = () => {
   const { socket } = useContext(SocketContext);

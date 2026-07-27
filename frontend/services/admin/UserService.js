@@ -79,5 +79,9 @@ class UserService {
     });
     return res;
   };
+  static deleteUsers = async ({ userIds }) => {
+    const res = await api.post(`/v1/admin/users/delete`, { userIds });
+    return res;
+  };
 }
 export default UserService;

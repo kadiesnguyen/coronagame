@@ -1,21 +1,31 @@
 import Layout from "@/components/Layout";
 import LoadingBox from "@/components/homePage/LoadingBox";
 import useGetTawkToConfig from "@/hooks/useGetTawkToConfig";
+import { openCskh } from "@/utils/openCskh";
 import { Box, Button, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { NextSeo } from "next-seo";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Home = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const { data, isLoading } = useGetTawkToConfig();
   const link = data?.link ?? "";
+  const openedRef = useRef(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       window.location.href = "/";
     }
   }, [status]);
+
+  // Vào /contact → mở luôn tab CSKH (không nhúng iframe)
+  useEffect(() => {
+    if (isLoading || openedRef.current) return;
+    if (!link) return;
+    openedRef.current = true;
+    openCskh();
+  }, [isLoading, link]);
 
   return (
     <>
@@ -27,10 +37,10 @@ const Home = () => {
         <Box
           sx={{
             paddingTop: "2rem",
-            height: "70vh",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "16px",
+            alignItems: "flex-start",
           }}
         >
           {!isLoading && !link && (
@@ -38,18 +48,12 @@ const Home = () => {
           )}
           {link && (
             <>
-              <Button
-                component="a"
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ alignSelf: "flex-start", minHeight: "48px" }}
-              >
+              <Typography sx={{ color: "#b8c0d4", fontSize: "1.4rem" }}>
+                Đang mở CSKH ở tab mới. Nếu không thấy, bấm nút bên dưới.
+              </Typography>
+              <Button onClick={() => openCskh()} sx={{ minHeight: "48px" }}>
                 Mở CSKH
               </Button>
-              <Box sx={{ flex: 1, minHeight: 0 }}>
-                <iframe src={link} frameBorder="0" width="100%" height="100%" title="CSKH" />
-              </Box>
             </>
           )}
         </Box>

@@ -200,11 +200,6 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno10p", phien, tinhTrang, vipLevel }) => {
     setIsAllowResetBtn(true);
   };
 
-  const convertTienCuoc = ({ loaiCuoc, loaiBi }) => {
-    const findItemCuoc = chiTietCuocTemp.find((e) => e.loaiCuoc === loaiCuoc && e.loaiBi === loaiBi);
-    return findItemCuoc ? convertMoney(findItemCuoc.tienCuoc) : 0;
-  };
-
   const handleResetCuoc = () => {
     setChiTietCuocTemp([]);
     setTienCuoc(0);
@@ -286,9 +281,6 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno10p", phien, tinhTrang, vipLevel }) => {
                     >
                       <Typography className="loai_cuoc">{itemLoaiCuoc.tenCuoc}</Typography>
                       <Typography className="ti_le">{Number(tiLe).toFixed(3)}</Typography>
-                      <Typography className="tien_cuoc">
-                        {convertTienCuoc({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi })}
-                      </Typography>
                     </ItemCuoc>
                   );
                 })}

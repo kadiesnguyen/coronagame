@@ -15,73 +15,58 @@ import useGetBetPayoutPercentage from "@/hooks/useGetBetPayoutPercentage";
 import useGetDetailedBetHistory from "@/hooks/useGetDetailedBetHistory";
 import useGetUserBetHistory from "@/hooks/useGetUserBetHistory";
 import GameService from "@/services/GameService";
-import convertMoney from "@/utils/convertMoney";
 import { mergeCltxBets } from "@/utils/mergeGameBets";
 import { toast } from "@/utils/toast";
 import _ from "lodash";
-const BoxContainer = styled(Box)(({ theme }) => ({
-  borderRadius: "20px",
-  padding: "20px",
-  marginTop: "10px",
 
-  backgroundColor: theme.palette.background.default,
-  position: "relative",
-  display: "flex",
-  gap: "10px",
-  flexDirection: "column",
-  color: theme.palette.text.secondary,
-  "& .bet_state": {
-    borderBottom: "3px solid #d4af37",
-    display: "inline-block",
-    fontWeight: 700,
-    margin: "0.1rem 0 0.3rem",
-  },
-}));
-const ItemCuoc = styled(Box)(({ theme }) => ({
-  borderRadius: "10px",
-  padding: "10px",
+const ItemCuoc = styled(Box)(() => ({
+  borderRadius: 0,
+  padding: "12px 8px",
   cursor: "pointer",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "transparent",
   position: "relative",
   display: "flex",
-  gap: "10px",
+  gap: "4px",
   flexDirection: "column",
-  border: "1px solid rgba(255,255,255,.12)",
   alignItems: "center",
-  color: theme.palette.text.secondary,
+  justifyContent: "center",
+  minHeight: "64px",
+  color: "#fff",
+  borderRight: "1px solid rgba(255,255,255,.12)",
+  borderBottom: "1px solid rgba(255,255,255,.12)",
+  "&:nth-of-type(2n)": {
+    borderRight: "none",
+  },
+  "&:nth-of-type(n+3)": {
+    borderBottom: "none",
+  },
   "& .loai_cuoc": {
     fontWeight: 700,
     color: "#e5c05b",
+    fontSize: "1.5rem",
+    lineHeight: 1.2,
   },
-  "& .tien_cuoc": {
-    fontWeight: 700,
-    color: "#fa8838",
-    "&.new": {
-      color: "blue",
-    },
+  "& .ti_le": {
+    color: "#b8c0d4",
+    fontSize: "1.2rem",
   },
-  "&.active-tien_cuoc": {
-    backgroundColor: "#d4af37",
-    borderColor: "#e5c05b",
-    "& .loai_cuoc": {
-      color: "#0b1528",
-    },
-    "& .tien_cuoc": {
-      color: "#0b1528",
-    },
+  "&.active": {
+    backgroundColor: "rgba(212,175,55,.18)",
   },
 }));
 
-const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
+const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang, vipLevel }) => {
   const titleDatCuocRef = useRef(null);
   const { data: detailedBetHistoryData, refetch: refetchDetailedBetHistory } = useGetDetailedBetHistory({
     typeGame: TYPE_GAME,
     phien,
+    vipLevel,
   });
-  const { data: betPayoutPercentageData } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME });
+  const { data: betPayoutPercentageData } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME, vipLevel });
   const { refetch: refetchUserBetHistory } = useGetUserBetHistory({
     typeGame: TYPE_GAME,
     pageSize: USER_BET_GAME_HISTORY_PAGE_SIZE,
+    vipLevel,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [tienCuoc, setTienCuoc] = useState(0);
@@ -92,7 +77,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
   useEffect(() => {
     setChiTietCuocTemp([]);
     setTienCuoc(0);
-  }, [phien]);
+  }, [phien, vipLevel]);
 
   useEffect(() => {
     if (tinhTrang === TINH_TRANG_GAME.DANG_QUAY || tinhTrang === TINH_TRANG_GAME.DANG_TRA_THUONG) {
@@ -135,6 +120,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
         data: {
           phien,
           chiTietCuoc: mergeCltxBets(chiTietCuocHienTai, chiTietCuocTemp),
+          ...(vipLevel ? { vipLevel } : {}),
         },
       });
       await refetchDetailedBetHistory();
@@ -204,25 +190,6 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
       )
     );
   };
-  /**
-   *
-   * @param {*} loaiCuoc Loại Cược : CLTX
-   * @param {*} chiTietCuoc Chi tiết cược: T, X
-   * @returns {Number} Số tiền đang cược
-   */
-
-  const convertTienCuocCLTX = ({ loaiCuoc, chiTietCuoc }) => {
-    const findItemCuoc = chiTietCuocTemp.find((e) => e.chiTietCuoc === chiTietCuoc && e.loaiCuoc === loaiCuoc);
-    if (findItemCuoc) {
-      return convertMoney(findItemCuoc.tienCuoc);
-    } else {
-      return 0;
-    }
-  };
-
-  /**
-   * Reset cược tạm thời về như ban đầu
-   */
   const handleResetCuoc = () => {
     setChiTietCuocTemp([]);
     setTienCuoc(0);
@@ -236,19 +203,12 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
           borderRadius: "2rem",
           padding: { xs: "1rem", md: "2rem" },
           marginTop: "1rem",
-
           backgroundColor: (theme) => theme.palette.background.default,
           position: "relative",
           display: "flex",
           gap: "10px",
           flexDirection: "column",
           color: (theme) => theme.palette.text.secondary,
-          "& .bet_state": {
-            borderBottom: "3px solid #d4af37",
-            display: "inline-block",
-            fontWeight: 700,
-            margin: "0.1rem 0 0.3rem",
-          },
         }}
       >
         <h2 className="title">Đặt cược</h2>
@@ -256,24 +216,32 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-            gap: "10px",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateRows: "repeat(2, minmax(0, 1fr))",
+            backgroundColor: "#101d33",
+            borderRadius: "8px",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,.12)",
           }}
         >
-          {LOAI_CUOC.map((item, i) => (
-            <ItemCuoc
-              key={item.tenCuoc}
-              onClick={() => handleClickCuocCLTX({ loaiCuoc: item.loaiCuoc, chiTietCuoc: item.chiTietCuoc, tienCuoc })}
-            >
-              <Typography className="loai_cuoc">{item.tenCuoc}</Typography>
-              <Typography>x{tiLe}</Typography>
-              <Typography className={"tien_cuoc"}>
-                {convertTienCuocCLTX({ loaiCuoc: item.loaiCuoc, chiTietCuoc: item.chiTietCuoc })}
-              </Typography>
-            </ItemCuoc>
-          ))}
+          {LOAI_CUOC.map((item) => {
+            const active = !!chiTietCuocTemp.find(
+              (e) => e.chiTietCuoc === item.chiTietCuoc && e.loaiCuoc === item.loaiCuoc
+            );
+            return (
+              <ItemCuoc
+                key={item.chiTietCuoc}
+                className={active ? "active" : ""}
+                onClick={() =>
+                  handleClickCuocCLTX({ loaiCuoc: item.loaiCuoc, chiTietCuoc: item.chiTietCuoc, tienCuoc })
+                }
+              >
+                <Typography className="loai_cuoc">{item.tenCuoc}</Typography>
+                <Typography className="ti_le">{Number(tiLe).toFixed(3)}</Typography>
+              </ItemCuoc>
+            );
+          })}
         </Box>
-
       </Box>
       <BetMoneyStickyPanel
         amounts={MUC_TIEN_CUOC}

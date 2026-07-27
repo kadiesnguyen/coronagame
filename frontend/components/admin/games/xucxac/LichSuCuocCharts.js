@@ -9,17 +9,18 @@ const transformDataChart = (dataQuery) => {
   const tempDataChart = [];
   const CuocT = { name: "Tài", value: 0 };
   const CuocX = { name: "Xỉu", value: 0 };
+  const CuocL = { name: "Lẻ", value: 0 };
+  const CuocC = { name: "Chẵn", value: 0 };
 
   dataQuery?.map((item) => {
     item.datCuoc.map((itemCuoc) => {
-      if (itemCuoc.chiTietCuoc === "T") {
-        CuocT.value += itemCuoc.tienCuoc;
-      } else if (itemCuoc.chiTietCuoc === "X") {
-        CuocX.value += itemCuoc.tienCuoc;
-      }
+      if (itemCuoc.chiTietCuoc === "T") CuocT.value += itemCuoc.tienCuoc;
+      else if (itemCuoc.chiTietCuoc === "X") CuocX.value += itemCuoc.tienCuoc;
+      else if (itemCuoc.chiTietCuoc === "L") CuocL.value += itemCuoc.tienCuoc;
+      else if (itemCuoc.chiTietCuoc === "C") CuocC.value += itemCuoc.tienCuoc;
     });
   });
-  tempDataChart.push(CuocT, CuocX);
+  tempDataChart.push(CuocT, CuocX, CuocL, CuocC);
   return tempDataChart;
 };
 const LichSuCuocCharts = ({ ID, TYPE_GAME }) => {

@@ -224,25 +224,6 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
     );
     setIsAllowResetBtn(true);
   };
-  /**
-   *
-   * @param {} loaiCuoc Loại Cược : C, L
-   * @param {} loaiBi Loại Bi: 1,2,3,4,5
-   * @returns {Number} Số tiền đang cược
-   */
-
-  const convertTienCuocCLTX = ({ loaiCuoc, loaiBi }) => {
-    const findItemCuoc = chiTietCuocTemp.find((e) => e.loaiCuoc === loaiCuoc && e.loaiBi === loaiBi);
-    if (findItemCuoc) {
-      return convertMoney(findItemCuoc.tienCuoc);
-    } else {
-      return 0;
-    }
-  };
-
-  /**
-   * Reset cược tạm thời về như ban đầu
-   */
   const handleResetCuoc = () => {
     setChiTietCuocTemp([]);
     setTienCuoc(0);
@@ -331,9 +312,6 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
                     >
                       <Typography className="loai_cuoc">{itemLoaiCuoc.tenCuoc}</Typography>
                       <Typography className="ti_le">{Number(tiLe).toFixed(3)}</Typography>
-                      <Typography className="tien_cuoc">
-                        {convertTienCuocCLTX({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi })}
-                      </Typography>
                     </ItemCuoc>
                   );
                 })}

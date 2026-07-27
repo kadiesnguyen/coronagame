@@ -10,15 +10,15 @@ const ErrorPage = () => {
       <NextSeo
         title="500 Error - Lỗi từ máy chủ"
         description="Không tìm thấy dữ liệu, 500 error, lỗi trang"
+        noindex
+        nofollow
         openGraph={{
           type: "website",
           locale: "vi_VN",
           url: `${process.env.NEXTAUTH_URL}/?error`,
         }}
         twitter={{
-          handle: "Thinh Le",
-          site: `${process.env.NEXTAUTH_URL}/?error`,
-          cardType: "summary_large_image",
+          cardType: "summary",
         }}
       />
       <Layout>

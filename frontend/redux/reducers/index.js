@@ -10,6 +10,8 @@ import gameXoSoMBReducer from "./gameXoSoMB";
 import gameXocDia1PReducer from "./gameXocDia1P";
 import gameXucXac1PReducer from "./gameXucXac1P";
 import gameXucXac3PReducer from "./gameXucXac3P";
+import gameXucXac5PReducer from "./gameXucXac5P";
+import gameXucXac10PReducer from "./gameXucXac10P";
 import adminReducer from "./admin";
 
 const reducers = combineReducers({
@@ -20,6 +22,8 @@ const reducers = combineReducers({
   gameKeno10P: gameKeno10PReducer,
   gameXucXac1P: gameXucXac1PReducer,
   gameXucXac3P: gameXucXac3PReducer,
+  gameXucXac5P: gameXucXac5PReducer,
+  gameXucXac10P: gameXucXac10PReducer,
   gameXocDia1P: gameXocDia1PReducer,
   gameXoSo3P: gameXoSo3PReducer,
   gameXoSo5P: gameXoSo5PReducer,

@@ -143,7 +143,7 @@ class GameXocDiaService {
       L: 0,
     };
     const lichSuDatCuoc = await this.SETTING_GAME.DATABASE_MODEL.HISTORY.find({
-      phien: this.CURRENT_GAME._id,
+      phien: this.gameState.getState()._id,
       tinhTrang: STATUS_HISTORY_GAME.DANG_CHO,
     }).lean();
     const LOAI_CUOC_CHAN = [

@@ -125,6 +125,18 @@ const heThongSchema = new mongoose.Schema(
             default: true,
           },
         },
+        xucXac10P: {
+          tiLeCLTX: { type: mongoose.Types.Decimal128, default: 2.1, get: getTileValue },
+          tiLeVip: {
+            vip1: { type: mongoose.Types.Decimal128, default: 2.1, get: getTileValue },
+            vip2: { type: mongoose.Types.Decimal128, default: 2.2, get: getTileValue },
+            vip3: { type: mongoose.Types.Decimal128, default: 2.3, get: getTileValue },
+          },
+          autoGame: {
+            type: Boolean,
+            default: true,
+          },
+        },
       },
       xocDiaConfigs: {
         xocDia1P: {

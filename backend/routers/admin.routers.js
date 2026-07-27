@@ -25,6 +25,10 @@ router.use("/games/xocdia1p", require("./admin.routers/game.xocdia.1p.admin.rout
 router.use("/games/xucxac1p", require("./admin.routers/game.xucxac.1p.admin.routers"));
 // Xuc Xac 3P
 router.use("/games/xucxac3p", require("./admin.routers/game.xucxac.3p.admin.routers"));
+// Xuc Xac 5P
+router.use("/games/xucxac5p", require("./admin.routers/game.xucxac.5p.admin.routers"));
+// Xuc Xac 10P
+router.use("/games/xucxac10p", require("./admin.routers/game.xucxac.10p.admin.routers"));
 
 // GAME KENO
 // Keno 1P

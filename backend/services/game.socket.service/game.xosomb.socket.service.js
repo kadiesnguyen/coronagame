@@ -1,6 +1,7 @@
 "use strict";
 
 const { isAdminSocket } = require("../../utils/socket_auth");
+const AdminSocketService = require("../admin.socket.service");
 
 const HeThong = require("../../models/HeThong");
 
@@ -51,20 +52,28 @@ class GameXoSoMBSocketService {
      */
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room`, () => {
-      this.socket.join(this.CONFIG.ROOM);
+      if (!AdminSocketService.exclusiveJoinPlayerRoom(this.socket, this.CONFIG.ROOM)) {
+        return;
+      }
+      AdminSocketService.broadcastGameRoomCounts();
       if (!this.GAME_DATA) {
         this.socket.disconnect();
         return;
       }
 
-      this.CONFIG.METHOD.SEND_ROOM_XOSO({
-        key: `${this.CONFIG.KEY_SOCKET}:timer`,
-        data: { timerOpen: this.GAME_DATA.getTimerOpen(), timerStopBet: this.GAME_DATA.getTimerStopBet() },
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:timer`, {
+        timerOpen: this.GAME_DATA.getTimerOpen(),
+        timerStopBet: this.GAME_DATA.getTimerStopBet(),
       });
-      this.CONFIG.METHOD.SEND_ROOM_XOSO({
-        key: `${this.CONFIG.KEY_SOCKET}:hienThiPhien`,
-        data: { currentDate: this.GAME_DATA.getCurrentDate(), latestCompleteDate: this.GAME_DATA.getLatestCompleteDate() },
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:hienThiPhien`, {
+        currentDate: this.GAME_DATA.getCurrentDate(),
+        latestCompleteDate: this.GAME_DATA.getLatestCompleteDate(),
       });
+    });
+
+    this.socket.on(`${this.CONFIG.KEY_SOCKET}:leave-room`, () => {
+      this.socket.leave(this.CONFIG.ROOM);
+      AdminSocketService.broadcastGameRoomCounts();
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room-admin`, () => {

@@ -1,17 +1,20 @@
 import { LOAI_GAME } from "@/configs/game.config";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TINH_TRANG_GAME } from "../configs/game.keno.config";
 import { setKetQua, setKetQuaPhienTruoc, setPhien, setTimer, setTinhTrang } from "../redux/actions/gameKeno3P";
 const useRegisterGameKeno3PSocket = ({ value }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const { isPlayGame: isPlayGameKeno3P } = useSelector((state) => state.gameKeno3P);
 
   useEffect(() => {
     const key_socket = LOAI_GAME.KENO3P;
+    const onGamePage = router.pathname === `/games/${key_socket}`;
     if (value.isConnected && value.socket) {
-      if (isPlayGameKeno3P) {
+      if (isPlayGameKeno3P && onGamePage) {
         value.socket.emit(`${key_socket}:join-room`);
         value.socket.on(`${key_socket}:hienThiPhien`, ({ phien }) => {
           dispatch(setPhien(phien));
@@ -39,6 +42,7 @@ const useRegisterGameKeno3PSocket = ({ value }) => {
         });
 
         return () => {
+          value.socket.emit(`${key_socket}:leave-room`);
           value.socket.off(`${key_socket}:hienThiPhien`);
           value.socket.off(`${key_socket}:timer`);
           value.socket.off(`${key_socket}:running`);
@@ -47,6 +51,7 @@ const useRegisterGameKeno3PSocket = ({ value }) => {
           value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
         };
       } else {
+        value.socket.emit(`${key_socket}:leave-room`);
         value.socket.off(`${key_socket}:hienThiPhien`);
         value.socket.off(`${key_socket}:timer`);
         value.socket.off(`${key_socket}:running`);
@@ -55,7 +60,7 @@ const useRegisterGameKeno3PSocket = ({ value }) => {
         value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
       }
     }
-  }, [value, isPlayGameKeno3P]);
+  }, [value, isPlayGameKeno3P, router.pathname]);
   return isPlayGameKeno3P;
 };
 export default useRegisterGameKeno3PSocket;

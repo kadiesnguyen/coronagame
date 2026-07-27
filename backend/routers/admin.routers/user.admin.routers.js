@@ -23,6 +23,7 @@ router
 router.route("/update-money").post(authController.protect, authController.reStrictTo("admin"), AdminController.updateMoneyUser);
 router.route("/update-password").post(authController.protect, authController.reStrictTo("admin"), AdminController.updatePasswordUser);
 router.route("/update-information").post(authController.protect, authController.reStrictTo("admin"), AdminController.updateInformationUser);
+router.route("/delete").post(authController.protect, authController.reStrictTo("admin"), AdminController.deleteUsers);
 router.route("/:id").get(authController.protect, authController.reStrictTo("admin"), AdminController.getChiTietUser);
 
 router.route("/").get(authController.protect, authController.reStrictTo("admin"), AdminController.getDanhSachUsers);

@@ -82,7 +82,7 @@ const AdminLogin = () => {
 
   return (
     <>
-      <NextSeo title="Admin Login | Corona Casino" noindex />
+      <NextSeo title="Corona Casin" titleTemplate="%s" description="Corona Casin" noindex nofollow />
       <LoadingBox isSuccess={loginStatus === "success"} isLoading={loginStatus === "loading"} />
       <Box
         sx={{

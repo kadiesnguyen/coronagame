@@ -1,4 +1,5 @@
 import { LOAI_GAME } from "@/configs/game.config";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TINH_TRANG_GAME } from "../configs/game.xocdia.config";
@@ -6,13 +7,15 @@ import { setKetQua, setKetQuaPhienTruoc, setPhien, setTimer, setTinhTrang } from
 
 const useRegisterGameXocDia1PSocket = ({ value }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const { isPlayGame: isPlayGameXocDia1P } = useSelector((state) => state.gameXocDia1P);
 
   useEffect(() => {
     const key_socket = LOAI_GAME.XOCDIA1P;
+    const onGamePage = router.pathname === `/games/${key_socket}`;
     if (value.isConnected && value.socket) {
-      if (isPlayGameXocDia1P) {
+      if (isPlayGameXocDia1P && onGamePage) {
         value.socket.emit(`${key_socket}:join-room`);
         value.socket.on(`${key_socket}:hienThiPhien`, ({ phien }) => {
           dispatch(setPhien(phien));
@@ -43,6 +46,7 @@ const useRegisterGameXocDia1PSocket = ({ value }) => {
         });
 
         return () => {
+          value.socket.emit(`${key_socket}:leave-room`);
           value.socket.off(`${key_socket}:hienThiPhien`);
           value.socket.off(`${key_socket}:timer`);
           value.socket.off(`${key_socket}:running`);
@@ -51,6 +55,7 @@ const useRegisterGameXocDia1PSocket = ({ value }) => {
           value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
         };
       } else {
+        value.socket.emit(`${key_socket}:leave-room`);
         value.socket.off(`${key_socket}:hienThiPhien`);
         value.socket.off(`${key_socket}:timer`);
         value.socket.off(`${key_socket}:running`);
@@ -59,7 +64,7 @@ const useRegisterGameXocDia1PSocket = ({ value }) => {
         value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
       }
     }
-  }, [value, isPlayGameXocDia1P]);
+  }, [value, isPlayGameXocDia1P, router.pathname]);
   return isPlayGameXocDia1P;
 };
 export default useRegisterGameXocDia1PSocket;

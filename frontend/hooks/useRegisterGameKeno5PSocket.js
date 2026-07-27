@@ -1,4 +1,5 @@
 import { LOAI_GAME } from "@/configs/game.config";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TINH_TRANG_GAME } from "../configs/game.keno.config";
@@ -6,13 +7,15 @@ import { setKetQua, setKetQuaPhienTruoc, setPhien, setTimer, setTinhTrang } from
 
 const useRegisterGameKeno5PSocket = ({ value }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const { isPlayGame: isPlayGameKeno5P } = useSelector((state) => state.gameKeno5P);
 
   useEffect(() => {
     const key_socket = LOAI_GAME.KENO5P;
+    const onGamePage = router.pathname === `/games/${key_socket}`;
     if (value.isConnected && value.socket) {
-      if (isPlayGameKeno5P) {
+      if (isPlayGameKeno5P && onGamePage) {
         value.socket.emit(`${key_socket}:join-room`);
         value.socket.on(`${key_socket}:hienThiPhien`, ({ phien }) => {
           dispatch(setPhien(phien));
@@ -40,6 +43,7 @@ const useRegisterGameKeno5PSocket = ({ value }) => {
         });
 
         return () => {
+          value.socket.emit(`${key_socket}:leave-room`);
           value.socket.off(`${key_socket}:hienThiPhien`);
           value.socket.off(`${key_socket}:timer`);
           value.socket.off(`${key_socket}:running`);
@@ -48,6 +52,7 @@ const useRegisterGameKeno5PSocket = ({ value }) => {
           value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
         };
       } else {
+        value.socket.emit(`${key_socket}:leave-room`);
         value.socket.off(`${key_socket}:hienThiPhien`);
         value.socket.off(`${key_socket}:timer`);
         value.socket.off(`${key_socket}:running`);
@@ -56,7 +61,7 @@ const useRegisterGameKeno5PSocket = ({ value }) => {
         value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
       }
     }
-  }, [value, isPlayGameKeno5P]);
+  }, [value, isPlayGameKeno5P, router.pathname]);
   return isPlayGameKeno5P;
 };
 export default useRegisterGameKeno5PSocket;

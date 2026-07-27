@@ -4,6 +4,8 @@ const LichSuDatCuocKeno5P = require("../models/LichSuDatCuocKeno5P");
 const LichSuDatCuocKeno10P = require("../models/LichSuDatCuocKeno10P");
 const LichSuDatCuocXucXac1P = require("../models/LichSuDatCuocXucXac1P");
 const LichSuDatCuocXucXac3P = require("../models/LichSuDatCuocXucXac3P");
+const LichSuDatCuocXucXac5P = require("../models/LichSuDatCuocXucXac5P");
+const LichSuDatCuocXucXac10P = require("../models/LichSuDatCuocXucXac10P");
 const LichSuDatCuocXocDia1P = require("../models/LichSuDatCuocXocDia1P");
 const LichSuDatCuocXoSo3P = require("../models/LichSuDatCuocXoSo3P");
 const LichSuDatCuocXoSo5P = require("../models/LichSuDatCuocXoSo5P");
@@ -16,6 +18,8 @@ const GAME_SOURCES = [
   { typeGame: "keno10p", gameName: "Keno 10P", model: LichSuDatCuocKeno10P, kind: "keno" },
   { typeGame: "xucxac1p", gameName: "Xúc Xắc 1P", model: LichSuDatCuocXucXac1P, kind: "xucxac" },
   { typeGame: "xucxac3p", gameName: "Xúc Xắc 3P", model: LichSuDatCuocXucXac3P, kind: "xucxac" },
+  { typeGame: "xucxac5p", gameName: "Xúc Xắc 5P", model: LichSuDatCuocXucXac5P, kind: "xucxac" },
+  { typeGame: "xucxac10p", gameName: "Xúc Xắc 10P", model: LichSuDatCuocXucXac10P, kind: "xucxac" },
   { typeGame: "xocdia1p", gameName: "Xóc Đĩa 1P", model: LichSuDatCuocXocDia1P, kind: "xocdia" },
   { typeGame: "xoso3p", gameName: "Xổ Số 3P", model: LichSuDatCuocXoSo3P, kind: "xoso" },
   { typeGame: "xoso5p", gameName: "Xổ Số 5P", model: LichSuDatCuocXoSo5P, kind: "xoso" },

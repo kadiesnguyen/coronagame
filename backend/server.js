@@ -14,8 +14,11 @@ const GameKeno5PService = require("./services/game.keno5p.service");
 const GameKeno10PService = require("./services/game.keno10p.service");
 const GameXucXac1PService = require("./services/game.xucxac1p.service");
 const GameXucXac3PService = require("./services/game.xucxac3p.service");
+const GameXucXac5PService = require("./services/game.xucxac5p.service");
+const GameXucXac10PService = require("./services/game.xucxac10p.service");
 const GameXoSo3PService = require("./services/game.xoso3p.service");
 const GameXoSo5PService = require("./services/game.xoso5p.service");
+const { seedFakeGameHistory } = require("./utils/seedFakeGameHistory");
 const server = http.createServer(app);
 
 process.on("uncaughtException", (err) => {
@@ -167,6 +170,35 @@ const khoiTaoHeThongDB = async () => {
         },
       }
     );
+    await HeThong.updateOne(
+      { systemID: 1, "gameConfigs.xucXacConfigs.xucXac5P": { $exists: false } },
+      {
+        $set: {
+          "gameConfigs.xucXacConfigs.xucXac5P": { tiLeCLTX: 1.98, autoGame: true },
+        },
+      }
+    );
+    await HeThong.updateOne(
+      { systemID: 1, "gameConfigs.xucXacConfigs.xucXac10P": { $exists: false } },
+      {
+        $set: {
+          "gameConfigs.xucXacConfigs.xucXac10P": {
+            tiLeCLTX: 2.1,
+            tiLeVip: { vip1: 2.1, vip2: 2.2, vip3: 2.3 },
+            autoGame: true,
+          },
+        },
+      }
+    );
+    await HeThong.updateOne(
+      { systemID: 1, "gameConfigs.xucXacConfigs.xucXac10P.tiLeVip": { $exists: false } },
+      {
+        $set: {
+          "gameConfigs.xucXacConfigs.xucXac10P.tiLeVip": { vip1: 2.1, vip2: 2.2, vip3: 2.3 },
+          "gameConfigs.xucXacConfigs.xucXac10P.tiLeCLTX": 2.1,
+        },
+      }
+    );
   } catch (err) {
     console.log("Lỗi tạo hệ thống");
   }
@@ -178,7 +210,14 @@ autoCreateAccountAdmin();
 // Khởi tạo hệ thống database
 khoiTaoHeThongDB();
 
-setTimeout(() => {
+setTimeout(async () => {
+  // Seed lịch sử phiên ảo cho game mới clone (idempotent nếu đã đủ ~100)
+  try {
+    await seedFakeGameHistory();
+  } catch (err) {
+    console.log("seedFakeGameHistory error:", err?.message || err);
+  }
+
   // Game Xóc Đĩa
   GameXocDia1PService.startGame();
   // Game Keno
@@ -189,6 +228,8 @@ setTimeout(() => {
   // // Game Tài Xỉu
   GameXucXac1PService.startGame();
   GameXucXac3PService.startGame();
+  GameXucXac5PService.startGame();
+  GameXucXac10PService.startGame();
   // // Game Xổ Số
   GameXoSo3PService.startGame();
   GameXoSo5PService.startGame();

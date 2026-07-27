@@ -195,6 +195,24 @@ class BullMQService {
             tiLe,
             itemDatCuoc,
           });
+        } else if (typeGame === LOAI_GAME.XUCXAC5P) {
+          const gameXucXac5PService = require("./game.xucxac5p.service");
+          await gameXucXac5PService.traThuongWorker({
+            nguoiDung,
+            bangKetQua,
+            listCuoc,
+            tiLe,
+            itemDatCuoc,
+          });
+        } else if (typeGame === LOAI_GAME.XUCXAC10P) {
+          const gameXucXac10PService = require("./game.xucxac10p.service");
+          await gameXucXac10PService.traThuongWorker({
+            nguoiDung,
+            bangKetQua,
+            listCuoc,
+            tiLe,
+            itemDatCuoc,
+          });
         }
       },
       {

@@ -29,6 +29,8 @@ const LOAI_CUOC_GAME = {
 const CHI_TIET_CUOC_GAME = {
   TAI: "T",
   XIU: "X",
+  CHAN: "C",
+  LE: "L",
 };
 
 Object.freeze(DEFAULT_SETTING_GAME);

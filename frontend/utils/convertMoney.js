@@ -29,7 +29,7 @@ export const convertJSXMoney = (money = 0) => {
   );
 };
 
-/** Admin stats compact: K / M / B — không dùng cho UI user. */
+/** Admin stats compact: K / Tr / Tỷ — không dùng cho UI user. */
 export const formatCompactMoney = (money = 0) => {
   const v = Number(money) || 0;
   const abs = Math.abs(v);
@@ -39,8 +39,8 @@ export const formatCompactMoney = (money = 0) => {
       .toFixed(2)
       .replace(/\.00$/, "")
       .replace(/(\.\d)0$/, "$1");
-  if (abs >= 1e9) return `${sign}${trim(abs / 1e9)}B`;
-  if (abs >= 1e6) return `${sign}${trim(abs / 1e6)}M`;
+  if (abs >= 1e9) return `${sign}${trim(abs / 1e9)} Tỷ`;
+  if (abs >= 1e6) return `${sign}${trim(abs / 1e6)} Tr`;
   if (abs >= 1e3) return `${sign}${trim(abs / 1e3)}K`;
   return `${sign}${Math.round(abs).toLocaleString("vi-VN")}`;
 };

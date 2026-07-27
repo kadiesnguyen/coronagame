@@ -404,6 +404,49 @@ class UserAdminController {
     }).send(res);
   });
 
+  /** Xóa nhiều user (không xóa admin / chính mình) */
+  static deleteUsers = catchAsync(async (req, res, next) => {
+    const userIds = Array.isArray(req.body?.userIds) ? req.body.userIds.filter(Boolean) : [];
+    if (!userIds.length) {
+      throw new BadRequestError("Vui lòng chọn tài khoản cần xóa");
+    }
+    const selfId = String(req.user._id);
+    const ids = userIds.map(String).filter((id) => id !== selfId);
+
+    const targets = await NguoiDung.find({
+      _id: { $in: ids },
+      role: { $ne: USER_ROLE.ADMIN },
+    })
+      .select("_id taiKhoan")
+      .lean();
+
+    if (!targets.length) {
+      throw new BadRequestError("Không có tài khoản hợp lệ để xóa");
+    }
+
+    const deleteIds = targets.map((u) => u._id);
+    await LienKetNganHang.deleteMany({ nguoiDung: { $in: deleteIds } });
+    const deleted = await NguoiDung.deleteMany({ _id: { $in: deleteIds }, role: { $ne: USER_ROLE.ADMIN } });
+
+    for (const u of targets) {
+      global._io?.to(`${u.taiKhoan}`)?.emit("sign-out");
+    }
+
+    await NhatKyHoatDong.insertNhatKyHoatDong({
+      taiKhoan: req.user.taiKhoan,
+      userId: req.user._id,
+      typeActivity: TYPE_ACTIVITY.ADMIN,
+      actionActivity: ACTION_ACTIVITY.ADMIN.DELETE_USERS,
+      description: `Xóa ${targets.length} tài khoản: ${targets.map((u) => u.taiKhoan).join(", ")}`,
+      metadata: { userIds: deleteIds.map(String), taiKhoan: targets.map((u) => u.taiKhoan) },
+    });
+
+    return new OkResponse({
+      message: `Đã xóa ${deleted.deletedCount} tài khoản`,
+      data: { deletedCount: deleted.deletedCount },
+    }).send(res);
+  });
+
   /** Danh sách tài khoản role=admin (menu Cài đặt → Danh sách quản trị) */
   static getDanhSachAdmins = catchAsync(async (req, res, next) => {
     const searchQuery = req.query?.query ?? "";

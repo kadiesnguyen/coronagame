@@ -17,6 +17,8 @@ const GAME_PLAYER_ROOMS = [
   "keno10p",
   "xucxac1p",
   "xucxac3p",
+  "xucxac5p",
+  "xucxac10p",
   "xocdia1p",
   "xoso3p",
   "xoso5p",

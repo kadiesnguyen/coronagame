@@ -1,6 +1,7 @@
 "use strict";
 
 const { isAdminSocket } = require("../../utils/socket_auth");
+const AdminSocketService = require("../admin.socket.service");
 
 const HeThong = require("../../models/HeThong");
 
@@ -27,7 +28,10 @@ class GameXocDiaSocketService {
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room`, () => {
-      this.socket.join(this.CONFIG.ROOM);
+      if (!AdminSocketService.exclusiveJoinPlayerRoom(this.socket, this.CONFIG.ROOM)) {
+        return;
+      }
+      AdminSocketService.broadcastGameRoomCounts();
       if (!this.GAME_DATA) {
         this.socket.disconnect();
         return;
@@ -37,12 +41,16 @@ class GameXocDiaSocketService {
         return;
       }
 
-      this.CONFIG.METHOD.SEND_ROOM_XOCDIA({ key: `${this.CONFIG.KEY_SOCKET}:timer`, data: { current_time: dataGame.timer } });
-      this.CONFIG.METHOD.SEND_ROOM_XOCDIA({ key: `${this.CONFIG.KEY_SOCKET}:hienThiPhien`, data: { phien: dataGame.phien } });
-      this.CONFIG.METHOD.SEND_ROOM_XOCDIA({
-        key: `${this.CONFIG.KEY_SOCKET}:phienHoanTatMoiNhat`,
-        data: { phienHoanTatMoiNhat: dataGame.phienHoanTatMoiNhat },
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:timer`, { current_time: dataGame.timer });
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:hienThiPhien`, { phien: dataGame.phien });
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:phienHoanTatMoiNhat`, {
+        phienHoanTatMoiNhat: dataGame.phienHoanTatMoiNhat,
       });
+    });
+
+    this.socket.on(`${this.CONFIG.KEY_SOCKET}:leave-room`, () => {
+      this.socket.leave(this.CONFIG.ROOM);
+      AdminSocketService.broadcastGameRoomCounts();
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room-admin`, () => {

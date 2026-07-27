@@ -6,6 +6,8 @@ const GameKeno5PSocketService = require("./game.socket.service/game.keno5p.socke
 const GameKeno10PSocketService = require("./game.socket.service/game.keno10p.socket.service");
 const GameXucXac1PSocketService = require("./game.socket.service/game.xucxac1p.socket.service");
 const GameXucXac3PSocketService = require("./game.socket.service/game.xucxac3p.socket.service");
+const GameXucXac5PSocketService = require("./game.socket.service/game.xucxac5p.socket.service");
+const GameXucXac10PSocketService = require("./game.socket.service/game.xucxac10p.socket.service");
 const GameXocDia1PSocketService = require("./game.socket.service/game.xocdia1p.socket.service");
 const GameXoSo3PSocketService = require("./game.socket.service/game.xoso3p.socket.service");
 const GameXoSo5PSocketService = require("./game.socket.service/game.xoso5p.socket.service");
@@ -33,6 +35,8 @@ class SocketService {
       });
     }
     console.log("New client connected " + socket.id);
+    // Tránh client cũ / reconnect giữ membership nhiều phòng game
+    AdminSocketService.leaveAllPlayerRooms(socket);
     AdminSocketService.LIST_USERS_SOCKET[user.taiKhoan] = user;
 
     BullMQService.initQueue({
@@ -86,6 +90,7 @@ class SocketService {
         key: KEYS_SOCKET_ADMIN.LIST_USERS_ONLINE,
         data: Object.keys(AdminSocketService.LIST_USERS_SOCKET),
       });
+      AdminSocketService.broadcastGameRoomCounts();
     });
     new GameKeno1PSocketService(socket);
     new GameKeno3PSocketService(socket);
@@ -94,6 +99,8 @@ class SocketService {
 
     new GameXucXac1PSocketService(socket);
     new GameXucXac3PSocketService(socket);
+    new GameXucXac5PSocketService(socket);
+    new GameXucXac10PSocketService(socket);
 
     new GameXocDia1PSocketService(socket);
     new GameXoSo3PSocketService(socket);

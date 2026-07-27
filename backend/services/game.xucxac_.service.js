@@ -22,6 +22,7 @@ const BullMQService = require("./bullmq.service");
 const XucXacGameState = require("./state.game.xucxac");
 const { createBroadcastMiddleware } = require("../middlewares/broadcast.logger");
 const dayjs = require("dayjs");
+const { DEFAULT_XUCXAC10P_TI_LE_VIP, resolveTiLeByVipLevel } = require("../utils/vip");
 
 let CURRENT_GAME = {
   _id: null,
@@ -139,7 +140,7 @@ class GameXucXacService {
       X: 0,
     };
     const lichSuDatCuoc = await this.SETTING_GAME.DATABASE_MODEL.HISTORY.find({
-      phien: this.CURRENT_GAME._id,
+      phien: this.gameState.getState()._id,
       tinhTrang: STATUS_HISTORY_GAME.DANG_CHO,
     }).lean();
     for (const itemDatCuoc of lichSuDatCuoc) {
@@ -254,8 +255,8 @@ class GameXucXacService {
       systemID: 1,
     });
 
-    const tiLe =
-      findHeThong?.gameConfigs?.xucXacConfigs?.[`xucXac${this.KEY_GAME.TYPE_GAME}`]?.tiLeCLTX ?? DEFAULT_SETTING_GAME.BET_PAYOUT_PERCENT;
+    const xucXacConfig = findHeThong?.gameConfigs?.xucXacConfigs?.[`xucXac${this.KEY_GAME.TYPE_GAME}`];
+    const defaultTiLe = xucXacConfig?.tiLeCLTX ?? DEFAULT_SETTING_GAME.BET_PAYOUT_PERCENT;
 
     const getQueueTraThuong = BullMQService.initQueue({
       queueName: GameXucXacService.QUEUE_TRA_THUONG,
@@ -263,6 +264,10 @@ class GameXucXacService {
     // Add to queue
     await getQueueTraThuong.addBulk(
       lichSuDatCuoc.map((itemDatCuoc) => {
+        const tiLe =
+          this.KEY_GAME.TYPE_GAME === "10P"
+            ? resolveTiLeByVipLevel(itemDatCuoc.vipLevel, xucXacConfig?.tiLeVip, defaultTiLe, DEFAULT_XUCXAC10P_TI_LE_VIP)
+            : defaultTiLe;
         const nameJob = `${this.KEY_GAME.KEY_SOCKET}-${itemDatCuoc.phien._id}`;
         return {
           name: nameJob,

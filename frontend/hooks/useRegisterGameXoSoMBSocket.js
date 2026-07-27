@@ -1,4 +1,5 @@
 import { LOAI_GAME } from "@/configs/game.config";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TINH_TRANG_GAME } from "../configs/game.xoso.config";
@@ -6,13 +7,15 @@ import { setKetQua, setKetQuaPhienTruoc, setPhien, setTimer, setTinhTrang } from
 
 const useRegisterGameXoSoMBSocket = ({ value }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const { isPlayGame: isPlayGameXoSoMB } = useSelector((state) => state.gameXoSoMB);
 
   useEffect(() => {
     const key_socket = LOAI_GAME.XOSOMB;
+    const onGamePage = router.pathname === `/games/${key_socket}`;
     if (value.isConnected && value.socket) {
-      if (isPlayGameXoSoMB) {
+      if (isPlayGameXoSoMB && onGamePage) {
         value.socket.emit(`${key_socket}:join-room`);
         value.socket.on(`${key_socket}:hienThiPhien`, ({ currentDate, latestCompleteDate }) => {
           dispatch(setPhien({ currentDate, latestCompleteDate }));
@@ -40,6 +43,7 @@ const useRegisterGameXoSoMBSocket = ({ value }) => {
         });
 
         return () => {
+          value.socket.emit(`${key_socket}:leave-room`);
           value.socket.off(`${key_socket}:hienThiPhien`);
           value.socket.off(`${key_socket}:timer`);
           value.socket.off(`${key_socket}:batDauGame`);
@@ -50,6 +54,7 @@ const useRegisterGameXoSoMBSocket = ({ value }) => {
           value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
         };
       } else {
+        value.socket.emit(`${key_socket}:leave-room`);
         value.socket.off(`${key_socket}:hienThiPhien`);
         value.socket.off(`${key_socket}:timer`);
         value.socket.off(`${key_socket}:batDauGame`);
@@ -60,7 +65,7 @@ const useRegisterGameXoSoMBSocket = ({ value }) => {
         value.socket.off(`${key_socket}:phienHoanTatMoiNhat`);
       }
     }
-  }, [value, isPlayGameXoSoMB]);
+  }, [value, isPlayGameXoSoMB, router.pathname]);
   return isPlayGameXoSoMB;
 };
 export default useRegisterGameXoSoMBSocket;

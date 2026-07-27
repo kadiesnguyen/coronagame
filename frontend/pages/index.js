@@ -19,22 +19,10 @@ import HomeNotification from "../components/homePage/HomeNotification";
 import "swiper/css";
 const LIST_GAME = [
   {
-    title: "Keno 1P",
-    desc: "Đoán số để dành chiến thắng",
-    img: Keno1P,
-    link: "/games/keno1p",
-  },
-  {
-    title: "Keno 3P",
-    desc: "Đoán số để dành chiến thắng",
-    img: Keno3P,
-    link: "/games/keno3p",
-  },
-  {
-    title: "Keno 5P",
-    desc: "Đoán số để dành chiến thắng",
-    img: Keno5P,
-    link: "/games/keno5p",
+    title: "Xúc Xắc 10P",
+    desc: "Đoán xúc xắc để dành chiến thắng",
+    img: XucXac3P,
+    link: "/games/xucxac10p",
   },
   {
     title: "Keno 10P",
@@ -43,17 +31,40 @@ const LIST_GAME = [
     link: "/games/keno10p",
   },
   {
-    title: "Xúc Xắc 1P",
+    title: "Xúc Xắc 5P",
     desc: "Đoán xúc xắc để dành chiến thắng",
-    img: XucXac1P,
-    link: "/games/xucxac1p",
+    img: XucXac3P,
+    link: "/games/xucxac5p",
   },
-
   {
     title: "Xúc Xắc 3P",
     desc: "Đoán xúc xắc để dành chiến thắng",
     img: XucXac3P,
     link: "/games/xucxac3p",
+  },
+  {
+    title: "Xúc Xắc 1P",
+    desc: "Đoán xúc xắc để dành chiến thắng",
+    img: XucXac1P,
+    link: "/games/xucxac1p",
+  },
+  {
+    title: "Keno 5P",
+    desc: "Đoán số để dành chiến thắng",
+    img: Keno5P,
+    link: "/games/keno5p",
+  },
+  {
+    title: "Keno 3P",
+    desc: "Đoán số để dành chiến thắng",
+    img: Keno3P,
+    link: "/games/keno3p",
+  },
+  {
+    title: "Keno 1P",
+    desc: "Đoán số để dành chiến thắng",
+    img: Keno1P,
+    link: "/games/keno1p",
   },
   {
     title: "Xóc Đĩa 1P",

@@ -1,3 +1,8 @@
+/**
+ * Link preview / SEO — single source for share cards (Telegram, Zalo, FB…).
+ * No og:image / twitter:image so shares stay text-only (no logo/banner).
+ * Search indexing blocked site-wide (robots + headers + robots.txt).
+ */
 const NextSeoConfig = {
   title: null,
   titleTemplate: "%s | Corona Casin",
@@ -63,11 +68,6 @@ const NextSeoConfig = {
       rel: "manifest",
       href: "/manifest.json",
     },
-    {
-      rel: "apple-touch-icon",
-      href: "/assets/images/logo-corona.png",
-      sizes: "180x180",
-    },
   ],
   openGraph: {
     type: "website",
@@ -75,21 +75,10 @@ const NextSeoConfig = {
     url: process.env.NEXTAUTH_URL,
     siteName: "Corona Casin",
     description: "Corona Casin",
-    images: [
-      {
-        url: "/assets/images/logo-corona.png",
-        width: 400,
-        height: 84,
-      },
-    ],
-  },
-  facebook: {
-    appId: process.env.FACEBOOK_APPID,
+    // intentionally no images — avoid logo/banner on link share
   },
   twitter: {
-    handle: "@ThinhLe2013478",
-    site: "@ThinhLe2013478",
-    cardType: "summary_large_image",
+    cardType: "summary",
   },
 };
 export default NextSeoConfig;

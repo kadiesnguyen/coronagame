@@ -12,6 +12,10 @@ class DashboardService {
     const res = await api.get(`/v1/admin/dashboard/game-transactionals?fromDate=${fromDate}&toDate=${toDate}`);
     return res;
   };
+  static getTopGameDashboard = async ({ days = 7 } = {}) => {
+    const res = await api.get(`/v1/admin/dashboard/top-game?days=${days}`);
+    return res;
+  };
 }
 
 export default DashboardService;

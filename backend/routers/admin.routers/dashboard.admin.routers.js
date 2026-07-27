@@ -8,5 +8,6 @@ router.route("/deposit").get(authController.protect, authController.reStrictTo("
 router
   .route("/game-transactionals")
   .get(authController.protect, authController.reStrictTo("admin"), AdminController.getGameTransactionalsDashboard);
+router.route("/top-game").get(authController.protect, authController.reStrictTo("admin"), AdminController.getTopGameDashboard);
 
 module.exports = router;

@@ -14,6 +14,8 @@ import useRegisterGameKeno5PSocket from "../hooks/useRegisterGameKeno5PSocket";
 import useRegisterGameKeno10PSocket from "../hooks/useRegisterGameKeno10PSocket";
 import useRegisterGameXucXac1PSocket from "../hooks/useRegisterGameXucXac1PSocket";
 import useRegisterGameXucXac3PSocket from "../hooks/useRegisterGameXucXac3PSocket";
+import useRegisterGameXucXac5PSocket from "../hooks/useRegisterGameXucXac5PSocket";
+import useRegisterGameXucXac10PSocket from "../hooks/useRegisterGameXucXac10PSocket";
 import useRegisterUserBalanceSocket from "../hooks/useRegisterUserBalanceSocket";
 
 const SocketProvider = (props) => {
@@ -42,6 +44,8 @@ const SocketProvider = (props) => {
   useRegisterGameKeno10PSocket({ value });
   useRegisterGameXucXac1PSocket({ value });
   useRegisterGameXucXac3PSocket({ value });
+  useRegisterGameXucXac5PSocket({ value });
+  useRegisterGameXucXac10PSocket({ value });
   useRegisterGameXocDia1PSocket({
     value,
   });

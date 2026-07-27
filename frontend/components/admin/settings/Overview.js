@@ -19,6 +19,7 @@ import BreadcrumbBar from "../BreadcrumbBar";
 const User = dynamic(() => import("../dashboard/User"), { ssr: false });
 const Deposit = dynamic(() => import("../dashboard/Deposit"), { ssr: false });
 const Transaction = dynamic(() => import("../dashboard/GameTransaction"), { ssr: false });
+const TopGameBoards = dynamic(() => import("../dashboard/TopGameBoards"), { ssr: false });
 
 const SETTING_GROUPS = [
   {
@@ -226,6 +227,10 @@ const Overview = () => {
             <Transaction />
           </Grid>
         </Grid>
+      </AdminSection>
+
+      <AdminSection title="Bảng xếp hạng game" subtitle="Top thắng · Top cược (7 ngày)" sx={{ mb: "24px" }}>
+        <TopGameBoards />
       </AdminSection>
 
       {SETTING_GROUPS.map((group) => (

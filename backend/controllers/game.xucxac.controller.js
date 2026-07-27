@@ -15,6 +15,7 @@ const BienDongSoDuServiceFactory = require("../services/biendongsodu.service");
 const AdminSocketService = require("../services/admin.socket.service");
 const NhatKyHoatDong = require("../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../configs/activity.config");
+const { resolveVipLevel } = require("../utils/vip");
 class GameXucXacController {
   constructor({ CONFIG }) {
     this.CONFIG = CONFIG;
@@ -82,11 +83,31 @@ class GameXucXacController {
             isErrorUpdateMoneyConcurrency = true;
             throw new BadRequestError("Xảy ra lỗi, vui lòng thử lại sau");
           }
-          const lichSuCuoc = await this.CONFIG.MODEL.LICH_SU_DAT_CUOC.findOne({
+
+          let betVipLevel;
+          if (this.CONFIG.REQUIRE_VIP_LEVEL) {
+            betVipLevel = Number(req.body.vipLevel);
+            if (![1, 2, 3].includes(betVipLevel)) {
+              throw new BadRequestError("VIP level không hợp lệ");
+            }
+            const heThongVip = await HeThong.findOne({ systemID: 1 }).session(session).select("vipLevels");
+            const userVipLevel = resolveVipLevel(findUser.money, heThongVip?.vipLevels);
+            // VIP cao được chơi phòng thấp hơn (VIP3 → VIP1/2/3)
+            if (!userVipLevel || userVipLevel < betVipLevel) {
+              throw new BadRequestError("Số dư không đủ điều kiện VIP này");
+            }
+          }
+
+          const lichSuCuocQuery = {
             phien: findPhien._id,
             nguoiDung: userID,
             tinhTrang: STATUS_HISTORY_GAME.DANG_CHO,
-          }).session(session);
+          };
+          if (this.CONFIG.REQUIRE_VIP_LEVEL) {
+            lichSuCuocQuery.vipLevel = betVipLevel;
+          }
+
+          const lichSuCuoc = await this.CONFIG.MODEL.LICH_SU_DAT_CUOC.findOne(lichSuCuocQuery).session(session);
           if (!lichSuCuoc) {
             const tongTienCuoc = chiTietCuoc.reduce((a, b) => a + b.tienCuoc, 0);
             if (findUser.money < tongTienCuoc) {
@@ -118,6 +139,7 @@ class GameXucXacController {
                   phien: findPhien._id,
                   nguoiDung: userID,
                   datCuoc: chiTietCuoc,
+                  ...(this.CONFIG.REQUIRE_VIP_LEVEL ? { vipLevel: betVipLevel } : {}),
                 },
               ],
               {
@@ -333,9 +355,16 @@ class GameXucXacController {
     const skip = (page - 1) * results;
     let sortValue = ["-createdAt"];
     sortValue = sortValue.join(" ");
-    const list = await this.CONFIG.MODEL.LICH_SU_DAT_CUOC.find({
+    const filter = {
       nguoiDung: userID,
-    })
+    };
+    if (this.CONFIG.REQUIRE_VIP_LEVEL && req.query.vipLevel) {
+      const vipLevel = Number(req.query.vipLevel);
+      if ([1, 2, 3].includes(vipLevel)) {
+        filter.vipLevel = vipLevel;
+      }
+    }
+    const list = await this.CONFIG.MODEL.LICH_SU_DAT_CUOC.find(filter)
       .skip(skip)
       .limit(results)
       .sort(sortValue)
@@ -365,6 +394,9 @@ class GameXucXacController {
     const list = await this.CONFIG.MODEL.LICH_SU_DAT_CUOC.findOne({
       nguoiDung: userID,
       phien: findPhien._id,
+      ...(this.CONFIG.REQUIRE_VIP_LEVEL && req.query.vipLevel && [1, 2, 3].includes(Number(req.query.vipLevel))
+        ? { vipLevel: Number(req.query.vipLevel) }
+        : {}),
     }).select("datCuoc");
     return new OkResponse({
       data: list,

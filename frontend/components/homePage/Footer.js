@@ -77,8 +77,9 @@ const listItem = [
     key: "contact",
     icon: <HeadsetMicOutlinedIcon />,
     activeIcon: <HeadsetMicIcon />,
-    url: "/contact",
+    url: null,
     title: "CSKH",
+    openCskh: true,
   },
 ];
 

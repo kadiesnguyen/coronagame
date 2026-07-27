@@ -5,6 +5,8 @@ const LOAI_GAME = {
   KENO10P: "keno10p",
   XUCXAC1P: "xucxac1p",
   XUCXAC3P: "xucxac3p",
+  XUCXAC5P: "xucxac5p",
+  XUCXAC10P: "xucxac10p",
   XOCDIA1P: "xocdia1p",
   XOSO3P: "xoso3p",
   XOSO5P: "xoso5p",

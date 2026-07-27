@@ -12,7 +12,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { Bars } from "react-loading-icons";
 
-const LichSuCuoc = ({ TYPE_GAME }) => {
+const LichSuCuoc = ({ TYPE_GAME, vipLevel }) => {
   const {
     data: listLichSuGame,
     isLoading,
@@ -20,7 +20,7 @@ const LichSuCuoc = ({ TYPE_GAME }) => {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = useGetUserBetHistory({ typeGame: TYPE_GAME, pageSize: USER_BET_GAME_HISTORY_PAGE_SIZE });
+  } = useGetUserBetHistory({ typeGame: TYPE_GAME, pageSize: USER_BET_GAME_HISTORY_PAGE_SIZE, vipLevel });
   const listLichSu = listLichSuGame ?? [];
 
   const { socket } = useContext(SocketContext);

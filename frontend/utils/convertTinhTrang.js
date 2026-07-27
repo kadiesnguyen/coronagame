@@ -254,7 +254,7 @@ export const convertTinhTrangUser = (tinhTrang) => {
     case TINH_TRANG_USER.TRUE:
       return "Đang sử dụng";
     case TINH_TRANG_USER.FALSE:
-      return "Ngưng sử dụng";
+      return "Khóa";
     default:
       return "";
   }

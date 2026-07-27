@@ -21,6 +21,8 @@ const listGame = [
   { title: "Keno 10P", link: "/admin/games/keno10p", room: "keno10p", icon: Keno5P, introduce: "Xem và chỉnh sửa kết quả quay số VIP" },
   { title: "Xúc Xắc 1P", link: "/admin/games/xucxac1p", room: "xucxac1p", icon: XucXac1P, introduce: "Xem và chỉnh sửa kết quả xúc xắc" },
   { title: "Xúc Xắc 3P", link: "/admin/games/xucxac3p", room: "xucxac3p", icon: XucXac3P, introduce: "Xem và chỉnh sửa kết quả xúc xắc" },
+  { title: "Xúc Xắc 5P", link: "/admin/games/xucxac5p", room: "xucxac5p", icon: XucXac3P, introduce: "Xem và chỉnh sửa kết quả xúc xắc" },
+  { title: "Xúc Xắc 10P", link: "/admin/games/xucxac10p", room: "xucxac10p", icon: XucXac3P, introduce: "Xem và chỉnh sửa kết quả xúc xắc" },
   { title: "Xóc Đĩa 1P", link: "/admin/games/xocdia1p", room: "xocdia1p", icon: XocDia1P, introduce: "Xem và chỉnh sửa kết quả xóc đĩa" },
   { title: "Xổ Số 3P", link: "/admin/games/xoso3p", room: "xoso3p", icon: XoSo3P, introduce: "Xem và chỉnh sửa kết quả xổ số" },
   { title: "Xổ Số 5P", link: "/admin/games/xoso5p", room: "xoso5p", icon: XoSo5P, introduce: "Xem và chỉnh sửa kết quả xổ số" },
@@ -71,7 +73,7 @@ const Overview = () => {
           )}
         </Box>
         <Typography sx={{ fontSize: "1.5rem", color: "#b8c0d4", marginBottom: "24px" }}>
-          Badge đỏ = phiên đang có cược chưa xem. Bấm vào game hoặc sang phiên mới sẽ mất.
+          Badge đỏ = phiên đang có cược chưa xem. Số người = user đang mở đúng trang game đó (không tính admin).
         </Typography>
 
         <Box

@@ -164,6 +164,9 @@ class NguoiDungController {
     if (!authPassword) {
       throw new BadRequestError("Mật khẩu không chính xác");
     }
+    if (user.status !== true) {
+      throw new UnauthorizedError("Tài khoản đã bị khóa");
+    }
     // Sign token
 
     const { accessToken, refreshToken, expireAccessToken } = signToken({

@@ -22,14 +22,14 @@ const ButtonTabChange = styled(Box)(({ theme }) => ({
   },
 }));
 
-const BoxLichSu = ({ TYPE_GAME }) => {
+const BoxLichSu = ({ TYPE_GAME, vipLevel }) => {
   const TYPE_TAB = {
     GAME_HISTORY: "Lịch sử trò chơi",
     USER_BET_HISTORY: "Lịch sử của tôi",
   };
   const COMPONENT_TAB = {
     GAME_HISTORY: <LichSuGame TYPE_GAME={TYPE_GAME} />,
-    USER_BET_HISTORY: <LichSuCuoc TYPE_GAME={TYPE_GAME} />,
+    USER_BET_HISTORY: <LichSuCuoc TYPE_GAME={TYPE_GAME} vipLevel={vipLevel} />,
   };
   const [tabPage, setTabPage] = useState(Object.keys(TYPE_TAB)[0]);
   const [isModal, setIsModal] = useState(false);
