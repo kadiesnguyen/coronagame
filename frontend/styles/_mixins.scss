@@ -1,0 +1,10 @@
+@mixin responsive($screen) {
+  @media (max-width: $screen) {
+    @content;
+  }
+}
+@mixin threeDots() {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

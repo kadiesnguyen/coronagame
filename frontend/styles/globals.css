@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap");
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Noto Sans", "League Spartan", "Bebas Neue", "IBM Plex Sans", "Poppins", sans-serif;
+  font-size: 62.5%;
+
+}
+
+
+
+@media only screen and (max-width: 600px) {
+
+  html,
+  body {
+    font-size: 55.5%;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+
+}
+
+::-webkit-scrollbar-track {
+  background: inherit;
+}
+
+textarea {
+  resize: vertical;
+  font-family: "Noto Sans", "League Spartan", "Bebas Neue", "IBM Plex Sans", "Poppins", sans-serif;
+}

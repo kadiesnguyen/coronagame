@@ -1,0 +1,39 @@
+# Secrets & local ops (do not commit)
+info.md
+imageslide/
+**/config.env
+**/.env
+**/.env.*
+!**/.env*.example
+!**/*.env.example
+
+# Dependencies & build
+**/node_modules/
+**/.next/
+**/out/
+**/build/cache/
+*.tsbuildinfo
+
+# PWA generated
+frontend/public/sw.js
+frontend/public/workbox-*.js
+
+# CKEditor custom build: keep source+build JS, drop heavy/local
+frontend/ckeditor5-*/node_modules/
+frontend/ckeditor5-*/build/*.map
+frontend/ckeditor5-*/sample/
+
+# Deploy notes may contain host/credentials — keep local only
+docs/superpowers/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.idea/
+.vscode/
+coverage/
+docker-data/

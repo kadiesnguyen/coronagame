@@ -1,0 +1,30 @@
+{
+  "root": true,
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "env": {
+    "es2021": true,
+    "jest": true,
+    "node": true
+  },
+  "plugins": ["import"],
+  "rules": {
+    "no-empty-pattern": "warn",
+    "no-useless-catch": "warn",
+    "no-console": "warn",
+    "no-unused-vars": "warn",
+    // Rule kiểm tra việc import module nhưng không sử dụng
+    "import/no-unused-modules": [
+      "warn",
+      {
+        "ignoreExports": [],
+        "missingExports": true,
+        "unusedExports": true
+      }
+    ]
+  }
+}
