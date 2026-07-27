@@ -83,10 +83,15 @@ class HeThongAdminController {
     }
     const link = String(tawkToConfigs.link || "").trim();
     if (!link) {
-      throw new BadRequestError("Vui lòng nhập link CSKH");
+      throw new BadRequestError("Vui lòng nhập script CSKH (ProvideSupport)");
     }
-    if (!/^https?:\/\//i.test(link)) {
-      throw new BadRequestError("Link CSKH phải bắt đầu bằng http:// hoặc https://");
+    const isProvideSupport =
+      /providesupport\.com/i.test(link) ||
+      /<script/i.test(link) ||
+      /^\(function/i.test(link) ||
+      /^https?:\/\//i.test(link);
+    if (!isProvideSupport) {
+      throw new BadRequestError("Dán mã ProvideSupport (script / Text Chat Link) hoặc URL https://...");
     }
     const heThong = await HeThong.findOneAndUpdate(
       { systemID: 1 },
@@ -108,7 +113,7 @@ class HeThongAdminController {
       userId: req.user._id,
       typeActivity: TYPE_ACTIVITY.ADMIN,
       actionActivity: ACTION_ACTIVITY.ADMIN.SET_TAWK_TO,
-      description: `Set cấu hình link CSKH`,
+      description: `Set cấu hình script CSKH`,
       metadata: {
         before: heThong.cskhConfigs.tawk,
         after: { link },

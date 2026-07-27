@@ -1,17 +1,23 @@
 import Layout from "@/components/Layout";
 import LoadingBox from "@/components/homePage/LoadingBox";
 import useGetTawkToConfig from "@/hooks/useGetTawkToConfig";
-import { openCskh } from "@/utils/openCskh";
+import {
+  ensureProvideSupportLoaded,
+  getProvideSupportChatUrl,
+  openProvideSupportChat,
+  resolveChatScript,
+} from "@/utils/provideSupport";
 import { Box, Button, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { NextSeo } from "next-seo";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const Home = () => {
+const Contact = () => {
   const { status } = useSession();
   const { data, isLoading } = useGetTawkToConfig();
-  const link = data?.link ?? "";
-  const openedRef = useRef(false);
+  const chatScript = useMemo(() => resolveChatScript(data?.link), [data?.link]);
+  const chatUrl = useMemo(() => getProvideSupportChatUrl(data?.link || chatScript), [data?.link, chatScript]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -19,47 +25,93 @@ const Home = () => {
     }
   }, [status]);
 
-  // Vào /contact → mở luôn tab CSKH (không nhúng iframe)
   useEffect(() => {
-    if (isLoading || openedRef.current) return;
-    if (!link) return;
-    openedRef.current = true;
-    openCskh();
-  }, [isLoading, link]);
+    if (status !== "authenticated" || isLoading) return;
+
+    let cancelled = false;
+
+    const boot = async () => {
+      await ensureProvideSupportLoaded(chatScript);
+      if (cancelled) return;
+      setReady(true);
+      // Try native ProvideSupport window; iframe below always shows chat in-page
+      void openProvideSupportChat();
+    };
+
+    void boot();
+
+    const onReopen = () => {
+      void openProvideSupportChat();
+    };
+    window.addEventListener("cskh:open", onReopen);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("cskh:open", onReopen);
+    };
+  }, [status, isLoading, chatScript]);
 
   return (
     <>
       <NextSeo title="Chăm sóc khách hàng" />
-      {isLoading && <LoadingBox isLoading={isLoading} />}
+      {(isLoading || status === "loading") && <LoadingBox isLoading />}
 
       <Layout>
         <h1 className="title-h1">Chăm sóc khách hàng</h1>
         <Box
           sx={{
-            paddingTop: "2rem",
+            paddingTop: "1.2rem",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
-            alignItems: "flex-start",
+            gap: "12px",
+            alignItems: "stretch",
           }}
         >
-          {!isLoading && !link && (
-            <Typography sx={{ color: "#b8c0d4" }}>CSKH chưa được cấu hình. Vui lòng liên hệ admin.</Typography>
-          )}
-          {link && (
-            <>
-              <Typography sx={{ color: "#b8c0d4", fontSize: "1.4rem" }}>
-                Đang mở CSKH ở tab mới. Nếu không thấy, bấm nút bên dưới.
-              </Typography>
-              <Button onClick={() => openCskh()} sx={{ minHeight: "48px" }}>
-                Mở CSKH
-              </Button>
-            </>
-          )}
+          <Typography sx={{ color: "#b8c0d4", fontSize: "1.4rem" }}>
+            Chat CSKH ngay bên dưới. Nếu cửa sổ nổi không hiện, dùng khung chat trên trang.
+          </Typography>
+          <Button
+            onClick={() => openProvideSupportChat()}
+            disabled={!ready}
+            sx={{
+              alignSelf: "flex-start",
+              minHeight: "48px",
+              backgroundColor: "#d4af37",
+              color: "#0b1528",
+              fontWeight: 700,
+              "&:hover": { backgroundColor: "#e5c05b" },
+            }}
+          >
+            Mở cửa sổ chat
+          </Button>
+          <Box
+            sx={{
+              width: "100%",
+              minHeight: "70vh",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid rgba(212,175,55,.35)",
+              background: "#0b1528",
+            }}
+          >
+            <Box
+              component="iframe"
+              title="CSKH ProvideSupport"
+              src={chatUrl}
+              sx={{
+                display: "block",
+                width: "100%",
+                height: "70vh",
+                border: 0,
+                background: "#fff",
+              }}
+              allow="microphone; camera; clipboard-write"
+            />
+          </Box>
         </Box>
       </Layout>
     </>
   );
 };
 
-export default Home;
+export default Contact;

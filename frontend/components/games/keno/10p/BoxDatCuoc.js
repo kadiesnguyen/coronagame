@@ -1,7 +1,7 @@
 import BetMoneyStickyPanel from "@/components/games/BetMoneyStickyPanel";
 import { GAME_DAT_CUOC_ID } from "@/components/games/StickyBetBar";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import { MUC_TIEN_CUOC, TINH_TRANG_GAME, USER_BET_GAME_HISTORY_PAGE_SIZE } from "@/configs/game.keno.config";
+import { TINH_TRANG_GAME, USER_BET_GAME_HISTORY_PAGE_SIZE } from "@/configs/game.keno.config";
 import { LOAI_BI_KENO10P, LOAI_CUOC_KENO10P, TEN_VI_TRI } from "@/configs/game.keno10p.config";
 import useGetBetPayoutPercentage from "@/hooks/useGetBetPayoutPercentage";
 import useGetDetailedBetHistory from "@/hooks/useGetDetailedBetHistory";
@@ -10,6 +10,7 @@ import GameService from "@/services/GameService";
 import convertMoney from "@/utils/convertMoney";
 import { convertInputTienCuoc, isNumberKey } from "@/utils/input";
 import { mergeKenoBets } from "@/utils/mergeGameBets";
+import { syncPendingBetAmount } from "@/utils/syncPendingBetAmount";
 import { toast } from "@/utils/toast";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -112,20 +113,11 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno10p", phien, tinhTrang, vipLevel }) => {
   }, [tinhTrang]);
 
   const applyTienCuocToPending = (amount) => {
-    setTienCuoc(amount);
-    if (!amount || amount <= 0) return;
-    setChiTietCuocTemp((prev) => {
-      let changed = false;
-      const next = prev.map((b) => {
-        if (b.tienCuoc === 0) {
-          changed = true;
-          return { ...b, tienCuoc: amount };
-        }
-        return b;
-      });
-      return changed ? next : prev;
+    setTienCuoc((prevDraft) => {
+      setChiTietCuocTemp((prev) => syncPendingBetAmount(prev, prevDraft, amount));
+      return amount;
     });
-    setIsAllowResetBtn(true);
+    if (amount && amount > 0) setIsAllowResetBtn(true);
   };
 
   const handleSubmitCuoc = async () => {
@@ -291,9 +283,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno10p", phien, tinhTrang, vipLevel }) => {
 
       </Box>
       <BetMoneyStickyPanel
-        amounts={MUC_TIEN_CUOC}
         tienCuoc={tienCuoc}
-        onSelectAmount={applyTienCuocToPending}
         onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
         onSubmit={handleSubmitCuoc}
         onReset={handleResetCuoc}

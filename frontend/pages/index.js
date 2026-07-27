@@ -16,6 +16,7 @@ import { Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Layout from "../components/Layout";
 import HomeNotification from "../components/homePage/HomeNotification";
+import HomeNotificationPopup from "../components/homePage/HomeNotificationPopup";
 import "swiper/css";
 const LIST_GAME = [
   {
@@ -23,12 +24,6 @@ const LIST_GAME = [
     desc: "Đoán xúc xắc để dành chiến thắng",
     img: XucXac3P,
     link: "/games/xucxac10p",
-  },
-  {
-    title: "Keno 10P",
-    desc: "Keno VIP 10 phút",
-    img: Keno5P,
-    link: "/games/keno10p",
   },
   {
     title: "Xúc Xắc 5P",
@@ -47,6 +42,12 @@ const LIST_GAME = [
     desc: "Đoán xúc xắc để dành chiến thắng",
     img: XucXac1P,
     link: "/games/xucxac1p",
+  },
+  {
+    title: "Keno 10P",
+    desc: "Keno VIP 10 phút",
+    img: Keno5P,
+    link: "/games/keno10p",
   },
   {
     title: "Keno 5P",
@@ -135,6 +136,7 @@ const Home = () => {
   return (
     <>
       <Layout>
+        <HomeNotificationPopup />
         <Swiper
           autoplay={{
             delay: 2500,

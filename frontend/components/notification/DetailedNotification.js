@@ -36,11 +36,13 @@ const DetailedNotification = ({ id }) => {
           <Box
             sx={{
               width: "100%",
-              height: "20rem",
+              maxWidth: 360,
+              aspectRatio: "1 / 1",
               backgroundPosition: "center center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
               backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
+              alignSelf: "center",
             }}
           >
             {coverUrl ? (
@@ -51,6 +53,8 @@ const DetailedNotification = ({ id }) => {
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
+                  objectPosition: "center",
+                  display: "block",
                 }}
               />
             ) : null}

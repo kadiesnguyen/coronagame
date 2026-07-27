@@ -19,7 +19,7 @@ const FormWithdraw = () => {
     soTien: Yup.number()
       .typeError("Vui lòng nhập số tiền hợp lệ")
       .required("Vui lòng nhập số tiền hợp lệ")
-      .min(10000, "Vui lòng nhập số tiền từ 10.000đ"),
+      .min(500000, "Vui lòng nhập số tiền từ 500.000đ"),
   });
   const formOptions = { resolver: yupResolver(validationSchema) };
 

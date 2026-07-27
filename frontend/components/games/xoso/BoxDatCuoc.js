@@ -5,7 +5,6 @@ import { memo, useEffect, useRef, useState } from "react";
 import BetMoneyStickyPanel from "@/components/games/BetMoneyStickyPanel";
 import { GAME_DAT_CUOC_ID } from "@/components/games/StickyBetBar";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import { MUC_TIEN_CUOC } from "@/configs/game.keno.config";
 import { LOAI_CUOC_GAME, convertLoaiCuoc, getTiLeDefault } from "@/configs/game.xoso.config";
 import { TINH_TRANG_GAME, USER_BET_GAME_HISTORY_PAGE_SIZE } from "@/configs/game.xucxac.config";
 import useGetBetPayoutPercentage from "@/hooks/useGetBetPayoutPercentage";
@@ -419,9 +418,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
         )}
       </Box>
       <BetMoneyStickyPanel
-        amounts={MUC_TIEN_CUOC}
         tienCuoc={tienCuoc}
-        onSelectAmount={setTienCuoc}
         onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
         onSubmit={handleSubmitCuoc}
         onReset={handleResetCuoc}

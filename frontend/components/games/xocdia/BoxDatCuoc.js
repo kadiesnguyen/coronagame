@@ -6,7 +6,6 @@ import {
   DEFAULT_SETTING_GAME,
   LOAI_CUOC,
   LOAI_CUOC_GAME,
-  MUC_TIEN_CUOC,
   TINH_TRANG_GAME,
   USER_BET_GAME_HISTORY_PAGE_SIZE,
 } from "@/configs/game.xocdia.config";
@@ -17,6 +16,7 @@ import GameService from "@/services/GameService";
 import convertMoney from "@/utils/convertMoney";
 import { convertInputTienCuoc, isNumberKey } from "@/utils/input";
 import { mergeCltxBets } from "@/utils/mergeGameBets";
+import { syncPendingBetAmount } from "@/utils/syncPendingBetAmount";
 import { toast } from "@/utils/toast";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -100,20 +100,11 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
   }, [tinhTrang]);
 
   const applyTienCuocToPending = (amount) => {
-    setTienCuoc(amount);
-    if (!amount || amount <= 0) return;
-    setChiTietCuocTemp((prev) => {
-      let changed = false;
-      const next = prev.map((b) => {
-        if (b.tienCuoc === 0) {
-          changed = true;
-          return { ...b, tienCuoc: amount };
-        }
-        return b;
-      });
-      return changed ? next : prev;
+    setTienCuoc((prevDraft) => {
+      setChiTietCuocTemp((prev) => syncPendingBetAmount(prev, prevDraft, amount));
+      return amount;
     });
-    setIsAllowResetBtn(true);
+    if (amount && amount > 0) setIsAllowResetBtn(true);
   };
 
   const handleSubmitCuoc = async () => {
@@ -310,9 +301,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang }) => {
 
       </Box>
       <BetMoneyStickyPanel
-        amounts={MUC_TIEN_CUOC}
         tienCuoc={tienCuoc}
-        onSelectAmount={applyTienCuocToPending}
         onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
         onSubmit={handleSubmitCuoc}
         onReset={handleResetCuoc}

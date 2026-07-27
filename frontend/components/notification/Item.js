@@ -24,13 +24,13 @@ const Item = ({ item }) => {
           <Box
             sx={{
               width: "100%",
-              height: "20rem",
+              aspectRatio: "1 / 1",
               backgroundPosition: "center center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
               backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
             }}
-          ></Box>
+          />
           <Box
             sx={{
               padding: "10px",

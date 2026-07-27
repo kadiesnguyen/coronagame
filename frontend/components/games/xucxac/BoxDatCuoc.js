@@ -5,17 +5,13 @@ import { memo, useEffect, useRef, useState } from "react";
 import BetMoneyStickyPanel from "@/components/games/BetMoneyStickyPanel";
 import { GAME_DAT_CUOC_ID } from "@/components/games/StickyBetBar";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import {
-  LOAI_CUOC,
-  MUC_TIEN_CUOC,
-  TINH_TRANG_GAME,
-  USER_BET_GAME_HISTORY_PAGE_SIZE,
-} from "@/configs/game.xucxac.config";
+import { LOAI_CUOC, TINH_TRANG_GAME, USER_BET_GAME_HISTORY_PAGE_SIZE } from "@/configs/game.xucxac.config";
 import useGetBetPayoutPercentage from "@/hooks/useGetBetPayoutPercentage";
 import useGetDetailedBetHistory from "@/hooks/useGetDetailedBetHistory";
 import useGetUserBetHistory from "@/hooks/useGetUserBetHistory";
 import GameService from "@/services/GameService";
 import { mergeCltxBets } from "@/utils/mergeGameBets";
+import { syncPendingBetAmount } from "@/utils/syncPendingBetAmount";
 import { toast } from "@/utils/toast";
 import _ from "lodash";
 
@@ -87,18 +83,9 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang, vipLevel }) => {
   }, [tinhTrang]);
 
   const applyTienCuocToPending = (amount) => {
-    setTienCuoc(amount);
-    if (!amount || amount <= 0) return;
-    setChiTietCuocTemp((prev) => {
-      let changed = false;
-      const next = prev.map((b) => {
-        if (b.tienCuoc === 0) {
-          changed = true;
-          return { ...b, tienCuoc: amount };
-        }
-        return b;
-      });
-      return changed ? next : prev;
+    setTienCuoc((prevDraft) => {
+      setChiTietCuocTemp((prev) => syncPendingBetAmount(prev, prevDraft, amount));
+      return amount;
     });
   };
 
@@ -244,9 +231,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang, vipLevel }) => {
         </Box>
       </Box>
       <BetMoneyStickyPanel
-        amounts={MUC_TIEN_CUOC}
         tienCuoc={tienCuoc}
-        onSelectAmount={applyTienCuocToPending}
         onChangeInput={(e) => handleChangeTienCuoc(e.target.value)}
         onSubmit={handleSubmitCuoc}
         onReset={handleResetCuoc}

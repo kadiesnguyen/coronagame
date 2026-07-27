@@ -1,16 +1,14 @@
 import Layout from "@/components/Layout";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import useGetTawkToConfig from "@/hooks/useGetTawkToConfig";
 import { openCskh } from "@/utils/openCskh";
 import { Box, Button, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { NextSeo } from "next-seo";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Deposit = () => {
   const { status } = useSession();
-  const { data, isLoading } = useGetTawkToConfig();
-  const link = data?.link ?? "";
+  const openedRef = useRef(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -18,16 +16,17 @@ const Deposit = () => {
     }
   }, [status]);
 
-  // Vào trang nạp → mở luôn link CSKH
+  // Nạp tiền = mở trang chat CSKH trong app
   useEffect(() => {
-    if (status !== "authenticated" || isLoading) return;
+    if (status !== "authenticated" || openedRef.current) return;
+    openedRef.current = true;
     openCskh();
-  }, [status, isLoading, link]);
+  }, [status]);
 
   return (
     <>
       <NextSeo title="Nạp tiền" />
-      {isLoading && <LoadingBox isLoading={isLoading} />}
+      {status === "loading" && <LoadingBox isLoading />}
       <Layout>
         <h1 className="title-h1">Nạp tiền</h1>
         <Box
@@ -40,7 +39,7 @@ const Deposit = () => {
           }}
         >
           <Typography sx={{ color: "#b8c0d4", fontSize: "1.5rem" }}>
-            Nạp tiền được hỗ trợ qua CSKH. Hệ thống sẽ mở cửa sổ chăm sóc khách hàng.
+            Nạp tiền được hỗ trợ qua CSKH. Hệ thống sẽ mở cửa sổ chat trên trang.
           </Typography>
           <Button
             onClick={() => openCskh()}

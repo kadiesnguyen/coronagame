@@ -4,7 +4,6 @@ import LoadingBox from "@/components/homePage/LoadingBox";
 import {
   LOAI_BI,
   LOAI_CUOC,
-  MUC_TIEN_CUOC,
   TEN_VI_TRI,
   TINH_TRANG_GAME,
   USER_BET_GAME_HISTORY_PAGE_SIZE,
@@ -16,6 +15,7 @@ import GameService from "@/services/GameService";
 import convertMoney from "@/utils/convertMoney";
 import { convertInputTienCuoc, isNumberKey } from "@/utils/input";
 import { mergeKenoBets } from "@/utils/mergeGameBets";
+import { syncPendingBetAmount } from "@/utils/syncPendingBetAmount";
 import { toast } from "@/utils/toast";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -122,20 +122,11 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
   }, [tinhTrang]);
 
   const applyTienCuocToPending = (amount) => {
-    setTienCuoc(amount);
-    if (!amount || amount <= 0) return;
-    setChiTietCuocTemp((prev) => {
-      let changed = false;
-      const next = prev.map((b) => {
-        if (b.tienCuoc === 0) {
-          changed = true;
-          return { ...b, tienCuoc: amount };
-        }
-        return b;
-      });
-      return changed ? next : prev;
+    setTienCuoc((prevDraft) => {
+      setChiTietCuocTemp((prev) => syncPendingBetAmount(prev, prevDraft, amount));
+      return amount;
     });
-    setIsAllowResetBtn(true);
+    if (amount && amount > 0) setIsAllowResetBtn(true);
   };
 
   const handleSubmitCuoc = async () => {
@@ -322,9 +313,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
 
       </Box>
       <BetMoneyStickyPanel
-        amounts={MUC_TIEN_CUOC}
         tienCuoc={tienCuoc}
-        onSelectAmount={applyTienCuocToPending}
         onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
         onSubmit={handleSubmitCuoc}
         onReset={handleResetCuoc}

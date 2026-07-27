@@ -1,24 +1,16 @@
 import OutlinedInput from "@/components/input/OutlinedInput";
 import useGetTawkToConfig from "@/hooks/admin/useGetTawkToConfig";
 import SystemService from "@/services/admin/SystemService";
+import { DEFAULT_CHAT_SCRIPT } from "@/utils/provideSupport";
+import { toast } from "@/utils/toast";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "@/utils/toast";
 import BreadcrumbBar from "../BreadcrumbBar";
 
 const BreadcrumbsData = [
-  {
-    title: "Admin",
-    href: "/admin",
-  },
-  {
-    title: "Settings",
-    href: "/admin/settings",
-  },
-  {
-    title: "Cài đặt CSKH",
-    href: "/admin/settings/tawk-to",
-  },
+  { title: "Admin", href: "/admin" },
+  { title: "Settings", href: "/admin/settings" },
+  { title: "Cài đặt CSKH", href: "/admin/settings/tawk-to" },
 ];
 
 const TawkTo = () => {
@@ -36,12 +28,12 @@ const TawkTo = () => {
     try {
       setIsLoadingState(true);
       const res = await SystemService.updateTawkToConfig({
-        tawkToConfigs: { link: link.trim() },
+        tawkToConfigs: { link: link.trim() || DEFAULT_CHAT_SCRIPT },
       });
       refetch();
       toast.success(res?.data?.message);
     } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Link CSKH không hợp lệ");
+      toast.error(err?.response?.data?.message ?? "Cấu hình CSKH không hợp lệ");
     } finally {
       setIsLoadingState(false);
     }
@@ -50,12 +42,7 @@ const TawkTo = () => {
   return (
     <>
       <BreadcrumbBar data={BreadcrumbsData} />
-      <h1
-        className="title"
-        style={{
-          fontSize: "2.5rem",
-        }}
-      >
+      <h1 className="title" style={{ fontSize: "2.5rem" }}>
         Cài đặt CSKH
       </h1>
 
@@ -80,20 +67,26 @@ const TawkTo = () => {
         {!isLoading && (
           <>
             <Typography sx={{ alignSelf: "stretch" }}>
-              Dán link chăm sóc khách hàng (Tawk.to, Telegram, Zalo, SaleSmartly…). Khi khách bấm CSKH sẽ mở link này.
+              Dán mã ProvideSupport (Text Chat Link / script). Trang CSKH sẽ nhúng chat trong app (iframe + cửa sổ
+              ProvideSupport) — không mở tab mới.
             </Typography>
             <FormControl fullWidth>
-              <Typography>Link CSKH</Typography>
+              <Typography>Script ProvideSupport</Typography>
               <OutlinedInput
-                placeholder="https://tawk.to/chat/..."
+                placeholder="<!-- BEGIN ProvideSupport... -->"
                 size="small"
-                type="url"
+                type="text"
                 name="link"
                 fullWidth
+                multiline
+                minRows={4}
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
               />
             </FormControl>
+            <Typography sx={{ alignSelf: "stretch", fontSize: "1.3rem", opacity: 0.85 }}>
+              Mặc định: account hash 1pwnw71rbyasn0gk3p7lzo2mzy (ProvideSupport).
+            </Typography>
             <Button onClick={handleClickChange}>Lưu thay đổi</Button>
           </>
         )}

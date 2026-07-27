@@ -1,16 +1,11 @@
-import SystemService from "@/services/SystemService";
+import Router from "next/router";
 
-/** Mở link CSKH (cấu hình admin). Fallback /contact nếu chưa có link. */
-export const openCskh = async () => {
-  try {
-    const res = await SystemService.getTawkToConfig();
-    const link = String(res?.data?.data?.link || "").trim();
-    if (link) {
-      window.open(link, "_blank", "noopener,noreferrer");
-      return;
-    }
-  } catch (_err) {
-    // fall through
+/** Mở trang CSKH ProvideSupport trong app — không nhảy tab mới. */
+export const openCskh = () => {
+  if (typeof window === "undefined") return;
+  if (Router.pathname === "/contact") {
+    window.dispatchEvent(new CustomEvent("cskh:open"));
+    return;
   }
-  window.location.href = "/contact";
+  Router.push("/contact");
 };
