@@ -171,6 +171,7 @@ class GameXucXacController {
 
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });
@@ -184,20 +185,6 @@ class GameXucXacController {
             let tongTienCuoc = 0;
             let noiDungBienDongSoDu = "";
 
-            let isDuplicateCuoc = false;
-
-            for (const itemMoi of lichSuDacCuocMoi) {
-              const findCuoc = lichSuDatCuoc.find((item) => item.chiTietCuoc === itemMoi.chiTietCuoc && item.loaiCuoc === itemMoi.loaiCuoc);
-              if (findCuoc) {
-                isDuplicateCuoc = false;
-              } else {
-                isDuplicateCuoc = true;
-              }
-            }
-            if (isDuplicateCuoc) {
-              throw new BadRequestError("Bạn chỉ được phép đặt cược 1 bên");
-            }
-
             for (const itemCu of lichSuDatCuoc) {
               const getItemMoi = lichSuDacCuocMoi.find(
                 (item) => item.chiTietCuoc === itemCu.chiTietCuoc && item.loaiCuoc === itemCu.loaiCuoc
@@ -209,6 +196,17 @@ class GameXucXacController {
                     getItemMoi.tienCuoc - itemCu.tienCuoc
                   )} | `;
                 }
+              }
+            }
+            for (const itemMoi of lichSuDacCuocMoi) {
+              const checkIsExist = lichSuDatCuoc.find(
+                (item) => item.chiTietCuoc === itemMoi.chiTietCuoc && item.loaiCuoc === itemMoi.loaiCuoc
+              );
+              if (!checkIsExist) {
+                tongTienCuoc += itemMoi.tienCuoc;
+                noiDungBienDongSoDu += `Cược ${convertChiTietCuoc(itemMoi.chiTietCuoc, itemMoi.loaiCuoc)} - ${convertMoney(
+                  itemMoi.tienCuoc
+                )} | `;
               }
             }
             noiDungBienDongSoDu = noiDungBienDongSoDu.slice(0, -2);
@@ -286,6 +284,7 @@ class GameXucXacController {
 
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });

@@ -2,7 +2,7 @@ import useGetVipLevelsConfig from "@/hooks/admin/useGetVipLevelsConfig";
 import SystemService from "@/services/admin/SystemService";
 import { Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import BreadcrumbBar from "../BreadcrumbBar";
 import OutlinedInput from "@/components/input/OutlinedInput";
 
@@ -65,7 +65,7 @@ const VipSettings = () => {
               <Box>
                 <Typography sx={{ marginBottom: "8px" }}>Min money</Typography>
                 <OutlinedInput
-                  value={vipLevels[key]?.minMoney ?? 0}
+                  value={vipLevels[key]?.minMoney ?? ""}
                   onChange={(e) => handleChange(key, "minMoney", e.target.value)}
                   fullWidth
                 />

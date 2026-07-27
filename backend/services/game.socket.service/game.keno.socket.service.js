@@ -1,6 +1,6 @@
 "use strict";
 
-const HeThong = require("../../models/HeThong");
+const { isAdminSocket } = require("../../utils/socket_auth");
 
 class GameKenoSocketService {
   constructor({ CONFIG, socket, GAME_DATA }) {
@@ -44,8 +44,7 @@ class GameKenoSocketService {
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room-admin`, () => {
-      const { role } = global._io;
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       this.socket.join(this.CONFIG.ADMIN_ROOM);
@@ -61,6 +60,13 @@ class GameKenoSocketService {
         return;
       }
 
+      // Sync current timer to this admin socket immediately
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:admin:timer`, {
+        current_time: dataGame.timer ?? 0,
+        phien: dataGame.phien,
+      });
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:admin:hienThiPhien`, { phien: dataGame.phien });
+
       if (settingGame.IS_MODIFIED_RESULT) {
         this.CONFIG.METHOD.SEND_ROOM_ADMIN_KENO({
           key: `${this.CONFIG.KEY_SOCKET}:admin:hien-thi-ket-qua-dieu-chinh`,
@@ -69,9 +75,7 @@ class GameKenoSocketService {
       }
     });
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:admin:set-ket-qua-dieu-chinh`, (ketQua) => {
-      const { role } = global._io;
-
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       if (!this.GAME_DATA) {
@@ -91,9 +95,7 @@ class GameKenoSocketService {
       });
     });
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:admin:set-random-ket-qua-dieu-chinh`, () => {
-      const { role } = global._io;
-
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       if (!this.GAME_DATA) {

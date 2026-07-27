@@ -9,7 +9,7 @@ import { listBank } from "@/utils/listBank";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import * as Yup from "yup";
 
 const FormBank = ({ data, handleOnSubmit }) => {

@@ -84,10 +84,14 @@ const ChiTietPhien = ({ ID, TYPE_GAME }) => {
         }
       });
       socket.on(`${TYPE_GAME}:admin:timer`, (data) => {
-        if (phien === data.phien) {
+        if (data?.phien == null || phien === data.phien) {
           setTimerOpen(data.timerOpen);
           setTimerStopBet(data.timerStopBet);
         }
+      });
+      socket.on(`${TYPE_GAME}:timer`, (data) => {
+        if (data?.timerOpen != null) setTimerOpen(data.timerOpen);
+        if (data?.timerStopBet != null) setTimerStopBet(data.timerStopBet);
       });
       socket.on(`${TYPE_GAME}:admin:ketqua`, (data) => {
         if (data?.ketQuaRandom && data?.phien === phien) {
@@ -123,6 +127,7 @@ const ChiTietPhien = ({ ID, TYPE_GAME }) => {
       return () => {
         socket.off(`${TYPE_GAME}:admin:refetch-data-chi-tiet-phien-game`);
         socket.off(`${TYPE_GAME}:admin:timer`);
+        socket.off(`${TYPE_GAME}:timer`);
         socket.off(`${TYPE_GAME}:admin:ketqua`);
         socket.off(`${TYPE_GAME}:admin:batDauGame`);
         socket.off(`${TYPE_GAME}:admin:batDauQuay`);

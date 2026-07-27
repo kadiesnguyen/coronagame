@@ -4,13 +4,14 @@ import { useEffect } from "react";
 import { useInfiniteQuery } from "react-query";
 const ITEMS_OF_PAGE = 10;
 
-const useGetListDepositHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId = "" }) => {
+const useGetListDepositHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId = "", statusGroup = "" }) => {
   const getData = async (pageParam) => {
     try {
       const response = await DepositService.getListDepositHistory({
         pageSize,
         page: pageParam,
         userId,
+        statusGroup,
       });
       const data = response.data;
       return data;
@@ -20,7 +21,7 @@ const useGetListDepositHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId =
   };
 
   const getListQuery = useInfiniteQuery(
-    ["get-list-deposit-history", "admin", { page, pageSize, userId }],
+    ["get-list-deposit-history", "admin", { page, pageSize, userId, statusGroup }],
     ({ pageParam = page }) => getData(pageParam),
     {
       getNextPageParam: (_lastPage, pages) => {

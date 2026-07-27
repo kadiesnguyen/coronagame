@@ -12,7 +12,7 @@ const useGetListUserBank = ({ userId }) => {
     }
   };
 
-  const { data, error, isLoading, isError } = useQuery(
+  const { data, error, isLoading, isError, refetch } = useQuery(
     [
       "get-list-user-bank",
       "admin",
@@ -33,6 +33,7 @@ const useGetListUserBank = ({ userId }) => {
     isLoading,
     isError,
     error,
+    refetch,
   };
 };
 export default useGetListUserBank;

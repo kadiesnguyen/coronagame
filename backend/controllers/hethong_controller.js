@@ -21,7 +21,22 @@ exports.getConfigTawk = catchAsync(async (req, res, next) => {
   const results = await HeThong.findOne({
     systemID: 1,
   }).select("cskhConfigs.tawk");
+  const tawk = results?.cskhConfigs?.tawk ?? {};
+  const link =
+    tawk.link ||
+    (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "");
   return new OkResponse({
-    data: results?.cskhConfigs?.tawk ?? {},
+    data: { link },
+  }).send(res);
+});
+
+exports.getBranding = catchAsync(async (req, res) => {
+  const results = await HeThong.findOne({ systemID: 1 }).select("branding");
+  const branding = results?.branding ?? {};
+  return new OkResponse({
+    data: {
+      logoUrl: branding.logoUrl || "",
+      banners: (branding.banners || []).filter((item) => item?.status !== false && item?.url),
+    },
   }).send(res);
 });

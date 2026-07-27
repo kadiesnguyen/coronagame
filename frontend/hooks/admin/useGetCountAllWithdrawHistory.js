@@ -1,10 +1,10 @@
 import WithdrawService from "@/services/admin/WithdrawService";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
-const useGetCountAllWithdrawHistory = ({ userId = "" }) => {
+const useGetCountAllWithdrawHistory = ({ userId = "", statusGroup = "" }) => {
   const getData = async () => {
     try {
-      const response = await WithdrawService.countAllWithdrawHistory({ userId });
+      const response = await WithdrawService.countAllWithdrawHistory({ userId, statusGroup });
       const data = response.data.data;
       return data;
     } catch (error) {
@@ -12,7 +12,7 @@ const useGetCountAllWithdrawHistory = ({ userId = "" }) => {
     }
   };
   const { data, error, isLoading, isError, refetch } = useQuery(
-    ["get-count-all-withdraw-history", "admin", { userId }],
+    ["get-count-all-withdraw-history", "admin", { userId, statusGroup }],
     () => getData()
   );
   useEffect(() => {

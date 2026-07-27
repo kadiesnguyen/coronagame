@@ -1,10 +1,10 @@
 import DepositService from "@/services/admin/DepositService";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
-const useGetCountAllDepositHistory = ({ userId = "" }) => {
+const useGetCountAllDepositHistory = ({ userId = "", statusGroup = "" }) => {
   const getData = async () => {
     try {
-      const response = await DepositService.countAllDepositHistory({ userId });
+      const response = await DepositService.countAllDepositHistory({ userId, statusGroup });
       const data = response.data.data;
       return data;
     } catch (error) {
@@ -13,7 +13,7 @@ const useGetCountAllDepositHistory = ({ userId = "" }) => {
   };
 
   const { data, error, isLoading, isError, refetch } = useQuery(
-    ["get-count-all-deposit-history", "admin", { userId }],
+    ["get-count-all-deposit-history", "admin", { userId, statusGroup }],
     () => getData()
   );
   useEffect(() => {

@@ -196,6 +196,7 @@ class GameXocDiaController {
             });
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });
@@ -308,6 +309,7 @@ class GameXocDiaController {
             });
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });

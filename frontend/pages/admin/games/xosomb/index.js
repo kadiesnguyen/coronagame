@@ -1,7 +1,10 @@
 import BreadcrumbBar from "@/components/admin/BreadcrumbBar";
 import Layout from "@/components/admin/Layout";
+import GameAdminShell from "@/components/admin/games/GameAdminShell";
+import AdminSettingsGrid from "@/components/admin/games/AdminSettingsGrid";
 import DieuChinhTiLe from "@/components/admin/games/xoso/DieuChinhTiLe";
 import ListGame from "@/components/admin/games/xoso/mb/ListGame";
+import LivePhienPanel from "@/components/admin/games/xoso/mb/LivePhienPanel";
 import { LOAI_GAME, convertLoaiGame } from "@/configs/game.config";
 import { NextSeo } from "next-seo";
 const Home = () => {
@@ -26,8 +29,11 @@ const Home = () => {
 
       <Layout>
         <BreadcrumbBar data={BreadcrumbData} />
-        <ListGame TYPE_GAME={TYPE_GAME} />
-        <DieuChinhTiLe TYPE_GAME={TYPE_GAME} />
+        <GameAdminShell typeGame={TYPE_GAME} description="Lịch sử phiên · tỉ lệ trả thưởng">
+          <DieuChinhTiLe TYPE_GAME={TYPE_GAME} />
+          <LivePhienPanel TYPE_GAME={TYPE_GAME} />
+          <ListGame TYPE_GAME={TYPE_GAME} infoOnlyWhenFinished />
+        </GameAdminShell>
       </Layout>
     </>
   );

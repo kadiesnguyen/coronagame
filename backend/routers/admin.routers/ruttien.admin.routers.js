@@ -3,6 +3,9 @@ const AdminController = require("../../controllers/admin/ruttien.admin.controlle
 const authController = require("../../controllers/auth_controller");
 const router = express.Router();
 router.route("/get-all").get(authController.protect, authController.reStrictTo("admin"), AdminController.countAllLichSuRut);
+router
+  .route("/:id/ngan-hang")
+  .put(authController.protect, authController.reStrictTo("admin"), AdminController.updateNganHangLichSuRut);
 router.route("/:id").get(authController.protect, authController.reStrictTo("admin"), AdminController.getChiTietLichSuRut);
 router.route("/:id").put(authController.protect, authController.reStrictTo("admin"), AdminController.updateChiTietLichSuRut);
 router.route("/").get(authController.protect, authController.reStrictTo("admin"), AdminController.getDanhSachLichSuRut);

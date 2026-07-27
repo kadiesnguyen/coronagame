@@ -6,53 +6,53 @@ const randomBiTheoLoai = ({ loai = "C" }) => {
   if (loai === "C") {
     if (ketQua % 2 === 0) {
       return ketQua;
-    } else {
-      return randomBiTheoLoai({ loai });
     }
-  } else if (loai === "L") {
+    return randomBiTheoLoai({ loai });
+  }
+  if (loai === "L") {
     if (ketQua % 2 !== 0) {
       return ketQua;
-    } else {
-      return randomBiTheoLoai({ loai });
     }
-  } else {
-    return ketQua;
+    return randomBiTheoLoai({ loai });
   }
+  if (loai === "T") {
+    // Tài: 5-9
+    if (ketQua >= 5) {
+      return ketQua;
+    }
+    return randomBiTheoLoai({ loai });
+  }
+  if (loai === "X") {
+    // Xỉu: 0-4
+    if (ketQua <= 4) {
+      return ketQua;
+    }
+    return randomBiTheoLoai({ loai });
+  }
+  return ketQua;
 };
 
 /**
  *
  * @param {Array<Number>} ketQua Kết quả xổ số: [0,0,0,0,0]
- * @return {{
-    1: {
-      C: false,
-      L: false,
-    },
-    2: { C: false, L: false },
-    3: { C: false, L: false },
-    4: { C: false, L: false },
-    5: { C: false, L: false },
-  }} Bảng tra kết quả
  */
 const getKetQua = (ketQua) => {
   const results = {
-    ["1"]: {
-      C: false,
-      L: false,
-    },
-    ["2"]: { C: false, L: false },
-    ["3"]: { C: false, L: false },
-    ["4"]: { C: false, L: false },
-    ["5"]: { C: false, L: false },
+    1: { C: false, L: false, T: false, X: false },
+    2: { C: false, L: false, T: false, X: false },
+    3: { C: false, L: false, T: false, X: false },
+    4: { C: false, L: false, T: false, X: false },
+    5: { C: false, L: false, T: false, X: false },
   };
   for (let i = 0; i < ketQua.length; i++) {
-    if (ketQua[i] % 2 === 0) {
-      results[`${i + 1}`]["C"] = true;
-      results[`${i + 1}`]["L"] = false;
-    } else {
-      results[`${i + 1}`]["C"] = false;
-      results[`${i + 1}`]["L"] = true;
-    }
+    const key = `${i + 1}`;
+    const value = Number(ketQua[i]);
+    const isChan = value % 2 === 0;
+    const isTai = value >= 5;
+    results[key].C = isChan;
+    results[key].L = !isChan;
+    results[key].T = isTai;
+    results[key].X = !isTai;
   }
   return results;
 };

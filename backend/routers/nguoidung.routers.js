@@ -4,6 +4,7 @@ const authController = require("../controllers/auth_controller");
 const router = express.Router();
 
 router.route("/").get(authController.protect, NguoiDungController.getDetailedUser);
+router.route("/lich-su-tham-gia").get(authController.protect, NguoiDungController.getLichSuThamGia);
 router.route("/thong-bao-nap-tien").post(authController.protect, NguoiDungController.thongBaoNapTienTelegram);
 router.route("/refresh-token").post(authController.protect, NguoiDungController.refreshToken);
 router.route("/update-password").post(authController.protect, NguoiDungController.changePassword);

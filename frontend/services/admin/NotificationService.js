@@ -12,6 +12,18 @@ class NotificationService {
     const res = await api.get(`/v1/admin/thong-bao?results=${pageSize}&page=${page}`);
     return res;
   };
+  static uploadHinhAnh = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api.post(`/v1/admin/thong-bao/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res;
+  };
+  static deleteHinhAnhFile = async (url) => {
+    const res = await api.delete(`/v1/admin/thong-bao/upload`, { data: { url } });
+    return res;
+  };
   static editNotification = async ({ id, tieuDe, hinhAnh, noiDung }) => {
     const res = await api.put(`/v1/admin/thong-bao/${id}`, {
       tieuDe,

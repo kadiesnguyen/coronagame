@@ -13,13 +13,13 @@ export const LOAI_GAME = {
 export const convertLoaiGame = (loaiGame) => {
   switch (loaiGame) {
     case LOAI_GAME.KENO1P:
-      return "Keno 1p";
+      return "Keno 1P";
     case LOAI_GAME.KENO3P:
-      return "Keno 3p";
+      return "Keno 3P";
     case LOAI_GAME.KENO5P:
-      return "Keno 5p";
+      return "Keno 5P";
     case LOAI_GAME.KENO10P:
-      return "Keno 10p";
+      return "Keno 10P";
     case LOAI_GAME.XUCXAC1P:
       return "Xúc xắc 1p";
     case LOAI_GAME.XUCXAC3P:

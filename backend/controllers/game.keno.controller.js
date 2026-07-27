@@ -148,7 +148,8 @@ class GameKenoController {
             }
             const heThongVip = await HeThong.findOne({ systemID: 1 }).session(session).select("vipLevels");
             const userVipLevel = resolveVipLevel(findUser.money, heThongVip?.vipLevels);
-            if (userVipLevel !== betVipLevel) {
+            // VIP cao được chơi phòng thấp hơn (VIP3 → VIP1/2/3)
+            if (!userVipLevel || userVipLevel < betVipLevel) {
               throw new BadRequestError("Số dư không đủ điều kiện VIP này");
             }
           }
@@ -234,7 +235,7 @@ class GameKenoController {
               userId: req.user._id,
               typeActivity: TYPE_ACTIVITY.GAME,
               actionActivity: ACTION_ACTIVITY.GAME.DAT_CUOC,
-              description: `Đặt cược game Keno ${this.CONFIG.TYPE_GAME} phiên ${findPhien.phien}`,
+              description: `Đặt cược game ${this.CONFIG.TYPE_GAME} phiên ${findPhien.phien}`,
               metadata: {
                 chiTietCuoc,
                 tongTienCuoc,
@@ -252,6 +253,7 @@ class GameKenoController {
             });
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });
@@ -266,24 +268,6 @@ class GameKenoController {
             const lichSuDacCuocMoi = chiTietCuoc;
             let tongTienCuoc = 0;
             let noiDungBienDongSoDu = "";
-
-            let isDuplicateCuoc = false;
-
-            for (const itemMoi of lichSuDacCuocMoi) {
-              const findCuocByBi = lichSuDatCuoc.find((item) => item.loaiBi === itemMoi.loaiBi);
-              if (!findCuocByBi) {
-                isDuplicateCuoc = false;
-              } else {
-                if (findCuocByBi.loaiCuoc === itemMoi.loaiCuoc) {
-                  isDuplicateCuoc = false;
-                } else {
-                  isDuplicateCuoc = true;
-                }
-              }
-            }
-            if (isDuplicateCuoc) {
-              throw new BadRequestError("Bạn chỉ được phép đặt cược 1 bên");
-            }
 
             for (const itemCu of lichSuDatCuoc) {
               const getItemMoi = lichSuDacCuocMoi.find((item) => item.loaiBi === itemCu.loaiBi && item.loaiCuoc === itemCu.loaiCuoc);
@@ -360,7 +344,7 @@ class GameKenoController {
               userId: req.user._id,
               typeActivity: TYPE_ACTIVITY.GAME,
               actionActivity: ACTION_ACTIVITY.GAME.DAT_CUOC,
-              description: `Đặt cược game Keno ${this.CONFIG.TYPE_GAME} phiên ${findPhien.phien}`,
+              description: `Đặt cược game ${this.CONFIG.TYPE_GAME} phiên ${findPhien.phien}`,
               metadata: {
                 lichSuDatCuocCu: insertLichSuDatCuoc.datCuoc,
                 lichSuDacCuocMoi,
@@ -380,6 +364,7 @@ class GameKenoController {
             });
             // Send event refetch users dashboard
             AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+            AdminSocketService.notifyGameBet({ room: this.CONFIG.ROOM, phien: findPhien.phien });
 
             // Update số dư tài khoản realtime
             UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });

@@ -37,3 +37,7 @@ yarn-error.log*
 .vscode/
 coverage/
 docker-data/
+
+# Runtime branding uploads
+backend/public/uploads/branding/*
+!backend/public/uploads/branding/.gitkeep

@@ -18,14 +18,18 @@ export const validateNumber = (event) => {
 };
 
 /**
- * Chuyển giá trị chuỗi từ input thành số
+ * Chuyển giá trị chuỗi từ input thành số.
+ * Chuỗi rỗng giữ "" để input clear số 0 khi focus (không ép về 0 ngay).
  * @param {String} value
- * @return {Number} value
+ * @return {Number|String}
  */
 export const convertInputTienCuoc = (value) => {
-  let parseValue = parseInt(value);
+  if (value === "" || value === null || value === undefined) {
+    return "";
+  }
+  const parseValue = parseInt(value, 10);
   if (isNaN(parseValue)) {
-    parseValue = 0;
+    return "";
   }
   return parseValue;
 };

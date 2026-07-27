@@ -4,7 +4,7 @@ import useGetBotTelegramConfig from "@/hooks/admin/useGetBotTelegramConfig";
 import SystemService from "@/services/admin/SystemService";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Select, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import BreadcrumbBar from "../BreadcrumbBar";
 
 const BreadcrumbsData = [
@@ -93,52 +93,6 @@ const BotTelegram = () => {
         {isLoading && <CircularProgress color="inherit" />}
         {dataQuery && (
           <>
-            <Typography>
-              Bước 1: Đầu tiên truy cập vào Bot Father để tạo Bot mới:{" "}
-              <a href="https://telegram.me/BotFather" target="_blank">
-                Click vào đây
-              </a>
-            </Typography>
-            <Typography>
-              Tiếp theo thực hiện tạo bot, sau khi tạo xong sẽ có token, copy token dán vào dưới:
-              <img
-                src="https://i.imgur.com/0uLaZCQ.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxWidth: "30rem",
-                }}
-              />
-            </Typography>
-            <Typography>
-              Bước 2: Dùng tài khoản cá nhân truy cập vào bot vừa tạo, bấm vào Start để Bot có thể gửi tin nhắn đến
-              chúng ta
-              <br></br>
-              <img
-                src="https://i.imgur.com/YkWtRy4.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxWidth: "30rem",
-                }}
-              />
-            </Typography>
-            <Typography>
-              Bước 3: Truy cập userinfobot{" "}
-              <a href="https://t.me/userinfobot" target="_blank">
-                (click vào đây)
-              </a>
-              , sau đó nhắn nội dung bất kỳ, bạn sẽ nhận được thông tin cá nhân của mình, bao gồm ID, dán ID xuống phía
-              dưới
-              <img
-                src="https://i.imgur.com/TAIImpW.png"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  maxWidth: "30rem",
-                }}
-              />
-            </Typography>
             <FormControl fullWidth>
               <Typography>Token của Bot Telegram</Typography>
 

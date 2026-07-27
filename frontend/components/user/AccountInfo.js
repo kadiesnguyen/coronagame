@@ -1,4 +1,5 @@
 import Avatar from "@/public/assets/images/avatar.png";
+import { openCskh } from "@/utils/openCskh";
 import AddCardOutlinedIcon from "@mui/icons-material/AddCardOutlined";
 import PriceChangeOutlinedIcon from "@mui/icons-material/PriceChangeOutlined";
 import { Box, Typography } from "@mui/material";
@@ -207,17 +208,19 @@ const AccountInfo = ({ user }) => {
           </Box>
         </Box>
         <TransactionBox>
-          <Link href="/deposit">
-            <Box
-              className="item"
-              sx={{
-                cursor: "pointer",
-              }}
-            >
-              <AddCardOutlinedIcon />
-              <Typography>Nạp tiền</Typography>
-            </Box>
-          </Link>
+          <Box
+            className="item"
+            sx={{ cursor: "pointer" }}
+            onClick={() => openCskh()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") openCskh();
+            }}
+          >
+            <AddCardOutlinedIcon />
+            <Typography>Nạp tiền</Typography>
+          </Box>
           <Link href="/withdraw">
             <Box
               sx={{

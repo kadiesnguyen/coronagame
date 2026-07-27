@@ -8,10 +8,12 @@ import { Box, IconButton } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
+import AdminSection from "../AdminSection";
+import { adminDataGridBoxSx, adminDataGridSx } from "../adminDataGridSx";
 import BoxSearch from "./BoxSearch";
 const PAGE_SIZE = 10;
 
-const ListGame = ({ TYPE_GAME = "keno1p" }) => {
+const ListGame = ({ TYPE_GAME = "keno1p", infoOnlyWhenFinished = false }) => {
   const { socket } = useContext(SocketContext);
   const router = useRouter();
   const [searchValue, setSearchValue] = useState("");
@@ -89,44 +91,23 @@ const ListGame = ({ TYPE_GAME = "keno1p" }) => {
       headerName: "Thao tác",
       type: "actions",
       width: 150,
-      getActions: (params) => [
-        <IconButton title="Chi tiết" onClick={() => router.push(`/admin/games/${TYPE_GAME}/${params.id}`)}>
-          <InfoIcon />
-        </IconButton>,
-      ],
+      getActions: (params) => {
+        if (infoOnlyWhenFinished && params.row.tinhTrang !== "hoanTat") {
+          return [];
+        }
+        return [
+          <IconButton key="info" title="Chi tiết" onClick={() => router.push(`/admin/games/${TYPE_GAME}/${params.id}`)}>
+            <InfoIcon />
+          </IconButton>,
+        ];
+      },
     },
   ];
 
   return (
-    <>
-      <h1
-        className="title"
-        style={{
-          fontSize: "2.5rem",
-        }}
-      >
-        Danh sách game
-      </h1>
-
+    <AdminSection title="Danh sách phiên" subtitle="Tìm kiếm và xem chi tiết từng phiên">
       <BoxSearch searchValue={searchValue} setSearchValue={setSearchValue} />
-      <Box
-        sx={{
-          textAlign: "center",
-          color: "text.secondary",
-          height: 500,
-          width: "100%",
-          "& .trangthai_hoantat": {
-            color: "#1fc67c",
-          },
-          "& .trangthai_dangcho": {
-            color: "#1a3e72",
-          },
-
-          "& .MuiPaper-root ": {
-            color: "#000000",
-          },
-        }}
-      >
+      <Box sx={adminDataGridBoxSx}>
         <DataGrid
           rowsPerPageOptions={[10, 50, 100]}
           pagination
@@ -139,34 +120,10 @@ const ListGame = ({ TYPE_GAME = "keno1p" }) => {
           onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           rows={GridRowsProp}
           columns={GridColDef}
-          componentsProps={{
-            panel: {
-              sx: {
-                "& .MuiTypography-root": {
-                  color: "dodgerblue",
-                  fontSize: 20,
-                },
-                "& .MuiDataGrid-filterForm": {
-                  bgcolor: "lightblue",
-                },
-              },
-            },
-          }}
-          sx={{
-            color: "#000000",
-            "& .MuiDataGrid-paper": {
-              color: "#000000",
-            },
-            "& .MuiToolbar-root": {
-              color: "#000000",
-            },
-            "& .MuiMenuItem-root": {
-              color: "#000000",
-            },
-          }}
+          sx={adminDataGridSx}
         />
       </Box>
-    </>
+    </AdminSection>
   );
 };
 export default ListGame;

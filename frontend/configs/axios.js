@@ -1,3 +1,4 @@
+import { getSessionAccessToken, setSessionAccessToken } from "@/utils/sessionToken";
 import axios from "axios";
 import { getSession } from "next-auth/react";
 
@@ -5,16 +6,20 @@ const api = axios.create({
   baseURL: `${process.env.ENDPOINT_SERVER}/api`,
 });
 
-// Add a request interceptor
 api.interceptors.request.use(
   async (config) => {
-    let session;
-    if (typeof window != "undefined") {
-      session = await getSession();
+    let token = getSessionAccessToken();
+    if (!token && typeof window !== "undefined") {
+      try {
+        const session = await getSession();
+        token = session?.user?.accessToken || null;
+        if (token) setSessionAccessToken(token);
+      } catch (_err) {
+        // ignore
+      }
     }
-
-    if (session) {
-      config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

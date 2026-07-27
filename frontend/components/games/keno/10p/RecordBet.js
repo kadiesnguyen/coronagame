@@ -1,35 +1,71 @@
+import useGetVipLevels from "@/hooks/useGetVipLevels";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "@/utils/toast";
 import Modal from "../../../homePage/Modal";
-import useGetVipLevels from "@/hooks/useGetVipLevels";
-import convertMoney from "@/utils/convertMoney";
-import BoxDatCuoc from "../BoxDatCuoc";
 import BoxInfor from "../BoxInfor";
-import BoxQuay from "../BoxQuay";
 import BoxLichSu from "../BoxLichSu";
+import BoxQuay from "../BoxQuay";
+import BoxDatCuoc from "./BoxDatCuoc";
 
-const VipTab = styled(Box)(({ theme, active, locked }) => ({
-  borderRadius: "12px",
-  padding: "12px 16px",
+const VIP_META = {
+  1: { label: "VIP 1", accent: "#cd7f32", glow: "rgba(205,127,50,.45)", Icon: EmojiEventsIcon },
+  2: { label: "VIP 2", accent: "#c0c0c0", glow: "rgba(192,192,192,.4)", Icon: WorkspacePremiumIcon },
+  3: { label: "VIP 3", accent: "#e5c05b", glow: "rgba(229,192,91,.55)", Icon: WorkspacePremiumIcon },
+};
+
+const VipCard = styled(Box)(({ active, locked, accent }) => ({
+  borderRadius: "14px",
+  padding: "14px 16px",
   cursor: locked ? "not-allowed" : "pointer",
   opacity: locked ? 0.55 : 1,
-  textAlign: "center",
-  border: active ? "2px solid #d4af37" : "1px solid rgba(212,175,55,.25)",
-  backgroundColor: active ? "rgba(212,175,55,.15)" : "#101d33",
-  color: active ? "#e5c05b" : "#fff",
-  minHeight: "44px",
+  width: "100%",
+  minHeight: "56px",
   display: "flex",
   alignItems: "center",
-  justifyContent: "center",
+  gap: "14px",
+  border: active ? `2px solid ${accent}` : "1px solid rgba(212,175,55,.22)",
+  background: active
+    ? `linear-gradient(90deg, rgba(212,175,55,.22) 0%, #162948 55%, #101d33 100%)`
+    : "#101d33",
+  boxShadow: active ? `0 0 18px ${accent}55` : "none",
+  transition: "border-color .2s ease, box-shadow .2s ease, background .2s ease",
 }));
+
+const iconFloat = {
+  animate: {
+    y: [0, -4, 0],
+    rotate: [0, -6, 6, 0],
+    scale: [1, 1.08, 1],
+    transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
+  },
+};
+
+const iconPulse = {
+  animate: {
+    scale: [1, 1.12, 1],
+    filter: [
+      "drop-shadow(0 0 0px rgba(229,192,91,0))",
+      "drop-shadow(0 0 8px rgba(229,192,91,.85))",
+      "drop-shadow(0 0 0px rgba(229,192,91,0))",
+    ],
+    transition: { duration: 1.6, repeat: Infinity, ease: "easeInOut" },
+  },
+};
 
 const RecordBet = ({ TYPE_GAME }) => {
   const router = useRouter();
-  const { data: vipData } = useGetVipLevels();
+  const { data: vipData, refetch: refetchVip } = useGetVipLevels();
+  const balance = useSelector((state) => state.balance.balance);
   const [vipLevel, setVipLevel] = useState(1);
+  const didInitVip = useRef(false);
   const {
     isPlayGame,
     phien,
@@ -40,17 +76,36 @@ const RecordBet = ({ TYPE_GAME }) => {
   } = useSelector((state) => state.gameKeno10P);
 
   useEffect(() => {
-    if (vipData?.currentLevel) {
-      setVipLevel(vipData.currentLevel);
+    const lvl = vipData?.currentLevel;
+    if (!lvl) return;
+    // Lần đầu vào phòng mặc định nấc cao nhất; sau đó chỉ hạ khi số dư tụt dưới ngưỡng
+    if (!didInitVip.current) {
+      didInitVip.current = true;
+      setVipLevel(lvl);
+      return;
     }
+    setVipLevel((prev) => (prev > lvl ? lvl : prev));
   }, [vipData?.currentLevel]);
+
+  // Số dư đổi (sau cược) → cập nhật nấc VIP; dưới ngưỡng thì cút khỏi phòng cao hơn
+  useEffect(() => {
+    refetchVip();
+  }, [balance, refetchVip]);
 
   const handleCloseModalPauseGame = () => {
     router.push("/");
   };
 
   const currentLevel = vipData?.currentLevel ?? null;
-  const vipLevels = vipData?.vipLevels ?? {};
+  const canEnterVip = (level) => Boolean(currentLevel && currentLevel >= level);
+
+  const handleSelectVip = (level) => {
+    if (!canEnterVip(level)) {
+      toast.error("Tài khoản không đủ số dư để vào phòng VIP này");
+      return;
+    }
+    setVipLevel(level);
+  };
 
   return (
     <>
@@ -75,42 +130,66 @@ const RecordBet = ({ TYPE_GAME }) => {
       </Box>
 
       <Box sx={{ marginTop: "1rem" }}>
-        <Typography sx={{ fontWeight: 700, marginBottom: "12px", textAlign: "center" }}>Chọn nấc VIP</Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0,1fr))" },
-            gap: "12px",
-          }}
-        >
+        <Typography sx={{ fontWeight: 800, marginBottom: "12px", textAlign: "center", fontSize: "1.8rem", color: "#fff" }}>
+          Chọn cấp VIP
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
           {[1, 2, 3].map((level) => {
-            const cfg = vipLevels[`vip${level}`] ?? {};
-            const locked = currentLevel !== level;
+            const locked = !canEnterVip(level);
+            const active = vipLevel === level;
+            const meta = VIP_META[level];
+            const Icon = meta.Icon;
             return (
-              <VipTab
-                key={level}
-                active={vipLevel === level}
-                locked={locked}
-                onClick={() => {
-                  if (!locked) setVipLevel(level);
-                }}
-              >
-                <Box>
-                  <Typography sx={{ fontWeight: 700 }}>VIP{level}</Typography>
-                  <Typography sx={{ fontSize: "1.2rem" }}>
-                    {convertMoney(cfg.minMoney ?? 0)} – {cfg.maxMoney ? convertMoney(cfg.maxMoney) : "∞"}
-                  </Typography>
-                  {locked && (
-                    <Typography sx={{ fontSize: "1.1rem", marginTop: "4px" }}>Số dư chưa đủ điều kiện</Typography>
+              <motion.div key={level} whileTap={locked ? undefined : { scale: 0.98 }} style={{ width: "100%" }}>
+                <VipCard active={active} locked={locked} accent={meta.accent} onClick={() => handleSelectVip(level)}>
+                  <motion.div
+                    variants={active ? iconPulse : iconFloat}
+                    animate="animate"
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      background: `radial-gradient(circle at 30% 30%, ${meta.glow}, transparent 70%), #0b1528`,
+                      border: `1px solid ${meta.accent}66`,
+                      color: meta.accent,
+                    }}
+                  >
+                    {locked ? <LockOutlinedIcon sx={{ fontSize: 24 }} /> : <Icon sx={{ fontSize: 26 }} />}
+                  </motion.div>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: 800, fontSize: "1.7rem", color: active ? meta.accent : "#fff", lineHeight: 1.2 }}>
+                      {meta.label}
+                    </Typography>
+                    <Typography sx={{ fontSize: "1.2rem", color: locked ? "#8b95a8" : "#b8c0d4", mt: "2px" }}>
+                      {locked ? "Chưa đủ điều kiện" : active ? "Đang chọn" : "Chạm để vào phòng"}
+                    </Typography>
+                  </Box>
+                  {active && (
+                    <motion.div
+                      animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.05, 0.9] }}
+                      transition={{ duration: 1.4, repeat: Infinity }}
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        backgroundColor: meta.accent,
+                        boxShadow: `0 0 10px ${meta.accent}`,
+                        flexShrink: 0,
+                      }}
+                    />
                   )}
-                </Box>
-              </VipTab>
+                </VipCard>
+              </motion.div>
             );
           })}
         </Box>
       </Box>
 
-      {isPlayGame && currentLevel === vipLevel && (
+      {isPlayGame && canEnterVip(vipLevel) && (
         <BoxDatCuoc TYPE_GAME={TYPE_GAME} tinhTrang={tinhTrang} phien={phien} vipLevel={vipLevel} />
       )}
 

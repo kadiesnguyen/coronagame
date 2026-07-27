@@ -15,6 +15,7 @@ const { TYPE_SEND_MESSAGE } = require("../configs/telegram.config");
 const NguoiDung = require("../models/NguoiDung");
 const { MIN_MONEY_DEPOSIT, LOAI_DEPOSIT } = require("../configs/deposit.config");
 const HeThong = require("../models/HeThong");
+const AdminSocketService = require("../services/admin.socket.service");
 class NapTienController {
   static getDanhSach = catchAsync(async (req, res, next) => {
     const page = req.query.page * 1 || 1;
@@ -94,6 +95,17 @@ class NapTienController {
         // Send notification Telegram
         const noiDungBot = `${taiKhoan} vừa gửi yêu cầu nạp tiền đến ${thongTinNganHang} với số tiền ${convertMoney(soTien)}`;
         TelegramService.sendNotification({ content: noiDungBot, type: TYPE_SEND_MESSAGE.DEPOSIT });
+        const created = insertLichSuNap[0];
+        AdminSocketService.notifyNewRequest({
+          id: String(created._id),
+          type: "deposit",
+          taiKhoan,
+          soTien,
+          href: "/admin/deposit",
+          title: "Yêu cầu nạp tiền",
+          message: `${taiKhoan} gửi yêu cầu nạp ${convertMoney(soTien)}`,
+          createdAt: created.createdAt || new Date().toISOString(),
+        });
         await session.commitTransaction();
       } catch (err) {
         console.log(err);

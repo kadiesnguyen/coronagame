@@ -5,7 +5,7 @@ import useRegisterGameXocDia1PSocket from "@/hooks/useRegisterGameXocDia1PSocket
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import { io } from "socket.io-client";
 import SocketContext from "../context/socket";
 import useRegisterGameKeno1PSocket from "../hooks/useRegisterGameKeno1PSocket";

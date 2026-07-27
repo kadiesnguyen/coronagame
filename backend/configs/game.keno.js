@@ -27,6 +27,8 @@ const DEFAULT_SETTING_GAME = {
 const LOAI_CUOC_GAME = {
   CHAN: "C",
   LE: "L",
+  TAI: "T",
+  XIU: "X",
 };
 const LOAI_BI = {
   BI_1: 1,

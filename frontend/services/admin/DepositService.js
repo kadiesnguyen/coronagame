@@ -11,12 +11,16 @@ class DepositService {
     });
     return res;
   };
-  static countAllDepositHistory = async ({ userId }) => {
-    const res = await api.get(`/v1/admin/nap-tien/get-all?userId=${userId}`);
+  static countAllDepositHistory = async ({ userId, statusGroup = "" }) => {
+    const res = await api.get(
+      `/v1/admin/nap-tien/get-all?userId=${userId || ""}&statusGroup=${statusGroup || ""}`
+    );
     return res;
   };
-  static getListDepositHistory = async ({ pageSize, page, userId }) => {
-    const res = await api.get(`/v1/admin/nap-tien?results=${pageSize}&page=${page}&userId=${userId}`);
+  static getListDepositHistory = async ({ pageSize, page, userId, statusGroup = "" }) => {
+    const res = await api.get(
+      `/v1/admin/nap-tien?results=${pageSize}&page=${page}&userId=${userId || ""}&statusGroup=${statusGroup || ""}`
+    );
     return res;
   };
 }

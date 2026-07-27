@@ -1,9 +1,11 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { memo, useEffect, useRef, useState } from "react";
 
+import BetMoneyStickyPanel from "@/components/games/BetMoneyStickyPanel";
+import { GAME_DAT_CUOC_ID } from "@/components/games/StickyBetBar";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import OutlinedInput from "@/components/input/OutlinedInput";
+import { MUC_TIEN_CUOC } from "@/configs/game.keno.config";
 import { LOAI_CUOC_GAME, convertLoaiCuoc, getTiLeDefault } from "@/configs/game.xoso.config";
 import { TINH_TRANG_GAME, USER_BET_GAME_HISTORY_PAGE_SIZE } from "@/configs/game.xucxac.config";
 import useGetBetPayoutPercentage from "@/hooks/useGetBetPayoutPercentage";
@@ -13,28 +15,31 @@ import { convertJSXMoney } from "@/utils/convertMoney";
 import { convertInputTienCuoc, isNumberKey } from "@/utils/input";
 import clsx from "clsx";
 import _ from "lodash";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 
 const ItemCuoc = styled(Box)(({ theme }) => ({
   borderRadius: "10px",
   padding: "10px",
   cursor: "pointer",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "#101d33",
   position: "relative",
   display: "flex",
   gap: "10px",
   flexDirection: "column",
-  border: "1px solid rgba(255,255,255,.12)",
+  border: "1px solid rgba(255,255,255,.18)",
   alignItems: "center",
-  color: "#000000",
+  justifyContent: "center",
+  minHeight: "44px",
+  color: "#ffffff",
   "& .loai_cuoc": {
-    color: "#000000",
+    color: "#ffffff",
+    fontWeight: 700,
   },
   "& .tien_cuoc": {
     fontWeight: 700,
-    color: "#fa8838",
+    color: "#e5c05b",
     "&.new": {
-      color: "blue",
+      color: "#3a86ff",
     },
   },
   "&.active-tien_cuoc": {
@@ -104,6 +109,11 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
     }
   }, [tinhTrang]);
 
+  useEffect(() => {
+    setListSoCuoc([]);
+    setTienCuoc(0);
+  }, [phien]);
+
   // Reset số cược khi chọn loại cược khác
   useEffect(() => {
     setListSoCuoc([]);
@@ -164,7 +174,12 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
       handleResetCuoc();
       toast.success(results?.data?.message ?? "Đặt cược thành công");
     } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Lỗi hệ thống: không thể cược");
+      const status = err?.response?.status;
+      const msg =
+        err?.response?.data?.message ||
+        (status === 401 ? "Vui lòng đăng nhập lại để đặt cược" : null) ||
+        "Lỗi hệ thống: không thể cược";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -239,6 +254,7 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
     <>
       {isLoading && <LoadingBox isLoading={isLoading} />}
       <Box
+        id={GAME_DAT_CUOC_ID}
         sx={{
           paddingTop: "3.6rem",
           display: "grid",
@@ -280,77 +296,6 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
           </Box>
         ))}
       </Box>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmitCuoc();
-        }}
-      >
-        <Box
-          sx={{
-            borderRadius: "2rem",
-            padding: { xs: "1rem", md: "2rem" },
-            marginTop: "1rem",
-
-            backgroundColor: (theme) => theme.palette.background.default,
-            position: "relative",
-            display: "flex",
-            gap: "10px",
-            flexDirection: "column",
-            color: (theme) => theme.palette.text.secondary,
-          }}
-        >
-          <Typography sx={{}} ref={titleDatCuocRef}>
-            Số tiền cược
-          </Typography>
-
-          <OutlinedInput
-            inputRef={inputDatCuocRef}
-            value={tienCuoc}
-            onChange={(e) => {
-              handleChangeTienCuoc(e, e.target.value);
-            }}
-            placeholder="Số tiền"
-            size="small"
-            type="text"
-            fullWidth
-            onWheel={(e) => e.target.blur()}
-          />
-          <Typography component={"div"} sx={{}}>
-            Đã chọn{" "}
-            <Typography
-              component={"span"}
-              sx={{
-                color: "#e5c05b",
-              }}
-            >
-              {listSoCuoc.length}
-            </Typography>
-            , Tổng tiền cược{" "}
-            <Typography
-              component={"span"}
-              sx={{
-                color: "#e5c05b",
-              }}
-            >
-              {convertJSXMoney(tienCuoc * listSoCuoc.length)}
-            </Typography>
-          </Typography>
-          <Typography sx={{}}>Tỉ lệ cược 1 : {tiLe[loaiCuocGame]}</Typography>
-
-          <Button
-            type="submit"
-            disabled={tinhTrang === TINH_TRANG_GAME.DANG_QUAY}
-            // onClick={handleSubmitCuoc}
-            sx={{
-              fontSize: "2rem",
-            }}
-          >
-            {tinhTrang === TINH_TRANG_GAME.DANG_QUAY ? "Chờ phiên mới" : "Đặt lệnh"}
-          </Button>
-        </Box>
-      </form>
 
       <Box
         sx={{
@@ -473,6 +418,28 @@ const BoxDatCuoc = ({ TYPE_GAME, phien, tinhTrang }) => {
           </Box>
         )}
       </Box>
+      <BetMoneyStickyPanel
+        amounts={MUC_TIEN_CUOC}
+        tienCuoc={tienCuoc}
+        onSelectAmount={setTienCuoc}
+        onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
+        onSubmit={handleSubmitCuoc}
+        onReset={handleResetCuoc}
+        inputRef={inputDatCuocRef}
+        titleRef={titleDatCuocRef}
+        isSpinning={tinhTrang === TINH_TRANG_GAME.DANG_QUAY}
+        submitLabel="Đặt lệnh"
+        extra={
+          <Typography sx={{ fontSize: "1.3rem", color: "#b8c0d4", lineHeight: 1.3 }}>
+            Đã chọn <Box component="span" sx={{ color: "#e5c05b", fontWeight: 700 }}>{listSoCuoc.length}</Box>
+            {" · "}Tổng{" "}
+            <Box component="span" sx={{ color: "#e5c05b", fontWeight: 700 }}>
+              {convertJSXMoney(tienCuoc * listSoCuoc.length)}
+            </Box>
+            {" · "}Tỉ lệ 1:{tiLe[loaiCuocGame]}
+          </Typography>
+        }
+      />
     </>
   );
 };

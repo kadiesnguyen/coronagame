@@ -1,37 +1,60 @@
 import Layout from "@/components/Layout";
-import DanhSachBank from "@/components/deposit/ListBank";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import useGetListBank from "@/hooks/useGetListBank";
-import { Box } from "@mui/material";
+import useGetTawkToConfig from "@/hooks/useGetTawkToConfig";
+import { openCskh } from "@/utils/openCskh";
+import { Box, Button, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { NextSeo } from "next-seo";
 import { useEffect } from "react";
+
 const Deposit = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const { data, isLoading } = useGetTawkToConfig();
+  const link = data?.link ?? "";
+
   useEffect(() => {
     if (status === "unauthenticated") {
       window.location.href = "/";
     }
   }, [status]);
 
-  const { data, isLoading } = useGetListBank();
+  // Vào trang nạp → mở luôn link CSKH
+  useEffect(() => {
+    if (status !== "authenticated" || isLoading) return;
+    openCskh();
+  }, [status, isLoading, link]);
 
   return (
     <>
       <NextSeo title="Nạp tiền" />
-
       {isLoading && <LoadingBox isLoading={isLoading} />}
       <Layout>
         <h1 className="title-h1">Nạp tiền</h1>
-        {!isLoading && data && (
-          <Box
+        <Box
+          sx={{
+            paddingTop: "3rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+            alignItems: "flex-start",
+          }}
+        >
+          <Typography sx={{ color: "#b8c0d4", fontSize: "1.5rem" }}>
+            Nạp tiền được hỗ trợ qua CSKH. Hệ thống sẽ mở cửa sổ chăm sóc khách hàng.
+          </Typography>
+          <Button
+            onClick={() => openCskh()}
             sx={{
-              paddingTop: "5rem",
+              minHeight: 48,
+              backgroundColor: "#d4af37",
+              color: "#0b1528",
+              fontWeight: 700,
+              "&:hover": { backgroundColor: "#e5c05b" },
             }}
           >
-            <DanhSachBank danhSachNganHang={data} />
-          </Box>
-        )}
+            Mở CSKH để nạp tiền
+          </Button>
+        </Box>
       </Layout>
     </>
   );

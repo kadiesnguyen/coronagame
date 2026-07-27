@@ -4,7 +4,7 @@ import { getRandomArbitrary } from "@/utils/xucxac";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { memo, useContext, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 const BoxContainer = styled(Box)(({ theme }) => ({
   background: "#00b977",
   borderRadius: "10px",

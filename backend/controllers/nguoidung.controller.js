@@ -16,10 +16,19 @@ const AdminSocketService = require("../services/admin.socket.service");
 const LoggingService = require("../services/logging.service");
 const NhatKyHoatDong = require("../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../configs/activity.config");
+const { getLichSuThamGia } = require("../services/lichsu.thamgia.service");
 
 const NAMESPACE = "NguoiDung";
 
 class NguoiDungController {
+  static getLichSuThamGia = catchAsync(async (req, res) => {
+    const { _id: userId } = req.user;
+    const page = req.query.page * 1 || 1;
+    const results = req.query.results * 1 || 20;
+    const payload = await getLichSuThamGia({ userId, page, results });
+    return new OkResponse(payload).send(res);
+  });
+
   static thongBaoNapTienTelegram = catchAsync(async (req, res, next) => {
     const { taiKhoan, _id } = req.user;
     const { soTien, bank } = req.body;

@@ -1,9 +1,11 @@
+import BetMoneyStickyPanel from "@/components/games/BetMoneyStickyPanel";
+import { GAME_DAT_CUOC_ID } from "@/components/games/StickyBetBar";
 import LoadingBox from "@/components/homePage/LoadingBox";
-import OutlinedInput from "@/components/input/OutlinedInput";
 import {
   LOAI_BI,
   LOAI_CUOC,
   MUC_TIEN_CUOC,
+  TEN_VI_TRI,
   TINH_TRANG_GAME,
   USER_BET_GAME_HISTORY_PAGE_SIZE,
 } from "@/configs/game.keno.config";
@@ -13,58 +15,66 @@ import useGetUserBetHistory from "@/hooks/useGetUserBetHistory";
 import GameService from "@/services/GameService";
 import convertMoney from "@/utils/convertMoney";
 import { convertInputTienCuoc, isNumberKey } from "@/utils/input";
-import { Box, Button, Typography } from "@mui/material";
+import { mergeKenoBets } from "@/utils/mergeGameBets";
+import { toast } from "@/utils/toast";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import _ from "lodash";
 import { memo, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
-const BoxContainer = styled(Box)(({ theme }) => ({
-  borderRadius: "2rem",
-  padding: "2rem",
-  marginTop: "1rem",
 
-  backgroundColor: "#162948",
-  border: "1px solid rgba(212,175,55,.25)",
-  position: "relative",
-  display: "flex",
-  gap: "10px",
-  flexDirection: "column",
-  color: "#fff",
-  "& .bet_state": {
-    borderBottom: "3px solid #d4af37",
-    display: "inline-block",
-    fontWeight: 700,
-    margin: "0.1rem 0 0.3rem",
-    color: "#e5c05b",
-  },
-}));
-const ItemCuoc = styled(Box)(({ theme }) => ({
-  borderRadius: "10px",
-  padding: "10px",
+const ItemCuoc = styled(Box)(() => ({
+  borderRadius: 0,
+  padding: "10px 8px",
   cursor: "pointer",
-  backgroundColor: "#101d33",
+  backgroundColor: "transparent",
   position: "relative",
   display: "flex",
-  gap: "10px",
+  gap: "4px",
   flexDirection: "column",
-  border: "1px solid rgba(255,255,255,.12)",
   alignItems: "center",
+  justifyContent: "center",
+  minHeight: "56px",
   color: "#fff",
+  borderRight: "1px solid rgba(255,255,255,.12)",
+  borderBottom: "1px solid rgba(255,255,255,.12)",
+  "&:nth-of-type(2n)": {
+    borderRight: "none",
+  },
+  "&:nth-of-type(n+3)": {
+    borderBottom: "none",
+  },
   "& .loai_cuoc": {
     fontWeight: 700,
     color: "#e5c05b",
+    fontSize: "1.3rem",
+    lineHeight: 1.2,
+  },
+  "& .ti_le": {
+    color: "#b8c0d4",
+    fontSize: "1.1rem",
   },
   "& .tien_cuoc": {
     fontWeight: 700,
     color: "#e2c499",
+    fontSize: "1.1rem",
+  },
+  "&.active": {
+    backgroundColor: "rgba(212,175,55,.18)",
+  },
+  "&.chip": {
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,.12)",
+    backgroundColor: "#101d33",
+    flexDirection: "column",
+    justifyContent: "center",
+    minHeight: "56px",
+    borderRight: "1px solid rgba(255,255,255,.12)",
+    borderBottom: "1px solid rgba(255,255,255,.12)",
   },
   "&.active-tien_cuoc": {
     backgroundColor: "#d4af37",
     borderColor: "#e5c05b",
     "& .loai_cuoc": {
-      color: "#0b1528",
-    },
-    "& .tien_cuoc": {
       color: "#0b1528",
     },
   },
@@ -81,7 +91,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
     vipLevel,
   });
 
-  const { data: betPayoutPercentageData } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME });
+  const { data: betPayoutPercentageData } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME, vipLevel });
 
   const { refetch: refetchUserBetHistory } = useGetUserBetHistory({
     typeGame: TYPE_GAME,
@@ -92,29 +102,41 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
   const [isAllowResetBtn, setIsAllowResetBtn] = useState(false);
 
   const [tienCuoc, setTienCuoc] = useState(0);
-  const [chiTietCuocTemp, setChiTietCuocTemp] = useState(detailedBetHistoryData?.datCuoc ?? []);
-  const tiLe = betPayoutPercentageData ?? 0;
+  // Pending only — không auto-fill cược đã đặt khi vào game
+  const [chiTietCuocTemp, setChiTietCuocTemp] = useState([]);
+  const tiLe = typeof betPayoutPercentageData === "number" ? betPayoutPercentageData : 0;
   const chiTietCuocHienTai = detailedBetHistoryData?.datCuoc ?? [];
 
   useEffect(() => {
-    // Reset lịch sử cược khi phiên bắt đầu quay
-    if (tinhTrang === TINH_TRANG_GAME.DANG_QUAY) {
-      handleResetCuoc();
-    }
-    // Reset lịch sử cược khi phiên đã hoàn tất
-    else if (tinhTrang === TINH_TRANG_GAME.DANG_TRA_THUONG) {
+    setChiTietCuocTemp([]);
+    setTienCuoc(0);
+    setIsAllowResetBtn(false);
+  }, [phien, vipLevel]);
+
+  useEffect(() => {
+    if (tinhTrang === TINH_TRANG_GAME.DANG_QUAY || tinhTrang === TINH_TRANG_GAME.DANG_TRA_THUONG) {
       setChiTietCuocTemp([]);
+      setTienCuoc(0);
+      setIsAllowResetBtn(false);
     }
   }, [tinhTrang]);
 
-  // Đồng bộ lịch sử cược khi thay đổi dữ liệu
-  useEffect(() => {
-    if (detailedBetHistoryData) {
-      setChiTietCuocTemp(detailedBetHistoryData.datCuoc);
-    } else {
-      setChiTietCuocTemp([]);
-    }
-  }, [detailedBetHistoryData]);
+  const applyTienCuocToPending = (amount) => {
+    setTienCuoc(amount);
+    if (!amount || amount <= 0) return;
+    setChiTietCuocTemp((prev) => {
+      let changed = false;
+      const next = prev.map((b) => {
+        if (b.tienCuoc === 0) {
+          changed = true;
+          return { ...b, tienCuoc: amount };
+        }
+        return b;
+      });
+      return changed ? next : prev;
+    });
+    setIsAllowResetBtn(true);
+  };
 
   const handleSubmitCuoc = async () => {
     try {
@@ -124,12 +146,18 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
 
         return;
       }
+      if (chiTietCuocTemp.some((e) => !e.tienCuoc || e.tienCuoc <= 0)) {
+        toast.error("Vui lòng chọn tiền cược hợp lệ");
+        titleDatCuocRef?.current?.scrollIntoView({ behavior: "smooth" });
+        inputDatCuocRef?.current?.focus();
+        return;
+      }
       setIsLoading(true);
       const results = await GameService.createDatCuoc({
         typeGame: TYPE_GAME,
         data: {
           phien,
-          chiTietCuoc: chiTietCuocTemp,
+          chiTietCuoc: mergeKenoBets(chiTietCuocHienTai, chiTietCuocTemp),
           ...(vipLevel ? { vipLevel } : {}),
         },
       });
@@ -138,7 +166,12 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
       toast.success(results?.data?.message ?? "Đặt cược thành công");
       handleResetCuoc();
     } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Lỗi hệ thống: không thể cược");
+      const status = err?.response?.status;
+      const msg =
+        err?.response?.data?.message ||
+        (status === 401 ? "Vui lòng đăng nhập lại để đặt cược" : null) ||
+        "Lỗi hệ thống: không thể cược";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -154,15 +187,14 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
       e.preventDefault();
       return;
     }
-    let parseValue = convertInputTienCuoc(value);
-    setTienCuoc(parseValue);
+    applyTienCuocToPending(convertInputTienCuoc(value));
   };
 
   /**
    *
    * @param {*} loaiCuoc Loại Cược : C, L
    * @param {*} loaiBi Loại Bi : 1,2,3,4,5
-   * @param {*} tienCuoc Số tiền cược
+   * @param {*} tienCuoc Số tiền cược (0 = chỉ chọn cửa, gắn tiền sau)
    * @returns
    */
   const handleClickCuocCLTX = ({ loaiCuoc, loaiBi, tienCuoc }) => {
@@ -170,41 +202,26 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
       toast.error("Vui lòng đợi phiên mới");
       return;
     }
-    if (!tienCuoc || tienCuoc <= 0 || !_.isNumber(tienCuoc)) {
-      toast.error("Vui lòng chọn tiền cược hợp lệ");
-      titleDatCuocRef?.current?.scrollIntoView({ behavior: "smooth" });
-      inputDatCuocRef?.current?.focus();
+    const amount = tienCuoc > 0 && _.isNumber(tienCuoc) ? tienCuoc : 0;
+    const findItem = chiTietCuocTemp.find((e) => e.loaiBi === loaiBi && e.loaiCuoc === loaiCuoc);
+
+    if (!findItem) {
+      setChiTietCuocTemp((state) => [...state, { loaiCuoc, loaiBi, tienCuoc: amount }]);
+      setIsAllowResetBtn(true);
       return;
     }
-
-    const findItemCuocByBi = chiTietCuocTemp.find((e) => e.loaiBi === loaiBi);
-    // Kiểm tra xem đã cược loại bi này hay chưa
-    if (!findItemCuocByBi) {
-      const chiTietCuocTemp = {
-        loaiCuoc,
-        loaiBi,
-        tienCuoc,
-      };
-      setChiTietCuocTemp((state) => [...state, chiTietCuocTemp]);
-    } else {
-      // Nếu đã tồn tại cược bi này, kiểm tra xem có cược khác loại hay không
-      if (loaiCuoc !== findItemCuocByBi.loaiCuoc) {
-        toast.error("Bạn chỉ được phép đặt cược 1 bên");
-        return;
-      } else {
-        // Ghi đè cược
-        const newTienCuoc = findItemCuocByBi.tienCuoc + tienCuoc;
-        setChiTietCuocTemp((prevState) => {
-          const newState = prevState.map((obj) => {
-            if (obj.loaiCuoc === loaiCuoc && obj.loaiBi === loaiBi) {
-              return { ...obj, tienCuoc: newTienCuoc };
-            }
-            return obj;
-          });
-          return newState;
-        });
+    if (amount <= 0) {
+      if (findItem.tienCuoc === 0) {
+        setChiTietCuocTemp((state) => state.filter((e) => !(e.loaiBi === loaiBi && e.loaiCuoc === loaiCuoc)));
       }
+      return;
     }
+    const newTienCuoc = findItem.tienCuoc + amount;
+    setChiTietCuocTemp((prevState) =>
+      prevState.map((obj) =>
+        obj.loaiCuoc === loaiCuoc && obj.loaiBi === loaiBi ? { ...obj, tienCuoc: newTienCuoc } : obj
+      )
+    );
     setIsAllowResetBtn(true);
   };
   /**
@@ -227,7 +244,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
    * Reset cược tạm thời về như ban đầu
    */
   const handleResetCuoc = () => {
-    setChiTietCuocTemp(chiTietCuocHienTai);
+    setChiTietCuocTemp([]);
     setTienCuoc(0);
     setIsAllowResetBtn(false);
   };
@@ -235,6 +252,7 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
     <>
       {isLoading && <LoadingBox isLoading={isLoading} />}
       <Box
+        id={GAME_DAT_CUOC_ID}
         sx={{
           borderRadius: "2rem",
           padding: { xs: "1rem", md: "2rem" },
@@ -260,109 +278,83 @@ const BoxDatCuoc = ({ TYPE_GAME = "keno1p", phien, tinhTrang, vipLevel }) => {
           ref={boxDatCuocRef}
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "repeat(1, minmax(0,1fr))", md: "repeat(2, minmax(0,1fr))" },
-            gap: "2rem",
+            // Full-width position cards; each card has inner 2x2 CLTX
+            gridTemplateColumns: "1fr",
+            gap: "12px",
           }}
         >
-          {LOAI_BI.map((item, i) => (
-            <Box key={i}>
+          {LOAI_BI.map((loaiBi) => (
+            <Box
+              key={loaiBi}
+              sx={{
+                border: "1px solid rgba(212,175,55,.25)",
+                borderRadius: "12px",
+                padding: "8px",
+                backgroundColor: "#162948",
+                minWidth: 0,
+              }}
+            >
               <Typography
                 sx={{
-                  fontWeight: "bold",
+                  fontWeight: 700,
                   textAlign: "center",
+                  marginBottom: "8px",
+                  color: "#fff",
+                  fontSize: "1.4rem",
+                  lineHeight: 1.3,
                 }}
               >
-                Cược bi {item}
+                {TEN_VI_TRI[loaiBi]}
               </Typography>
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: "10px",
+                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                  gridTemplateRows: "repeat(2, minmax(0, 1fr))",
+                  backgroundColor: "#101d33",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,.12)",
                 }}
               >
-                {LOAI_CUOC.map((itemLoaiCuoc) => (
-                  <ItemCuoc
-                    key={itemLoaiCuoc.tenCuoc}
-                    onClick={() => handleClickCuocCLTX({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi: item, tienCuoc })}
-                  >
-                    <Typography className="loai_cuoc">{itemLoaiCuoc.tenCuoc}</Typography>
-                    <Typography>x{tiLe}</Typography>
-                    <Typography className="tien_cuoc">
-                      {convertTienCuocCLTX({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi: item })}
-                    </Typography>
-                  </ItemCuoc>
-                ))}
+                {LOAI_CUOC.map((itemLoaiCuoc) => {
+                  const active = !!chiTietCuocTemp.find(
+                    (e) => e.loaiBi === loaiBi && e.loaiCuoc === itemLoaiCuoc.loaiCuoc
+                  );
+                  return (
+                    <ItemCuoc
+                      key={itemLoaiCuoc.loaiCuoc}
+                      className={active ? "active" : ""}
+                      onClick={() =>
+                        handleClickCuocCLTX({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi, tienCuoc })
+                      }
+                    >
+                      <Typography className="loai_cuoc">{itemLoaiCuoc.tenCuoc}</Typography>
+                      <Typography className="ti_le">{Number(tiLe).toFixed(3)}</Typography>
+                      <Typography className="tien_cuoc">
+                        {convertTienCuocCLTX({ loaiCuoc: itemLoaiCuoc.loaiCuoc, loaiBi })}
+                      </Typography>
+                    </ItemCuoc>
+                  );
+                })}
               </Box>
             </Box>
           ))}
         </Box>
 
-        <Typography
-          sx={{
-            fontWeight: "bold",
-          }}
-          ref={titleDatCuocRef}
-        >
-          Chọn tiền cược sẵn có
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "flex-end",
-            flexWrap: "wrap",
-          }}
-        >
-          {MUC_TIEN_CUOC.map((item, i) => (
-            <ItemCuoc
-              key={item}
-              className={tienCuoc == item ? "active-tien_cuoc" : ""}
-              onClick={() => setTienCuoc(item)}
-            >
-              <Typography className="loai_cuoc">{convertMoney(item)}</Typography>
-            </ItemCuoc>
-          ))}
-        </Box>
-
-        <Typography
-          sx={{
-            fontWeight: "bold",
-          }}
-        >
-          Hoặc nhập số tiền bất kỳ ở dưới
-        </Typography>
-        <OutlinedInput
-          inputRef={inputDatCuocRef}
-          value={tienCuoc}
-          onChange={(e) => handleChangeTienCuoc(e, e.target.value)}
-          onWheel={(e) => e.target.blur()}
-          placeholder="Số tiền"
-          size="small"
-          type="text"
-          fullWidth
-        />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            alignItems: "center",
-            "& > button": {
-              maxWidth: "20rem",
-              width: "100%",
-            },
-          }}
-        >
-          <Button disabled={tinhTrang === TINH_TRANG_GAME.DANG_QUAY} onClick={handleSubmitCuoc}>
-            {tinhTrang === TINH_TRANG_GAME.DANG_QUAY ? "Chờ phiên mới" : "Xác nhận"}
-          </Button>
-
-          <Button disabled={!isAllowResetBtn} onClick={handleResetCuoc}>
-            Đặt lại
-          </Button>
-        </Box>
       </Box>
+      <BetMoneyStickyPanel
+        amounts={MUC_TIEN_CUOC}
+        tienCuoc={tienCuoc}
+        onSelectAmount={applyTienCuocToPending}
+        onChangeInput={(e) => handleChangeTienCuoc(e, e.target.value)}
+        onSubmit={handleSubmitCuoc}
+        onReset={handleResetCuoc}
+        inputRef={inputDatCuocRef}
+        titleRef={titleDatCuocRef}
+        isSpinning={tinhTrang === TINH_TRANG_GAME.DANG_QUAY}
+        resetDisabled={!isAllowResetBtn}
+      />
     </>
   );
 };

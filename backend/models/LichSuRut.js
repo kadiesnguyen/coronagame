@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { STATUS_WITHDRAW } = require("../configs/withdraw.config");
+
 const lichSuRutSchema = new mongoose.Schema(
   {
     nguoiDung: {
@@ -10,11 +11,10 @@ const lichSuRutSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Snapshot { tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode }. Mixed để đọc được lệnh cũ (ObjectId).
     nganHang: {
-      type: mongoose.Schema.ObjectId,
-      ref: "LienKetNganHang",
-      trim: true,
-      required: [true, "Vui lòng chọn ngân hàng cần rút"],
+      type: mongoose.Schema.Types.Mixed,
+      required: [true, "Vui lòng nhập thông tin ngân hàng nhận tiền"],
     },
     tinhTrang: {
       type: String,
@@ -31,5 +31,8 @@ const lichSuRutSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-const LichSuRut = mongoose.models.LichSuRut || mongoose.model("LichSuRut", lichSuRutSchema);
+if (mongoose.models.LichSuRut) {
+  delete mongoose.models.LichSuRut;
+}
+const LichSuRut = mongoose.model("LichSuRut", lichSuRutSchema);
 module.exports = LichSuRut;

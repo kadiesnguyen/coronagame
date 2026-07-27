@@ -44,7 +44,12 @@ const ChiTietPhien = ({ ID, TYPE_GAME }) => {
         }
       });
       socket.on(`${TYPE_GAME}:admin:timer`, (data) => {
-        if (phien === data.phien) {
+        if (data?.phien == null || phien === data.phien) {
+          setTime(data.current_time);
+        }
+      });
+      socket.on(`${TYPE_GAME}:timer`, (data) => {
+        if (typeof data?.current_time === "number") {
           setTime(data.current_time);
         }
       });
@@ -91,6 +96,7 @@ const ChiTietPhien = ({ ID, TYPE_GAME }) => {
       return () => {
         socket.off(`${TYPE_GAME}:admin:refetch-data-chi-tiet-phien-game`);
         socket.off(`${TYPE_GAME}:admin:timer`);
+        socket.off(`${TYPE_GAME}:timer`);
         socket.off(`${TYPE_GAME}:admin:ketqua`);
         socket.off(`${TYPE_GAME}:admin:hien-thi-ket-qua-dieu-chinh`);
         socket.off(`${TYPE_GAME}:admin:batDauGame`);

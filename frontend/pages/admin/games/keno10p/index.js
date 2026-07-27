@@ -1,8 +1,11 @@
 import BreadcrumbBar from "@/components/admin/BreadcrumbBar";
 import Layout from "@/components/admin/Layout";
+import GameAdminShell from "@/components/admin/games/GameAdminShell";
+import AdminSettingsGrid from "@/components/admin/games/AdminSettingsGrid";
 import DieuChinhAuto from "@/components/admin/games/keno/DieuChinhAuto";
 import DieuChinhTiLe from "@/components/admin/games/keno/DieuChinhTiLe";
 import ListGame from "@/components/admin/games/keno/ListGame";
+import LivePhienPanel from "@/components/admin/games/keno/LivePhienPanel";
 import { LOAI_GAME, convertLoaiGame } from "@/configs/game.config";
 import { NextSeo } from "next-seo";
 const Home = () => {
@@ -27,9 +30,14 @@ const Home = () => {
 
       <Layout>
         <BreadcrumbBar data={BreadcrumbData} />
-        <ListGame TYPE_GAME={TYPE_GAME} />
-        <DieuChinhTiLe TYPE_GAME={TYPE_GAME} />
-        <DieuChinhAuto TYPE_GAME={TYPE_GAME} />
+        <GameAdminShell typeGame={TYPE_GAME} description="Phiên live · lịch sử phiên · tỉ lệ · auto">
+          <AdminSettingsGrid>
+            <DieuChinhTiLe TYPE_GAME={TYPE_GAME} />
+            <DieuChinhAuto TYPE_GAME={TYPE_GAME} />
+          </AdminSettingsGrid>
+          <LivePhienPanel TYPE_GAME={TYPE_GAME} />
+          <ListGame TYPE_GAME={TYPE_GAME} infoOnlyWhenFinished />
+        </GameAdminShell>
       </Layout>
     </>
   );

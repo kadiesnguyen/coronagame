@@ -7,7 +7,7 @@ const GameKenoController = require("./game.keno.controller");
 class GameKeno5PController extends GameKenoController {
   constructor() {
     const CONFIG = {
-      TYPE_GAME: "Keno5P",
+      TYPE_GAME: "Keno 5P",
       ROOM: LOAI_GAME.KENO5P,
       ADMIN_ROOM: "admin_keno5p",
       KEY_SYSTEM_DB: "keno5P",

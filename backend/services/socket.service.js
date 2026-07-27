@@ -16,9 +16,15 @@ const BullMQService = require("./bullmq.service");
 
 class SocketService {
   connection(socket) {
+    const user = socket.data?.user || global._io.user;
+    if (!user?.taiKhoan) {
+      socket.disconnect();
+      return;
+    }
+
     if (socket.recovered) {
       console.log("SOCKET recovery", global._io.sockets.adapter.rooms);
-      AdminSocketService.LIST_USERS_SOCKET[global._io.user.taiKhoan] = global._io.user;
+      AdminSocketService.LIST_USERS_SOCKET[user.taiKhoan] = user;
 
       // Send list users online
       AdminSocketService.sendRoomAdmin({
@@ -27,7 +33,7 @@ class SocketService {
       });
     }
     console.log("New client connected " + socket.id);
-    AdminSocketService.LIST_USERS_SOCKET[global._io.user.taiKhoan] = global._io.user;
+    AdminSocketService.LIST_USERS_SOCKET[user.taiKhoan] = user;
 
     BullMQService.initQueue({
       queueName: BullMQService.LIST_QUEUE_NAME.UPDATE_LAST_ONLINE_TIME,
@@ -43,13 +49,14 @@ class SocketService {
       console.log("client disconnected " + socket.id);
 
       console.log("ROOM AFTER DISCONNECT:", global._io.sockets.adapter.rooms);
-      const checkIsExistsKey = global._io.sockets.adapter.rooms.has(global._io.user.taiKhoan);
+      const taiKhoan = socket.data?.user?.taiKhoan || user.taiKhoan;
+      const checkIsExistsKey = global._io.sockets.adapter.rooms.has(taiKhoan);
 
       /**
        * Nếu tồn tại nhiều socket cùng tài khoản  thì không xóa (ví dụ nhiều tab mở cùng 1 tài khoản)
        */
       if (!checkIsExistsKey) {
-        delete AdminSocketService.LIST_USERS_SOCKET[global._io.user.taiKhoan];
+        delete AdminSocketService.LIST_USERS_SOCKET[taiKhoan];
 
         /**
          * Cập nhật thời gian online cuối
@@ -58,12 +65,12 @@ class SocketService {
           const getQueueUpdateLastTimeOnline = BullMQService.initQueue({
             queueName: BullMQService.LIST_QUEUE_NAME.UPDATE_LAST_ONLINE_TIME,
           });
-          const nameJob = `updateLastOnlineTime-${global._io.user.taiKhoan}`;
+          const nameJob = `updateLastOnlineTime-${taiKhoan}`;
 
           await getQueueUpdateLastTimeOnline.add(
             nameJob,
             {
-              taiKhoan: global._io.user.taiKhoan,
+              taiKhoan,
               lastOnlineTime: Date.now(),
             },
             {

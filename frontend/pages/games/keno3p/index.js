@@ -17,7 +17,7 @@ const Home = () => {
 
   return (
     <>
-      <NextSeo title="Game Keno 3 phút" />
+      <NextSeo title="Game Keno 3P" />
 
       <Layout>
         <RecordBet TYPE_GAME={TYPE_GAME} />

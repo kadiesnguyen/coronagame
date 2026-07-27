@@ -61,6 +61,46 @@ const getDesignTokens = (mode) => ({
         },
       },
     },
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          color: "#ffffff",
+          borderColor: "rgba(212,175,55,.25)",
+          backgroundColor: "#162948",
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#101d33",
+            color: "#e5c05b",
+            borderBottom: "1px solid rgba(212,175,55,.25)",
+          },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            color: "#e5c05b",
+            fontWeight: 700,
+          },
+          "& .MuiDataGrid-cell": {
+            color: "#ffffff",
+            borderBottom: "1px solid rgba(255,255,255,.08)",
+          },
+          "& .MuiDataGrid-footerContainer": {
+            color: "#ffffff",
+            borderTop: "1px solid rgba(212,175,55,.25)",
+          },
+          "& .MuiTablePagination-root, & .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiIconButton-root":
+            {
+              color: "#ffffff",
+            },
+          "& .MuiDataGrid-row:hover": {
+            backgroundColor: "rgba(212,175,55,.08)",
+          },
+        },
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: "inherit",
+        },
+      },
+    },
   },
   typography: {
     fontSize: 21,

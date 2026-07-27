@@ -9,12 +9,11 @@ const bcrypt = require("bcryptjs");
 const catchAsync = require("../../utils/catch_async");
 const _ = require("lodash");
 const { OkResponse } = require("../../utils/successResponse");
-const { default: mongoose } = require("mongoose");
 const { MIN_LENGTH_PASSWORD, USER_ROLE } = require("../../configs/user.config");
 const UserSocketService = require("../../services/user.socket.service");
 const BienDongSoDuServiceFactory = require("../../services/biendongsodu.service");
 const { TYPE_BALANCE_FLUCTUATION } = require("../../configs/balance.fluctuation.config");
-const { LOAI_DEPOSIT } = require("../../configs/deposit.config");
+const { LOAI_DEPOSIT, STATUS_DEPOSIT } = require("../../configs/deposit.config");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
 const { convertMoney } = require("../../utils/convertMoney");
@@ -28,6 +27,32 @@ class UserAdminController {
       data: results,
     }).send(res);
   });
+  static updateNganHangUser = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode } = req.body;
+    if (!tenNganHang?.trim() || !tenChuTaiKhoan?.trim() || !soTaiKhoan?.trim()) {
+      throw new BadRequestError("Vui lòng nhập đầy đủ thông tin ngân hàng");
+    }
+    const updatePayload = {
+      tenNganHang: tenNganHang.trim(),
+      tenChuTaiKhoan: tenChuTaiKhoan.trim(),
+      soTaiKhoan: soTaiKhoan.trim(),
+    };
+    if (bankCode !== undefined) {
+      updatePayload.bankCode = String(bankCode || "").trim();
+    }
+    const bank = await LienKetNganHang.findOneAndUpdate({ _id: id }, updatePayload, {
+      new: true,
+      runValidators: true,
+    }).lean();
+    if (!bank) {
+      throw new BadRequestError("Không tìm thấy tài khoản ngân hàng");
+    }
+    return new OkResponse({
+      data: bank,
+      message: "Cập nhật tài khoản ngân hàng thành công",
+    }).send(res);
+  });
   static getChiTietUser = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const result = await NguoiDung.findOne({ _id: id }).select("-__v -matKhau -refreshToken -refreshTokenUsed").lean();
@@ -36,110 +61,108 @@ class UserAdminController {
     }).send(res);
   });
   static updateMoneyUser = catchAsync(async (req, res, next) => {
-    const { userId, moneyUpdate } = req.body;
+    // ponytail: Mongo standalone — no multi-doc transactions; use isProcessing lock only.
+    const { userId, moneyUpdate, noiDung } = req.body;
+    const money = Number(moneyUpdate);
+    const note = typeof noiDung === "string" ? noiDung.trim() : "";
 
-    if (!userId || !moneyUpdate) {
+    if (!userId || !_.isFinite(money) || money === 0) {
       throw new UnauthorizedError("Vui lòng nhập đầy đủ thông tin");
     }
-    if (!_.isNumber(moneyUpdate)) {
-      throw new UnauthorizedError("Vui lòng nhập đầy đủ thông tin");
+
+    const findUser = await NguoiDung.findOneAndUpdate(
+      {
+        _id: userId,
+        isProcessing: { $ne: true },
+      },
+      { $set: { isProcessing: true, lockTimestamp: Date.now() } },
+      { new: true }
+    );
+    if (!findUser) {
+      throw new BadRequestError("Đã xảy ra lỗi, vui lòng thử lại sau");
     }
-    const session = await mongoose.startSession();
+
     try {
-      await session.withTransaction(async () => {
-        const findUser = await NguoiDung.findOneAndUpdate(
-          {
-            _id: userId,
-            isProcessing: { $ne: true },
-          },
-          { $set: { isProcessing: true, lockTimestamp: Date.now() } },
-          {
-            new: true,
-            session,
-          }
-        );
-        if (!findUser) {
-          throw new BadRequestError("Đã xảy ra lỗi, vui lòng thử lại sau");
-        }
-        // Update money
-        const updateMoney = await NguoiDung.findOneAndUpdate(
-          {
-            _id: userId,
-            isProcessing: true,
-          },
-          {
-            $inc: {
-              money: moneyUpdate,
-            },
-            $set: {
-              isProcessing: false,
-            },
-          },
-          {
-            new: true,
-            session,
-          }
-        );
-        if (!updateMoney) {
-          throw new BadRequestError("Đã xảy ra lỗi, vui lòng thử lại sau");
-        }
+      if (money < 0 && findUser.money + money < 0) {
+        throw new BadRequestError("Số dư không đủ để trừ");
+      }
 
-        await BienDongSoDuServiceFactory.createBienDong({
-          type: TYPE_BALANCE_FLUCTUATION.DEPOSIT,
-          payload: {
-            nguoiDung: userId,
-            tienTruoc: findUser.money,
-            tienSau: findUser.money + moneyUpdate,
-            noiDung: moneyUpdate > 0 ? `Nhận tiền từ admin` : `Trừ tiền từ admin`,
-            loaiDeposit: moneyUpdate > 0 ? LOAI_DEPOSIT.NHAN_TIEN : LOAI_DEPOSIT.TRU_TIEN,
-          },
-          options: {
-            session,
-          },
-        });
-
-        await NhatKyHoatDong.insertNhatKyHoatDong({
-          taiKhoan: req.user.taiKhoan,
-          userId: req.user._id,
-          typeActivity: TYPE_ACTIVITY.ADMIN,
-          actionActivity: ACTION_ACTIVITY.ADMIN.UPDATE_MONEY,
-          description: `${moneyUpdate > 0 ? "Cộng tiền" : "Trừ tiền"} người chơi: ${findUser.taiKhoan}: ${convertMoney(moneyUpdate)}`,
-          metadata: {
-            tienTruoc: convertMoney(findUser.money),
-            tienSau: convertMoney(findUser.money + moneyUpdate),
-            nguoiDung: userId,
-            taiKhoan: findUser.taiKhoan,
-          },
-          options: { session },
-        });
-
-        UserSocketService.updateUserBalance({
-          user: findUser.taiKhoan,
-          updateBalance: moneyUpdate,
-        });
-      });
-    } catch (err) {
-      throw err;
-    } finally {
-      await NguoiDung.findOneAndUpdate(
+      const updateMoney = await NguoiDung.findOneAndUpdate(
         {
           _id: userId,
+          isProcessing: true,
         },
         {
-          isProcessing: false,
+          $inc: { money },
+          $set: { isProcessing: false },
         },
-        {
-          session,
-        }
+        { new: true }
       );
-      await session.endSession();
+      if (!updateMoney) {
+        throw new BadRequestError("Đã xảy ra lỗi, vui lòng thử lại sau");
+      }
+
+      const tienTruoc = findUser.money;
+      const tienSau = findUser.money + money;
+      const defaultNote = money > 0 ? `Admin cộng tiền` : `Admin trừ tiền`;
+      const content = note || defaultNote;
+
+      // Chỉ cộng tiền → ghi lịch sử nạp (hoàn tất). Trừ tiền không ghi lịch sử rút.
+      if (money > 0) {
+        await LichSuNap.create({
+          nguoiDung: userId,
+          soTien: money,
+          tinhTrang: STATUS_DEPOSIT.SUCCESS,
+          noiDung: content,
+          nganHang: {
+            shortName: "ADMIN",
+            tenNganHang: "Admin cộng tiền",
+            tenChuTaiKhoan: req.user.taiKhoan,
+            soTaiKhoan: "ADMIN",
+          },
+        });
+      }
+
+      await BienDongSoDuServiceFactory.createBienDong({
+        type: TYPE_BALANCE_FLUCTUATION.DEPOSIT,
+        payload: {
+          nguoiDung: userId,
+          tienTruoc,
+          tienSau,
+          noiDung: content,
+          loaiDeposit: money > 0 ? LOAI_DEPOSIT.NHAN_TIEN : LOAI_DEPOSIT.TRU_TIEN,
+        },
+      });
+
+      await NhatKyHoatDong.insertNhatKyHoatDong({
+        taiKhoan: req.user.taiKhoan,
+        userId: req.user._id,
+        typeActivity: TYPE_ACTIVITY.ADMIN,
+        actionActivity: ACTION_ACTIVITY.ADMIN.UPDATE_MONEY,
+        description: `${money > 0 ? "Cộng tiền" : "Trừ tiền"} người chơi: ${findUser.taiKhoan}: ${convertMoney(money)}`,
+        metadata: {
+          tienTruoc: convertMoney(tienTruoc),
+          tienSau: convertMoney(tienSau),
+          nguoiDung: userId,
+          taiKhoan: findUser.taiKhoan,
+          noiDung: content,
+        },
+      });
+
+      UserSocketService.updateUserBalance({
+        user: findUser.taiKhoan,
+        updateBalance: money,
+      });
+    } catch (err) {
+      await NguoiDung.findOneAndUpdate({ _id: userId }, { isProcessing: false });
+      throw err;
     }
 
     return new OkResponse({
-      message: "Update tiền thành công",
+      message: money > 0 ? "Cộng tiền thành công" : "Trừ tiền thành công",
       metadata: {
         userId,
-        moneyUpdate,
+        moneyUpdate: money,
       },
     }).send(res);
   });
@@ -252,11 +275,11 @@ class UserAdminController {
   });
   static countAllUser = catchAsync(async (req, res, next) => {
     const searchQuery = req.query?.query ?? "";
-    let query = {};
+    let query = {
+      role: { $ne: USER_ROLE.ADMIN },
+    };
     if (searchQuery) {
-      query = {
-        taiKhoan: new RegExp(searchQuery, "i"),
-      };
+      query.taiKhoan = new RegExp(searchQuery, "i");
     }
     const countList = await NguoiDung.countDocuments(query);
     return new OkResponse({
@@ -356,14 +379,19 @@ class UserAdminController {
     const searchQuery = req.query?.query ?? "";
     let sortValue = ["-createdAt"];
     sortValue = sortValue.join(" ");
-    let query = {};
+    let query = {
+      role: { $ne: USER_ROLE.ADMIN },
+    };
     if (searchQuery) {
-      query = {
-        taiKhoan: new RegExp(searchQuery, "i"),
-      };
+      query.taiKhoan = new RegExp(searchQuery, "i");
     }
 
-    const list = await NguoiDung.find(query).select("-__v").skip(skip).limit(results).sort(sortValue).lean();
+    const list = await NguoiDung.find(query)
+      .select("-__v -matKhau -refreshToken -refreshTokenUsed")
+      .skip(skip)
+      .limit(results)
+      .sort(sortValue)
+      .lean();
     return new OkResponse({
       data: list,
       metadata: {
@@ -371,6 +399,26 @@ class UserAdminController {
         page,
         limitItems: results,
         sort: sortValue,
+        searchQuery,
+      },
+    }).send(res);
+  });
+
+  /** Danh sách tài khoản role=admin (menu Cài đặt → Danh sách quản trị) */
+  static getDanhSachAdmins = catchAsync(async (req, res, next) => {
+    const searchQuery = req.query?.query ?? "";
+    let query = { role: USER_ROLE.ADMIN };
+    if (searchQuery) {
+      query.taiKhoan = new RegExp(searchQuery, "i");
+    }
+    const list = await NguoiDung.find(query)
+      .select("-__v -matKhau -refreshToken -refreshTokenUsed")
+      .sort("-createdAt")
+      .lean();
+    return new OkResponse({
+      data: list,
+      metadata: {
+        results: list.length,
         searchQuery,
       },
     }).send(res);

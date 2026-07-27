@@ -1,5 +1,7 @@
 "use strict";
 
+const { isAdminSocket } = require("../../utils/socket_auth");
+
 const HeThong = require("../../models/HeThong");
 
 class GameXoSoMBSocketService {
@@ -66,8 +68,7 @@ class GameXoSoMBSocketService {
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room-admin`, () => {
-      const { role } = global._io;
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       this.socket.join(this.CONFIG.ADMIN_ROOM);
@@ -76,13 +77,10 @@ class GameXoSoMBSocketService {
         this.socket.disconnect();
         return;
       }
-      this.CONFIG.METHOD.SEND_ROOM_XOSO({
-        key: `${this.CONFIG.KEY_SOCKET}:admin:timer`,
-        data: {
-          phien: this.GAME_DATA.getCurrentDate(),
-          timerOpen: this.GAME_DATA.getTimerOpen(),
-          timerStopBet: this.GAME_DATA.getTimerStopBet(),
-        },
+      this.socket.emit(`${this.CONFIG.KEY_SOCKET}:admin:timer`, {
+        phien: this.GAME_DATA.getCurrentDate(),
+        timerOpen: this.GAME_DATA.getTimerOpen(),
+        timerStopBet: this.GAME_DATA.getTimerStopBet(),
       });
     });
   }

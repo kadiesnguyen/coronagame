@@ -5,7 +5,7 @@ import { Box, Button, FormControl, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import * as Yup from "yup";
 import LoadingBox from "../homePage/LoadingBox";
 import ErrorMessageLabel from "../input/ErrorMessageLabel";

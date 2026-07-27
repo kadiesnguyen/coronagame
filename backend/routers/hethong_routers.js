@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.route("/ngan-hang").get(authController.protect, heThongController.getNganHang);
 router.route("/tawk-to").get(authController.protect, heThongController.getConfigTawk);
+router.route("/branding").get(heThongController.getBranding);
 
 module.exports = router;

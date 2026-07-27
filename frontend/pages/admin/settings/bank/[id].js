@@ -2,7 +2,7 @@ import { Backdrop, Box, Button, CircularProgress } from "@mui/material";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/admin/Layout";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 
 import BreadcrumbBar from "@/components/admin/BreadcrumbBar";
 import FormBank from "@/components/admin/settings/Bank/FormBank";

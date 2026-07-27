@@ -1,12 +1,4 @@
-import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import Link from "next/link";
-import { Swiper, SwiperSlide } from "swiper/react";
-import Layout from "../components/Layout";
-import HomeNotification from "../components/homePage/HomeNotification";
-// Import Swiper styles
-import Banner1 from "@/public/assets/images/banner-baccarat-quy-3.jpg";
-import Banner2 from "@/public/assets/images/banner-money-shower.jpg";
+import useGetBranding from "@/hooks/useGetBranding";
 import Keno1P from "@/public/assets/images/keno1p.png";
 import Keno3P from "@/public/assets/images/keno3p.png";
 import Keno5P from "@/public/assets/images/keno5p.png";
@@ -15,30 +7,37 @@ import XoSo3P from "@/public/assets/images/xoso3p.png";
 import XoSo5P from "@/public/assets/images/xoso5p.png";
 import XucXac1P from "@/public/assets/images/xucxac1p.png";
 import XucXac3P from "@/public/assets/images/xucxac3p.png";
+import { resolveMediaUrl } from "@/utils/branding";
+import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import Image from "next/image";
+import Link from "next/link";
 import { Autoplay } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+import Layout from "../components/Layout";
+import HomeNotification from "../components/homePage/HomeNotification";
 import "swiper/css";
 const LIST_GAME = [
   {
-    title: "Keno1P",
+    title: "Keno 1P",
     desc: "Đoán số để dành chiến thắng",
     img: Keno1P,
     link: "/games/keno1p",
   },
   {
-    title: "Keno3P",
+    title: "Keno 3P",
     desc: "Đoán số để dành chiến thắng",
     img: Keno3P,
     link: "/games/keno3p",
   },
   {
-    title: "Keno5P",
+    title: "Keno 5P",
     desc: "Đoán số để dành chiến thắng",
     img: Keno5P,
     link: "/games/keno5p",
   },
   {
-    title: "Keno10P",
+    title: "Keno 10P",
     desc: "Keno VIP 10 phút",
     img: Keno5P,
     link: "/games/keno10p",
@@ -81,17 +80,6 @@ const LIST_GAME = [
     link: "/games/xosomb",
   },
 ];
-const LIST_SWIPER = [
-  {
-    desc: "Corona Baccarat Tournament Quarter III",
-    img: Banner1,
-  },
-  {
-    desc: "Corona Money Shower",
-    img: Banner2,
-  },
-];
-
 const GameItem = styled(Box)(({ theme }) => ({
   marginTop: "10px",
   background: "linear-gradient(145deg, #1a2f4d 0%, #162948 55%, #12243c 100%)",
@@ -130,6 +118,9 @@ const GameItem = styled(Box)(({ theme }) => ({
 }));
 
 const Home = () => {
+  const { data: branding } = useGetBranding();
+  const banners = branding.banners || [];
+
   return (
     <>
       <Layout>
@@ -145,13 +136,18 @@ const Home = () => {
             borderRadius: "10px",
           }}
         >
-          {LIST_SWIPER.map((item, i) => (
-            <SwiperSlide key={i}>
+          {banners.map((item, i) => (
+            <SwiperSlide key={`${item.url}-${i}`}>
               <Image
-                src={item.img}
-                alt={item.desc}
+                src={resolveMediaUrl(item.url)}
+                alt={item.desc || `banner-${i + 1}`}
+                width={1080}
+                height={480}
+                unoptimized
                 priority={i === 0}
                 style={{
+                  width: "100%",
+                  height: "auto",
                   objectFit: "cover",
                 }}
               />

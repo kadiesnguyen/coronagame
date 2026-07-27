@@ -2,10 +2,10 @@ import OutlinedInput from "@/components/input/OutlinedInput";
 import useGetTawkToConfig from "@/hooks/admin/useGetTawkToConfig";
 import SystemService from "@/services/admin/SystemService";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Typography } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import SocketContext from "../../../context/socket";
+import { useEffect, useState } from "react";
+import { toast } from "@/utils/toast";
 import BreadcrumbBar from "../BreadcrumbBar";
+
 const BreadcrumbsData = [
   {
     title: "Admin",
@@ -16,45 +16,37 @@ const BreadcrumbsData = [
     href: "/admin/settings",
   },
   {
-    title: "Cấu hình Live chat Tawk To",
+    title: "Cài đặt CSKH",
     href: "/admin/settings/tawk-to",
   },
 ];
-const TawkTo = () => {
-  const { socket } = useContext(SocketContext);
-  const { data: dataQuery, isLoading, refetch } = useGetTawkToConfig();
 
+const TawkTo = () => {
+  const { data: dataQuery, isLoading, refetch } = useGetTawkToConfig();
   const [isLoadingState, setIsLoadingState] = useState(false);
-  const [tawk, setTawk] = useState(
-    dataQuery ?? {
-      propertyId: "",
-      widgetId: "",
-    }
-  );
+  const [link, setLink] = useState("");
+
   useEffect(() => {
-    if (dataQuery) {
-      setTawk(dataQuery);
+    if (dataQuery?.link != null) {
+      setLink(dataQuery.link);
     }
   }, [dataQuery]);
 
   const handleClickChange = async () => {
     try {
       setIsLoadingState(true);
-
       const res = await SystemService.updateTawkToConfig({
-        tawkToConfigs: tawk,
+        tawkToConfigs: { link: link.trim() },
       });
       refetch();
       toast.success(res?.data?.message);
     } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Thông tin cấu hình không hợp lệ");
+      toast.error(err?.response?.data?.message ?? "Link CSKH không hợp lệ");
     } finally {
       setIsLoadingState(false);
     }
   };
-  const handleChangeInput = (e) => {
-    setTawk((state) => ({ ...state, [e.target.name]: e.target.value }));
-  };
+
   return (
     <>
       <BreadcrumbBar data={BreadcrumbsData} />
@@ -64,7 +56,7 @@ const TawkTo = () => {
           fontSize: "2.5rem",
         }}
       >
-        Cài đặt Tawk.to
+        Cài đặt CSKH
       </h1>
 
       <Box
@@ -85,42 +77,23 @@ const TawkTo = () => {
           </Backdrop>
         )}
         {isLoading && <CircularProgress color="inherit" />}
-        {!isLoading && dataQuery && (
+        {!isLoading && (
           <>
-            <Typography>
-              Hướng dẫn: Truy cập{" "}
-              <a href="https://help.tawk.to/article/react-js" target="_blank">
-                https://help.tawk.to/article/react-js
-              </a>{" "}
-              để biết cách lấy PropertyID và Widget ID
+            <Typography sx={{ alignSelf: "stretch" }}>
+              Dán link chăm sóc khách hàng (Tawk.to, Telegram, Zalo, SaleSmartly…). Khi khách bấm CSKH sẽ mở link này.
             </Typography>
             <FormControl fullWidth>
-              <Typography>Property ID</Typography>
-
+              <Typography>Link CSKH</Typography>
               <OutlinedInput
-                placeholder="Property ID"
+                placeholder="https://tawk.to/chat/..."
                 size="small"
-                type="text"
-                name="propertyId"
+                type="url"
+                name="link"
                 fullWidth
-                value={tawk.propertyId}
-                onChange={handleChangeInput}
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
               />
             </FormControl>
-            <FormControl fullWidth>
-              <Typography>Widget ID</Typography>
-
-              <OutlinedInput
-                placeholder="Widget ID"
-                size="small"
-                type="text"
-                fullWidth
-                value={tawk.widgetId}
-                name="widgetId"
-                onChange={handleChangeInput}
-              />
-            </FormControl>
-
             <Button onClick={handleClickChange}>Lưu thay đổi</Button>
           </>
         )}

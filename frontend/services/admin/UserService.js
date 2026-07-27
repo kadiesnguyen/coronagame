@@ -5,6 +5,10 @@ class UserService {
     const result = await api.get(`/v1/admin/users?results=${pageSize}&page=${page}&query=${searchValue}`);
     return result;
   };
+  static getListAdmins = async ({ searchValue = "" } = {}) => {
+    const result = await api.get(`/v1/admin/users/admins?query=${encodeURIComponent(searchValue)}`);
+    return result;
+  };
   static getDepositHistoryUser = async ({ pageSize, page, userId }) => {
     const result = await api.get(`/v1/admin/users/deposit-history?results=${pageSize}&page=${page}&userId=${userId}`);
     return result;
@@ -35,6 +39,15 @@ class UserService {
     const result = await api.get(`/v1/admin/users/list-bank?userId=${userId}`);
     return result;
   };
+  static updateUserBank = async ({ id, tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode }) => {
+    const result = await api.put(`/v1/admin/users/list-bank/${id}`, {
+      tenNganHang,
+      tenChuTaiKhoan,
+      soTaiKhoan,
+      bankCode,
+    });
+    return result;
+  };
   static getCountAllUser = async ({ searchValue }) => {
     const res = await api.get(`/v1/admin/users/get-so-luong-user?query=${searchValue}`);
     return res;
@@ -43,10 +56,11 @@ class UserService {
     const res = await api.get(`/v1/admin/users/${id}`);
     return res;
   };
-  static updateMoneyUser = async ({ userId, moneyUpdate }) => {
+  static updateMoneyUser = async ({ userId, moneyUpdate, noiDung }) => {
     const res = await api.post(`/v1/admin/users/update-money`, {
       userId,
       moneyUpdate,
+      ...(noiDung ? { noiDung } : {}),
     });
     return res;
   };

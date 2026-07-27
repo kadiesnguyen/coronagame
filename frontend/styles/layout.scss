@@ -445,7 +445,7 @@ table tbody tr:hover {
   height: calc(100vh - 0px);
 
   transform: translateX(0);
-  background-color: #f9f9f9;
+  background-color: #101d33;
   border-right: 1px solid rgb(75, 76, 78);
 }
 /* Allows the MUI grid rows to expand to child height */
@@ -465,6 +465,22 @@ table tbody tr:hover {
   align-items: center;
   padding-top: 10px !important;
   padding-bottom: 10px !important;
+  color: #ffffff !important;
+}
+.MuiDataGrid-columnHeaderTitle,
+.MuiDataGrid-columnHeader,
+.MuiDataGrid-footerContainer,
+.MuiTablePagination-root {
+  color: #ffffff !important;
+}
+.box-container .MuiTypography-root,
+.box-container label,
+.box-container .MuiFormLabel-root {
+  color: #e8eefc;
+}
+.box-container .MuiPaper-root {
+  background-color: #162948;
+  color: #ffffff;
 }
 #scroll-container {
   border-radius: 5px;
@@ -1172,21 +1188,23 @@ table tbody tr:hover {
   display: flex;
   flex-direction: column;
   font-size: 1.5rem;
-  background: none;
-  border: 1px solid #ffc107;
-  // line-height: 0.222rem;
-
+  background: #101d33;
+  border: 1px solid rgba(229, 192, 91, 0.55);
   border-radius: 1rem;
   text-align: center;
+  color: #ffffff;
   & > p {
     line-height: 1;
+    color: #ffffff;
   }
 }
 .tab-3cang > .item.active {
-  background: #ffc107;
+  background: #d4af37;
+  border-color: #e5c05b;
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
+  color: #0b1528;
   & > p {
-    color: white;
+    color: #0b1528;
   }
 }
 .tab-3cang > li > div {

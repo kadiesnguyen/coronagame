@@ -1,12 +1,29 @@
 const NextSeoConfig = {
   title: null,
-  titleTemplate: "%s | Xổ số Megalott",
-  defaultTitle: "Xổ số Megalott",
-  description: "Megalott - Hệ thống chơi xổ số trực tuyến",
+  titleTemplate: "%s | Corona Casin",
+  defaultTitle: "Corona Casin",
+  description: "Corona Casin",
+  dangerouslySetAllPagesToNoIndex: true,
+  dangerouslySetAllPagesToNoFollow: true,
+  noindex: true,
+  nofollow: true,
+  robotsProps: {
+    nosnippet: true,
+    notranslate: true,
+    noimageindex: true,
+    noarchive: true,
+    maxSnippet: -1,
+    maxImagePreview: "none",
+    maxVideoPreview: -1,
+  },
   additionalMetaTags: [
     {
-      property: "keywords",
-      content: "megalott, MEGALOTT, xo so, xoso, keno, keno 1p, keno 3p, keno 5p, keno online",
+      name: "robots",
+      content: "noindex, nofollow, noarchive, nosnippet, noimageindex",
+    },
+    {
+      name: "googlebot",
+      content: "noindex, nofollow, noarchive, nosnippet, noimageindex",
     },
     {
       name: "viewport",
@@ -22,7 +39,7 @@ const NextSeoConfig = {
     },
     {
       name: "apple-mobile-web-app-title",
-      content: "Xổ số Megalott",
+      content: "Corona Casin",
     },
     {
       name: "mobile-web-app-capable",
@@ -30,17 +47,17 @@ const NextSeoConfig = {
     },
     {
       name: "theme-color",
-      content: "#000000",
+      content: "#0b1528",
     },
     {
       name: "application-name",
-      content: "Xổ số Megalott",
+      content: "Corona Casin",
     },
   ],
   additionalLinkTags: [
     {
       rel: "icon",
-      href: "/assets/images/logo.png",
+      href: "/assets/images/logo-corona.png",
     },
     {
       rel: "manifest",
@@ -48,7 +65,7 @@ const NextSeoConfig = {
     },
     {
       rel: "apple-touch-icon",
-      href: "/assets/images/logo.png",
+      href: "/assets/images/logo-corona.png",
       sizes: "180x180",
     },
   ],
@@ -56,13 +73,13 @@ const NextSeoConfig = {
     type: "website",
     locale: "vi_VN",
     url: process.env.NEXTAUTH_URL,
-    siteName: "Xổ số Megalott",
-    description: "Xổ số Megalott",
+    siteName: "Corona Casin",
+    description: "Corona Casin",
     images: [
       {
-        url: "https://i.imgur.com/JbAkY41.png",
-        width: 1200,
-        height: 628,
+        url: "/assets/images/logo-corona.png",
+        width: 400,
+        height: 84,
       },
     ],
   },

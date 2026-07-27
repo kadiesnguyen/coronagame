@@ -1,6 +1,7 @@
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import CreditScoreOutlinedIcon from "@mui/icons-material/CreditScoreOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
@@ -9,7 +10,7 @@ import { styled } from "@mui/material/styles";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-const AccountMenuItem = styled(Box)(({ theme }) => ({
+const AccountMenuItem = styled(Box)(() => ({
   cursor: "pointer",
   display: "flex",
   gap: "1rem",
@@ -29,7 +30,13 @@ const AccountMenuItem = styled(Box)(({ theme }) => ({
     "& .title-menu": { color: "#e5c05b" },
   },
 }));
+
 const listMenu = [
+  {
+    icon: <HistoryOutlinedIcon />,
+    title: "Lịch sử tham gia",
+    url: "/participation-history",
+  },
   {
     icon: <LocalAtmOutlinedIcon />,
     title: "Biến động số dư",
@@ -46,9 +53,9 @@ const listMenu = [
     url: "/withdraw-history",
   },
   {
-    icon: <AccountBalanceOutlinedIcon />,
-    title: "Liên kết ngân hàng",
-    url: "/list-bank",
+    icon: <LockOutlinedIcon />,
+    title: "Đổi mật khẩu",
+    url: "/change-password",
   },
   {
     icon: <LogoutOutlinedIcon />,
@@ -56,37 +63,36 @@ const listMenu = [
     url: "/sign-out",
   },
 ];
+
 const AccountMenu = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
-    <>
-      <Box
-        sx={{
-          padding: "1rem",
-          display: "flex",
-          flexDirection: "column",
-          marginTop: "4rem",
-        }}
-      >
-        {session && session.user && session.user.role === "admin" && (
-          <Link href={"/admin"}>
-            <AccountMenuItem>
-              <ManageAccountsIcon />
-              <Typography className="title-menu">Quản lý</Typography>
-            </AccountMenuItem>
-          </Link>
-        )}
-        {listMenu.map((item, i) => (
-          <Link key={i} href={item.url}>
-            <AccountMenuItem>
-              {item.icon}
-              <Typography className="title-menu">{item.title}</Typography>
-            </AccountMenuItem>
-          </Link>
-        ))}
-      </Box>
-    </>
+    <Box
+      sx={{
+        padding: "1rem",
+        display: "flex",
+        flexDirection: "column",
+        marginTop: "4rem",
+      }}
+    >
+      {session?.user?.role === "admin" && (
+        <Link href={"/admin"}>
+          <AccountMenuItem>
+            <ManageAccountsIcon />
+            <Typography className="title-menu">Quản lý</Typography>
+          </AccountMenuItem>
+        </Link>
+      )}
+      {listMenu.map((item) => (
+        <Link key={item.url} href={item.url}>
+          <AccountMenuItem>
+            {item.icon}
+            <Typography className="title-menu">{item.title}</Typography>
+          </AccountMenuItem>
+        </Link>
+      ))}
+    </Box>
   );
 };
 export default AccountMenu;

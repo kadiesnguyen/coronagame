@@ -22,6 +22,7 @@ const KenoGameState = require("./state.game.keno");
 const dayjs = require("dayjs");
 const { createBroadcastMiddleware } = require("../middlewares/broadcast.logger");
 const { default: mongoose } = require("mongoose");
+const { resolveTiLeByVipLevel } = require("../utils/vip");
 
 let CURRENT_GAME = {
   _id: null,
@@ -56,7 +57,8 @@ class GameKenoService {
   }
 
   initializeErrorHandling() {
-    process.on("unhandledRejection", this.handleGameError.bind(this));
+    // ponytail: do NOT bind process unhandledRejection here — each game instance
+    // was setting IS_PLAY_GAME=false on ANY rejection (incl. other games), freezing timers.
     process.on("SIGTERM", this.handleGracefulShutdown.bind(this));
   }
   getDataGame = () => {
@@ -291,9 +293,9 @@ class GameKenoService {
       systemID: 1,
     });
 
-    // Lấy tỉ lệ trả thưởng khi thắng
-    const tiLe =
-      findHeThong?.gameConfigs?.kenoConfigs?.[`keno${this.KEY_GAME.TYPE_GAME}`]?.tiLeCLTX ?? DEFAULT_SETTING_GAME.BET_PAYOUT_PERCENT;
+    // Lấy tỉ lệ trả thưởng khi thắng (keno10p: theo vipLevel từng vé cược)
+    const kenoConfig = findHeThong?.gameConfigs?.kenoConfigs?.[`keno${this.KEY_GAME.TYPE_GAME}`];
+    const defaultTiLe = kenoConfig?.tiLeCLTX ?? DEFAULT_SETTING_GAME.BET_PAYOUT_PERCENT;
 
     // Tìm lịch sử đặt cược của phiên game
     const lichSuDatCuoc = await this.SETTING_GAME.DATABASE_MODEL.HISTORY.find({
@@ -316,6 +318,10 @@ class GameKenoService {
     // Add to queue
     await getQueueTraThuong.addBulk(
       lichSuDatCuoc.map((itemLichSuDatCuoc) => {
+        const tiLe =
+          this.KEY_GAME.TYPE_GAME === "10P"
+            ? resolveTiLeByVipLevel(itemLichSuDatCuoc.vipLevel, kenoConfig?.tiLeVip, defaultTiLe)
+            : defaultTiLe;
         return {
           name: `${this.KEY_GAME.KEY_SOCKET}-${itemLichSuDatCuoc.phien._id}`,
           data: {
@@ -439,7 +445,7 @@ class GameKenoService {
               nguoiDung: findUser._id,
               tienTruoc: findUser.money,
               tienSau: findUser.money + tongTienThang,
-              noiDung: `Cược game Keno${this.KEY_GAME.TYPE_GAME} thắng: ${thongBaoBienDongSoDu}`,
+              noiDung: `Cược game Keno ${this.KEY_GAME.TYPE_GAME} thắng: ${thongBaoBienDongSoDu}`,
               loaiGame: this.KEY_GAME.KEY_SOCKET,
             },
             options: {
@@ -497,6 +503,7 @@ class GameKenoService {
     const phien = await this.createPhien({ currentPhien });
     this.broadcastGameUpdateForUser(`batDauGame`);
     this.broadcastGameUpdateForAdmin(`admin:batDauGame`, { phien });
+    AdminSocketService.resetGameBetAlert({ room: this.KEY_GAME.KEY_SOCKET, phien });
     this.broadcastGameUpdateForAdmin(`admin:refetch-data-game`);
 
     return { currentPhien, phien };

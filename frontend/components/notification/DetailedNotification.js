@@ -1,9 +1,11 @@
 import useGetDetailedNotification from "@/hooks/useGetDetailedNotification";
+import { resolveMediaUrl } from "@/utils/branding";
 import { convertDateTime } from "@/utils/convertTime";
 import { Box, Typography } from "@mui/material";
 import { Bars } from "react-loading-icons";
 const DetailedNotification = ({ id }) => {
   const { data, isLoading } = useGetDetailedNotification({ id });
+  const coverUrl = resolveMediaUrl(data?.hinhAnh);
 
   return (
     <>
@@ -38,17 +40,20 @@ const DetailedNotification = ({ id }) => {
               backgroundPosition: "center center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
-              backgroundImage: `url(${data.hinhAnh})`,
+              backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
             }}
           >
-            <img
-              src={data.hinhAnh}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            {coverUrl ? (
+              <img
+                src={coverUrl}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : null}
           </Box>
           <Box
             sx={{

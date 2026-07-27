@@ -15,9 +15,10 @@ const HuongDan = () => {
       >
         <h2 className="title">Hướng dẫn rút tiền</h2>
         <Typography component="ul">
-          <li>Nhập số tiền và chọn ngân hàng muốn rút.</li>
+          <li>Nhập tên ngân hàng, tên chủ tài khoản, số tài khoản và số tiền muốn rút.</li>
           <li>Số tiền rút tối thiểu 10.000đ.</li>
-          <li>Tiền sẽ tự động vào tài khoản trong vòng 1 phút, nếu thấy lâu có thể liên hệ bộ phận hỗ trợ.</li>
+          <li>Thông tin ngân hàng chỉ gắn với lệnh rút (không lưu vào tài khoản). Admin có thể chỉnh lại trước khi duyệt.</li>
+          <li>Tiền sẽ về tài khoản sau khi admin duyệt; nếu lâu hãy liên hệ CSKH.</li>
         </Typography>
       </Box>
     </>

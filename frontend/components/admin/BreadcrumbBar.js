@@ -10,6 +10,7 @@ const BreadcrumbBar = ({ data = [] }) => {
               sx={{
                 textTransform: "capitalize",
                 cursor: "pointer",
+                color: "#b8c0d4",
               }}
             >
               {item.title}

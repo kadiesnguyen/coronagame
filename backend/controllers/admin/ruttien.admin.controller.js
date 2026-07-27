@@ -1,62 +1,99 @@
 const { default: mongoose } = require("mongoose");
-const { MIN_MONEY_WITHDRAW, STATUS_WITHDRAW } = require("../../configs/withdraw.config");
+const { STATUS_WITHDRAW } = require("../../configs/withdraw.config");
 const LichSuRut = require("../../models/LichSuRut");
-const LienKetNganHang = require("../../models/LienKetNganHang");
-const { UnauthorizedError, BadRequestError } = require("../../utils/app_error");
+const { BadRequestError } = require("../../utils/app_error");
 const catchAsync = require("../../utils/catch_async");
 const { convertMoney } = require("../../utils/convertMoney");
-const { OkResponse, CreatedResponse } = require("../../utils/successResponse");
-const _ = require("lodash");
+const { OkResponse } = require("../../utils/successResponse");
 const BienDongSoDuServiceFactory = require("../../services/biendongsodu.service");
 const { TYPE_BALANCE_FLUCTUATION } = require("../../configs/balance.fluctuation.config");
 const UserSocketService = require("../../services/user.socket.service");
-const TelegramService = require("../../services/telegram.service");
-const { TYPE_SEND_MESSAGE } = require("../../configs/telegram.config");
 const { LOAI_DEPOSIT } = require("../../configs/deposit.config");
 const NguoiDung = require("../../models/NguoiDung");
+const { normalizeWithdrawBank, normalizeWithdrawBankList } = require("../../utils/withdraw_bank");
+
 class RutTienAdminController {
   static getChiTietLichSuRut = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const data = await LichSuRut.findOne({ _id: id })
+    let data = await LichSuRut.findOne({ _id: id })
       .select("-__v")
       .populate({
         path: "nguoiDung",
         select: "taiKhoan",
       })
-      .populate("nganHang")
       .lean();
     if (!data) {
       throw new BadRequestError("Lịch sử rút không tồn tại");
     }
+    data = await normalizeWithdrawBank(data);
     return new OkResponse({
       data: data,
     }).send(res);
   });
+
+  static updateNganHangLichSuRut = catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const { tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode } = req.body;
+    const data = await LichSuRut.findOne({ _id: id }).select("_id tinhTrang").lean();
+    if (!data) {
+      throw new BadRequestError("Lịch sử rút không tồn tại");
+    }
+    if (data.tinhTrang !== STATUS_WITHDRAW.PENDING) {
+      throw new BadRequestError("Chỉ được đổi ngân hàng khi lệnh đang chờ duyệt");
+    }
+    if (!tenNganHang?.trim() || !tenChuTaiKhoan?.trim() || !soTaiKhoan?.trim()) {
+      throw new BadRequestError("Vui lòng nhập đầy đủ thông tin ngân hàng");
+    }
+    const nganHang = {
+      tenNganHang: tenNganHang.trim(),
+      tenChuTaiKhoan: tenChuTaiKhoan.trim(),
+      soTaiKhoan: soTaiKhoan.trim(),
+      bankCode: String(bankCode || "").trim(),
+    };
+    const updated = await LichSuRut.findOneAndUpdate(
+      { _id: id, tinhTrang: STATUS_WITHDRAW.PENDING },
+      { nganHang },
+      { new: true }
+    ).lean();
+    if (!updated) {
+      throw new BadRequestError("Không thể cập nhật ngân hàng trên lệnh này");
+    }
+    return new OkResponse({
+      data: updated.nganHang,
+      message: "Cập nhật tài khoản ngân hàng trên lệnh thành công",
+    }).send(res);
+  });
+
   static updateChiTietLichSuRut = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const { tinhTrang, noiDung } = req.body;
-    const data = await LichSuRut.findOne({ _id: id })
+    let data = await LichSuRut.findOne({ _id: id })
       .select("-__v")
       .populate({
         path: "nguoiDung",
       })
-      .populate("nganHang")
       .lean();
     if (!data) {
       throw new BadRequestError("Lịch sử rút không tồn tại");
+    }
+    data = await normalizeWithdrawBank(data);
+    if (data.tinhTrang !== STATUS_WITHDRAW.PENDING) {
+      throw new BadRequestError("Đơn đã xử lý, không thể đổi trạng thái");
     }
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
         const updateLichSuRut = await LichSuRut.findOneAndUpdate(
-          { _id: id },
+          { _id: id, tinhTrang: STATUS_WITHDRAW.PENDING },
           { tinhTrang, noiDung },
           {
             session,
             new: false,
           }
         );
-        // Hủy đơn hàng thì cộng tiền lại cho người dùng
+        if (!updateLichSuRut) {
+          throw new BadRequestError("Đơn đã xử lý, không thể đổi trạng thái");
+        }
         if (updateLichSuRut.tinhTrang === STATUS_WITHDRAW.PENDING && tinhTrang === STATUS_WITHDRAW.CANCEL) {
           const checkUser = await NguoiDung.findOneAndUpdate(
             {
@@ -77,7 +114,6 @@ class RutTienAdminController {
           if (!checkUser) {
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại sau");
           }
-          // Cong tien User
           const updateUserMoney = await NguoiDung.findOneAndUpdate(
             {
               taiKhoan: data.nguoiDung.taiKhoan,
@@ -92,9 +128,10 @@ class RutTienAdminController {
           if (!updateUserMoney) {
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại sau");
           }
-          // Update số dư tài khoản realtime
           UserSocketService.updateUserBalance({ user: data.nguoiDung.taiKhoan, updateBalance: data.soTien });
-          const thongTinNganHang = `${data.nganHang.tenNganHang} - ${data.nganHang.tenChuTaiKhoan} - ${data.nganHang.soTaiKhoan}`;
+          const thongTinNganHang = `${data.nganHang?.tenNganHang || ""} - ${data.nganHang?.tenChuTaiKhoan || ""} - ${
+            data.nganHang?.soTaiKhoan || ""
+          }`;
           await BienDongSoDuServiceFactory.createBienDong({
             type: TYPE_BALANCE_FLUCTUATION.DEPOSIT,
             payload: {
@@ -116,40 +153,66 @@ class RutTienAdminController {
     } finally {
       await session.endSession();
     }
+    const isSuccess = tinhTrang === STATUS_WITHDRAW.SUCCESS;
+    const isCancel = tinhTrang === STATUS_WITHDRAW.CANCEL;
+    if (isSuccess || isCancel) {
+      UserSocketService.notifyUser({
+        taiKhoan: data.nguoiDung.taiKhoan,
+        payload: {
+          id: `withdraw:${id}:${tinhTrang}`,
+          type: "withdraw",
+          status: tinhTrang,
+          href: "/withdraw-history",
+          title: isSuccess ? "Rút tiền thành công" : "Rút tiền bị hủy",
+          message: isSuccess
+            ? `Đơn rút ${convertMoney(data.soTien)} đã được duyệt chuyển khoản.`
+            : `Đơn rút ${convertMoney(data.soTien)} đã bị hủy, tiền đã hoàn lại.${noiDung ? ` ${noiDung}` : ""}`,
+          soTien: data.soTien,
+        },
+      });
+    }
+
     return new OkResponse({
       message: "Cập nhật thành công",
     }).send(res);
   });
-  static countAllLichSuRut = catchAsync(async (req, res, next) => {
+
+  static buildListQuery = (req) => {
     const userId = req.query.userId || "";
-    let query = {};
-    if (userId) {
-      query = {
-        nguoiDung: userId,
-      };
+    const statusGroup = req.query.statusGroup || "";
+    const tinhTrang = req.query.tinhTrang || "";
+    const query = {};
+    if (userId) query.nguoiDung = userId;
+    if (tinhTrang) {
+      query.tinhTrang = tinhTrang;
+    } else if (statusGroup === "pending") {
+      query.tinhTrang = STATUS_WITHDRAW.PENDING;
+    } else if (statusGroup === "history") {
+      query.tinhTrang = { $in: [STATUS_WITHDRAW.SUCCESS, STATUS_WITHDRAW.CANCEL] };
     }
+    return query;
+  };
+
+  static countAllLichSuRut = catchAsync(async (req, res, next) => {
+    const query = RutTienAdminController.buildListQuery(req);
     const countList = await LichSuRut.countDocuments(query);
     return new OkResponse({
       data: countList,
       metadata: {
-        userId,
+        userId: req.query.userId || "",
+        statusGroup: req.query.statusGroup || "",
       },
     }).send(res);
   });
+
   static getDanhSachLichSuRut = catchAsync(async (req, res, next) => {
-    const userId = req.query.userId || "";
     const page = req.query.page * 1 || 1;
     const results = req.query.results * 1 || 10;
     const skip = (page - 1) * results;
     let sortValue = ["-createdAt"];
     sortValue = sortValue.join(" ");
-    let query = {};
-    if (userId) {
-      query = {
-        nguoiDung: userId,
-      };
-    }
-    const list = await LichSuRut.find(query)
+    const query = RutTienAdminController.buildListQuery(req);
+    let list = await LichSuRut.find(query)
       .select("-__v")
       .skip(skip)
       .limit(results)
@@ -158,8 +221,8 @@ class RutTienAdminController {
       .populate({
         path: "nguoiDung",
         select: "taiKhoan",
-      })
-      .populate("nganHang");
+      });
+    list = await normalizeWithdrawBankList(list);
     return new OkResponse({
       data: list,
       metadata: {
@@ -167,7 +230,8 @@ class RutTienAdminController {
         page,
         limitItems: results,
         sort: sortValue,
-        userId,
+        userId: req.query.userId || "",
+        statusGroup: req.query.statusGroup || "",
       },
     }).send(res);
   });

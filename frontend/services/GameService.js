@@ -4,8 +4,9 @@ class GameService {
     const res = await api.post(`/v1/games/${typeGame}`, data);
     return res;
   };
-  static getTiLeGame = async ({ typeGame }) => {
-    const res = await api.get(`/v1/games/${typeGame}/ti-le`);
+  static getTiLeGame = async ({ typeGame, vipLevel }) => {
+    const vipQuery = vipLevel ? `?vipLevel=${vipLevel}` : "";
+    const res = await api.get(`/v1/games/${typeGame}/ti-le${vipQuery}`);
     return res;
   };
   static getDetailedUserBetGameHistory = async ({ typeGame, phien, vipLevel }) => {

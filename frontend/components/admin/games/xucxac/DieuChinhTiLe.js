@@ -3,7 +3,8 @@ import useGetBetPayoutPercentage from "@/hooks/admin/useGetBetPayoutPercentage";
 import GameKenoService from "@/services/admin/GameService";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
+import AdminSection from "../AdminSection";
 
 const DieuChinhTiLe = ({ TYPE_GAME }) => {
   const { data: dataQuery, isLoading, refetch } = useGetBetPayoutPercentage({ typeGame: TYPE_GAME });
@@ -34,23 +35,11 @@ const DieuChinhTiLe = ({ TYPE_GAME }) => {
     }
   };
   return (
-    <>
-      <h2
-        className="title"
-        style={{
-          fontSize: "2.5rem",
-        }}
-      >
-        Điều chỉnh tỉ lệ trả thưởng
-      </h2>
-
-      <Box
+    <AdminSection title="Tỉ lệ trả thưởng" subtitle="Cập nhật tỉ lệ trả thưởng cho game">
+<Box
         sx={{
-          textAlign: "center",
           color: "text.secondary",
-
           width: "100%",
-          maxWidth: "600px",
         }}
       >
         {isLoadingState && (
@@ -77,16 +66,17 @@ const DieuChinhTiLe = ({ TYPE_GAME }) => {
 
             <Button
               sx={{
-                marginTop: "10px",
+                marginTop: "16px",
+                minHeight: "48px",
               }}
               onClick={handleClickDieuChinh}
             >
-              Điều chỉnh
+              Lưu tỉ lệ
             </Button>
           </>
         )}
       </Box>
-    </>
+    </AdminSection>
   );
 };
 export default DieuChinhTiLe;

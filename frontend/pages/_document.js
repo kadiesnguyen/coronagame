@@ -4,6 +4,9 @@ export default function Document() {
   return (
     <Html>
       <Head>
+        <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+        <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
         <link
           href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100;400;500&display=swap"

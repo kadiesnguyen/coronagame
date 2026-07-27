@@ -26,6 +26,15 @@ class UserSocketService {
   static updateUserBalance = ({ user, updateBalance }) => {
     global._io.to(user).emit("update-current-balance", updateBalance);
   };
+
+  /** Thông báo nạp/rút (và các alert cá nhân) → room = taiKhoan */
+  static notifyUser = ({ taiKhoan, payload }) => {
+    if (!taiKhoan || !payload?.id) return;
+    global._io.to(taiKhoan).emit("user:notification", {
+      ...payload,
+      createdAt: payload.createdAt || new Date().toISOString(),
+    });
+  };
 }
 
 module.exports = UserSocketService;

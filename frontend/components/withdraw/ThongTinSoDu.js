@@ -54,7 +54,7 @@ const ThongTinSoDu = () => {
               fontSize: "2.5rem",
             }}
           >
-            {session.user.taiKhoan}
+            {session?.user?.taiKhoan || ""}
           </Typography>
         </Box>
       </Box>

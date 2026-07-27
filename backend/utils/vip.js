@@ -6,6 +6,36 @@ const DEFAULT_VIP_LEVELS = {
   vip3: { minMoney: 1000000000, maxMoney: null },
 };
 
+const DEFAULT_KENO10P_TI_LE_VIP = {
+  vip1: 2.1,
+  vip2: 2.2,
+  vip3: 2.3,
+};
+
+const toNumber = (value, fallback) => {
+  if (value === null || value === undefined) return fallback;
+  const num = Number(typeof value === "object" && value.toString ? value.toString() : value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeTiLeVip = (tiLeVip) => {
+  const source = tiLeVip ?? DEFAULT_KENO10P_TI_LE_VIP;
+  return {
+    vip1: toNumber(source.vip1, DEFAULT_KENO10P_TI_LE_VIP.vip1),
+    vip2: toNumber(source.vip2, DEFAULT_KENO10P_TI_LE_VIP.vip2),
+    vip3: toNumber(source.vip3, DEFAULT_KENO10P_TI_LE_VIP.vip3),
+  };
+};
+
+const resolveTiLeByVipLevel = (vipLevel, tiLeVip, fallbackTiLe = DEFAULT_KENO10P_TI_LE_VIP.vip1) => {
+  const normalized = normalizeTiLeVip(tiLeVip);
+  const level = Number(vipLevel);
+  if ([1, 2, 3].includes(level)) {
+    return normalized[`vip${level}`];
+  }
+  return toNumber(fallbackTiLe, DEFAULT_KENO10P_TI_LE_VIP.vip1);
+};
+
 const resolveVipLevel = (money, vipLevels = DEFAULT_VIP_LEVELS) => {
   const balance = Number(money) || 0;
   for (let level = 1; level <= 3; level += 1) {
@@ -40,6 +70,9 @@ const normalizeVipLevels = (vipLevels) => {
 
 module.exports = {
   DEFAULT_VIP_LEVELS,
+  DEFAULT_KENO10P_TI_LE_VIP,
   resolveVipLevel,
   normalizeVipLevels,
+  normalizeTiLeVip,
+  resolveTiLeByVipLevel,
 };

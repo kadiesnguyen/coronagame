@@ -3,7 +3,8 @@ import useGetAutoGameStatus from "@/hooks/admin/useGetAutoGameStatus";
 import GameKenoService from "@/services/admin/GameService";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Select, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
+import AdminSection from "../AdminSection";
 const listStatus = [
   {
     tenStatus: "Đang mở",
@@ -36,23 +37,11 @@ const DieuChinhAuto = ({ TYPE_GAME = "keno1p" }) => {
   };
 
   return (
-    <>
-      <h2
-        className="title"
-        style={{
-          fontSize: "2.5rem",
-        }}
-      >
-        Điều chỉnh Auto kết quả
-      </h2>
-
+    <AdminSection title="Auto kết quả" subtitle="Bật/tắt tự động chỉnh kết quả theo bên đặt nhiều">
       <Box
         sx={{
-          textAlign: "center",
           color: "text.secondary",
-
           width: "100%",
-          maxWidth: "600px",
         }}
       >
         {isLoadingState && (
@@ -84,16 +73,17 @@ const DieuChinhAuto = ({ TYPE_GAME = "keno1p" }) => {
 
             <Button
               sx={{
-                marginTop: "10px",
+                marginTop: "16px",
+                minHeight: "48px",
               }}
               onClick={handleClickDieuChinh}
             >
-              Điều chỉnh
+              Lưu cấu hình
             </Button>
           </>
         )}
       </Box>
-    </>
+    </AdminSection>
   );
 };
 export default DieuChinhAuto;

@@ -1,3 +1,4 @@
+import { GAME_LICH_SU_ID } from "@/components/games/StickyBetBar";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
@@ -34,11 +35,11 @@ const BoxLichSu = ({ TYPE_GAME }) => {
   const [isModal, setIsModal] = useState(false);
 
   return (
-    <>
+    <Box id={GAME_LICH_SU_ID}>
       <LichSuGameChart isModal={isModal} setIsModal={setIsModal} TYPE_GAME={TYPE_GAME} />
       <Box
         sx={{
-          paddingTop: "1rem",
+          paddingTop: "8px",
           textAlign: "center",
         }}
       >
@@ -60,7 +61,7 @@ const BoxLichSu = ({ TYPE_GAME }) => {
         ))}
       </Box>
       {COMPONENT_TAB[tabPage]}
-    </>
+    </Box>
   );
 };
 export default BoxLichSu;

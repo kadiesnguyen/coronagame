@@ -1,6 +1,4 @@
-const dotenv = require("dotenv");
-dotenv.config({ path: "./config.env" });
-// dotenv.config({ path: "./docker.config.env" });
+require("./configs/load-env").loadEnv();
 
 const http = require("http");
 const HeThong = require("./models/HeThong");
@@ -41,7 +39,7 @@ const port = process.env.PORT || 7000;
 // Socket IO connection
 const io = require("socket.io")(server, {
   cors: {
-    origin: clientOrigins?.length > 1 ? clientOrigins : clientEndpoint,
+    origin: clientOrigins?.length ? clientOrigins : clientEndpoint,
   },
   connectionStateRecovery: {
     // the backup duration of the sessions and the packets
@@ -65,6 +63,9 @@ global._io.use(async (socket, next) => {
 
       const decode = await verifyToken(token);
       socket.join(`${decode.taiKhoan}`);
+      // Per-socket auth — never store role/user on global._io (race across connections).
+      socket.data.user = decode;
+      socket.data.role = decode.role;
       global._io.role = decode.role;
       global._io.user = decode;
       next();
@@ -116,7 +117,8 @@ const khoiTaoHeThongDB = async () => {
       {
         $setOnInsert: {
           "gameConfigs.kenoConfigs.keno10P": {
-            tiLeCLTX: 1.98,
+            tiLeCLTX: 2.1,
+            tiLeVip: { vip1: 2.1, vip2: 2.2, vip3: 2.3 },
             autoGame: true,
           },
           vipLevels: {
@@ -149,9 +151,19 @@ const khoiTaoHeThongDB = async () => {
       {
         $set: {
           "gameConfigs.kenoConfigs.keno10P": {
-            tiLeCLTX: 1.98,
+            tiLeCLTX: 2.1,
+            tiLeVip: { vip1: 2.1, vip2: 2.2, vip3: 2.3 },
             autoGame: true,
           },
+        },
+      }
+    );
+    await HeThong.updateOne(
+      { systemID: 1, "gameConfigs.kenoConfigs.keno10P.tiLeVip": { $exists: false } },
+      {
+        $set: {
+          "gameConfigs.kenoConfigs.keno10P.tiLeVip": { vip1: 2.1, vip2: 2.2, vip3: 2.3 },
+          "gameConfigs.kenoConfigs.keno10P.tiLeCLTX": 2.1,
         },
       }
     );

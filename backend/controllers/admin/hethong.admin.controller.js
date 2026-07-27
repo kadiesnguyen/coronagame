@@ -6,7 +6,6 @@ const { OkResponse } = require("../../utils/successResponse");
 const _ = require("lodash");
 const HeThong = require("../../models/HeThong");
 const TelegramService = require("../../services/telegram.service");
-const { default: axios } = require("axios");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
 const { DEFAULT_VIP_LEVELS, normalizeVipLevels } = require("../../utils/vip");
@@ -26,8 +25,12 @@ class HeThongAdminController {
     if (!heThong) {
       throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
     }
+    const tawk = heThong?.cskhConfigs?.tawk ?? {};
+    const link =
+      tawk.link ||
+      (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "");
     return new OkResponse({
-      data: heThong?.cskhConfigs?.tawk ?? null,
+      data: { link },
     }).send(res);
   });
   static updateBotTelegramConfig = catchAsync(async (req, res, next) => {
@@ -78,19 +81,18 @@ class HeThongAdminController {
     if (!tawkToConfigs || !_.isPlainObject(tawkToConfigs)) {
       throw new UnauthorizedError("Vui lòng nhập đầy đủ thông tin");
     }
-    const { propertyId, widgetId } = tawkToConfigs;
-    try {
-      // Check config is valid
-      const testConfig = await axios.get(`https://tawk.to/chat/${propertyId}/${widgetId}`, {});
-    } catch (err) {
-      throw new BadRequestError("Thông tin cấu hình không hợp lệ");
+    const link = String(tawkToConfigs.link || "").trim();
+    if (!link) {
+      throw new BadRequestError("Vui lòng nhập link CSKH");
+    }
+    if (!/^https?:\/\//i.test(link)) {
+      throw new BadRequestError("Link CSKH phải bắt đầu bằng http:// hoặc https://");
     }
     const heThong = await HeThong.findOneAndUpdate(
       { systemID: 1 },
       {
         $set: {
-          "cskhConfigs.tawk.propertyId": propertyId ?? "",
-          "cskhConfigs.tawk.widgetId": widgetId ?? "",
+          "cskhConfigs.tawk.link": link,
         },
       },
       {
@@ -106,10 +108,10 @@ class HeThongAdminController {
       userId: req.user._id,
       typeActivity: TYPE_ACTIVITY.ADMIN,
       actionActivity: ACTION_ACTIVITY.ADMIN.SET_TAWK_TO,
-      description: `Set cấu hình tawk to`,
+      description: `Set cấu hình link CSKH`,
       metadata: {
         before: heThong.cskhConfigs.tawk,
-        after: tawkToConfigs,
+        after: { link },
       },
     });
     return new OkResponse({
@@ -161,6 +163,75 @@ class HeThongAdminController {
     });
     return new OkResponse({
       message: "Cập nhật thành công",
+    }).send(res);
+  });
+
+  static getBrandingConfig = catchAsync(async (req, res) => {
+    const heThong = await HeThong.findOne({ systemID: 1 });
+    if (!heThong) {
+      throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
+    }
+    return new OkResponse({
+      data: {
+        logoUrl: heThong?.branding?.logoUrl || "",
+        banners: heThong?.branding?.banners || [],
+      },
+    }).send(res);
+  });
+
+  static updateBrandingConfig = catchAsync(async (req, res) => {
+    const { logoUrl, banners } = req.body;
+    if (banners !== undefined && !Array.isArray(banners)) {
+      throw new UnauthorizedError("Danh sách banner không hợp lệ");
+    }
+    const normalizedBanners = Array.isArray(banners)
+      ? banners
+          .filter((item) => item?.url)
+          .map((item) => ({
+            url: String(item.url),
+            desc: String(item.desc || ""),
+            status: item.status !== false,
+          }))
+      : undefined;
+
+    const update = {};
+    if (logoUrl !== undefined) {
+      update["branding.logoUrl"] = String(logoUrl || "");
+    }
+    if (normalizedBanners !== undefined) {
+      update["branding.banners"] = normalizedBanners;
+    }
+
+    const heThong = await HeThong.findOneAndUpdate({ systemID: 1 }, { $set: update }, { new: false });
+    if (!heThong) {
+      throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
+    }
+
+    await NhatKyHoatDong.insertNhatKyHoatDong({
+      taiKhoan: req.user.taiKhoan,
+      userId: req.user._id,
+      typeActivity: TYPE_ACTIVITY.ADMIN,
+      actionActivity: ACTION_ACTIVITY.ADMIN.SET_BOT_TELEGRAM,
+      description: `Set cấu hình branding logo/banner`,
+      metadata: {
+        before: heThong.branding,
+        after: { logoUrl, banners: normalizedBanners },
+      },
+    });
+
+    return new OkResponse({
+      message: "Cập nhật branding thành công",
+    }).send(res);
+  });
+
+  static uploadBrandingAsset = catchAsync(async (req, res) => {
+    if (!req.file) {
+      throw new BadRequestError("Vui lòng chọn file ảnh");
+    }
+    const url = `/uploads/branding/${req.file.filename}`;
+    return new OkResponse({
+      message: "Upload thành công",
+      data: { url },
     }).send(res);
   });
 }

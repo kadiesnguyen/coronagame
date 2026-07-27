@@ -1,10 +1,15 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
+import useGetBranding from "@/hooks/useGetBranding";
+import { resolveMediaUrl } from "@/utils/branding";
 import AccountBalance from "../user/AccountBalance";
 
 const Header = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const { data: branding } = useGetBranding();
+  const logoSrc = resolveMediaUrl(branding.logoUrl);
 
   return (
     <>
@@ -17,19 +22,24 @@ const Header = () => {
                 alignItems: "center",
                 gap: "10px",
                 cursor: "pointer",
+                height: { xs: "36px", md: "44px" },
+                maxWidth: { xs: "180px", md: "240px" },
               }}
             >
-              <Typography
-                className="logo"
-                sx={{
-                  color: "#ffffff",
-                  fontSize: "3rem",
-                  fontWeight: "bold",
-                  fontStyle: "italic",
+              <Image
+                src={logoSrc}
+                alt="Corona Casin"
+                width={240}
+                height={50}
+                unoptimized
+                style={{
+                  width: "auto",
+                  height: "100%",
+                  maxWidth: "100%",
+                  objectFit: "contain",
                 }}
-              >
-                Megalott
-              </Typography>
+                priority
+              />
             </Box>
           </Link>
           <Box

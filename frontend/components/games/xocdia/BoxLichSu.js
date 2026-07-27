@@ -1,3 +1,4 @@
+import { GAME_LICH_SU_ID } from "@/components/games/StickyBetBar";
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
@@ -32,7 +33,7 @@ const BoxLichSu = ({ TYPE_GAME }) => {
   const [tabPage, setTabPage] = useState(Object.keys(TYPE_TAB)[0]);
 
   return (
-    <>
+    <Box id={GAME_LICH_SU_ID}>
       <Box
         sx={{
           display: "flex",
@@ -48,7 +49,7 @@ const BoxLichSu = ({ TYPE_GAME }) => {
         ))}
       </Box>
       {COMPONENT_TAB[tabPage]}
-    </>
+    </Box>
   );
 };
 export default BoxLichSu;

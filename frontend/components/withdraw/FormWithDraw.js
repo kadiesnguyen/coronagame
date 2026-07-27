@@ -1,26 +1,25 @@
-import { OptionMenu, OptionMenuItem } from "@/custom/optionMenu";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, FormControl, Select, Typography } from "@mui/material";
+import { Box, Button, FormControl, Typography } from "@mui/material";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import * as Yup from "yup";
 
 import WithdrawService from "@/services/WithdrawService";
 import LoadingBox from "../homePage/LoadingBox";
 import ErrorMessageLabel from "../input/ErrorMessageLabel";
 import OutlinedInput from "../input/OutlinedInput";
-const FormWithdraw = ({ listBank }) => {
-  const getBalance = useSelector((state) => state.balance.balance);
+
+const FormWithdraw = () => {
   const [isLoading, setIsLoading] = useState(false);
-  // form validation rules
   const validationSchema = Yup.object().shape({
+    tenNganHang: Yup.string().trim().required("Vui lòng nhập tên ngân hàng"),
+    tenChuTaiKhoan: Yup.string().trim().required("Vui lòng nhập tên chủ tài khoản"),
+    soTaiKhoan: Yup.string().trim().required("Vui lòng nhập số tài khoản"),
     soTien: Yup.number()
       .typeError("Vui lòng nhập số tiền hợp lệ")
       .required("Vui lòng nhập số tiền hợp lệ")
       .min(10000, "Vui lòng nhập số tiền từ 10.000đ"),
-    nganHang: Yup.string().required("Vui lòng chọn ngân hàng"),
   });
   const formOptions = { resolver: yupResolver(validationSchema) };
 
@@ -28,22 +27,24 @@ const FormWithdraw = ({ listBank }) => {
     control,
     handleSubmit,
     formState: { errors },
-    register,
     reset,
   } = useForm(formOptions);
-  const onSubmit = async ({ soTien, nganHang }) => {
+
+  const onSubmit = async ({ soTien, tenNganHang, tenChuTaiKhoan, soTaiKhoan }) => {
     try {
       setIsLoading(true);
       const result = await WithdrawService.createWithdraw({
-        soTien,
-        nganHang,
+        soTien: Number(soTien),
+        tenNganHang,
+        tenChuTaiKhoan,
+        soTaiKhoan,
       });
       toast.success(result?.data?.message ?? "Tạo yêu cầu rút tiền thành công");
       reset();
-      setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
       toast.error(err?.response?.data?.message ?? "Có lỗi xảy ra khi tạo yêu cầu rút tiền");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,9 +56,7 @@ const FormWithdraw = ({ listBank }) => {
           display: "grid",
           gridTemplateColumns: "repeat(1, minmax(0,1fr))",
           gap: "10px",
-
           padding: "0px 20px",
-
           color: (theme) => theme.palette.text.secondary,
         }}
       >
@@ -70,57 +69,72 @@ const FormWithdraw = ({ listBank }) => {
           }}
           onSubmit={handleSubmit(onSubmit)}
         >
-          <FormControl
-            variant="standard"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-            error={errors.tenNganHang}
-          >
-            <Typography
-              sx={{
-                marginBottom: "10px",
-              }}
-            >
-              Ngân hàng
-            </Typography>
+          <FormControl variant="standard" fullWidth error={!!errors.tenNganHang}>
+            <Typography sx={{ marginBottom: "10px" }}>Tên ngân hàng</Typography>
             <Controller
-              name="nganHang"
+              name="tenNganHang"
               control={control}
-              render={({ field: { ref, ...field } }) => (
-                <Select
-                  inputRef={ref}
-                  labelId="select-bank"
-                  id="select-bank-option"
-                  label="Ngân hàng"
-                  input={<OptionMenu />}
-                  {...field}
-                >
-                  <OptionMenuItem value="">
-                    <em>Chọn ngân hàng của bạn</em>
-                  </OptionMenuItem>
-                  {listBank.map((item, i) => (
-                    <OptionMenuItem key={item._id} value={item._id}>
-                      {item.tenNganHang} - {item.tenChuTaiKhoan} - {item.soTaiKhoan}
-                    </OptionMenuItem>
-                  ))}
-                </Select>
-              )}
               defaultValue=""
+              render={({ field: { ref, ...field } }) => (
+                <OutlinedInput
+                  inputRef={ref}
+                  placeholder="VD: Vietcombank, Techcombank..."
+                  size="small"
+                  fullWidth
+                  error={!!errors.tenNganHang}
+                  {...field}
+                />
+              )}
             />
-            <ErrorMessageLabel>{errors.nganHang ? errors.nganHang.message : ""}</ErrorMessageLabel>
+            <ErrorMessageLabel>{errors.tenNganHang?.message || ""}</ErrorMessageLabel>
           </FormControl>
-          <FormControl
-            variant="standard"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+
+          <FormControl variant="standard" fullWidth error={!!errors.tenChuTaiKhoan}>
+            <Typography sx={{ marginBottom: "10px" }}>Tên chủ tài khoản</Typography>
+            <Controller
+              name="tenChuTaiKhoan"
+              control={control}
+              defaultValue=""
+              render={({ field: { ref, ...field } }) => (
+                <OutlinedInput
+                  inputRef={ref}
+                  placeholder="Tên chủ tài khoản nhận tiền"
+                  size="small"
+                  fullWidth
+                  error={!!errors.tenChuTaiKhoan}
+                  {...field}
+                />
+              )}
+            />
+            <ErrorMessageLabel>{errors.tenChuTaiKhoan?.message || ""}</ErrorMessageLabel>
+          </FormControl>
+
+          <FormControl variant="standard" fullWidth error={!!errors.soTaiKhoan}>
+            <Typography sx={{ marginBottom: "10px" }}>Số tài khoản</Typography>
+            <Controller
+              name="soTaiKhoan"
+              control={control}
+              defaultValue=""
+              render={({ field: { ref, ...field } }) => (
+                <OutlinedInput
+                  inputRef={ref}
+                  placeholder="Số tài khoản nhận tiền"
+                  size="small"
+                  fullWidth
+                  error={!!errors.soTaiKhoan}
+                  {...field}
+                />
+              )}
+            />
+            <ErrorMessageLabel>{errors.soTaiKhoan?.message || ""}</ErrorMessageLabel>
+          </FormControl>
+
+          <FormControl variant="standard" fullWidth error={!!errors.soTien}>
+            <Typography sx={{ marginBottom: "10px" }}>Số tiền rút</Typography>
             <Controller
               name="soTien"
               control={control}
+              defaultValue=""
               render={({ field: { ref, ...field } }) => (
                 <OutlinedInput
                   inputRef={ref}
@@ -128,20 +142,20 @@ const FormWithdraw = ({ listBank }) => {
                   size="small"
                   type="number"
                   fullWidth
-                  error={errors.soTien ? true : false}
+                  error={!!errors.soTien}
                   onWheel={(e) => e.target.blur()}
                   {...field}
                 />
               )}
-              defaultValue=""
             />
-            <ErrorMessageLabel>{errors.soTien ? errors.soTien.message : ""}</ErrorMessageLabel>
+            <ErrorMessageLabel>{errors.soTien?.message || ""}</ErrorMessageLabel>
           </FormControl>
 
           <Button
             sx={{
               fontSize: "2rem",
               fontWeight: "bold",
+              minHeight: 48,
             }}
             type="submit"
           >

@@ -137,6 +137,7 @@ class GameXSMBService {
         await this.getKetQuaXSMB();
         this.sendRoomXoSo({ key: `${this.KEY_GAME}:batDauGame` });
         this.sendRoomXoSo({ key: `${this.KEY_GAME}:admin:batDauGame`, data: { phien: this.getCurrentDate() } });
+        AdminSocketService.resetGameBetAlert({ room: this.KEY_GAME, phien: this.getCurrentDate() });
 
         this.setStatusGame(STATUS_GAME.DANG_CHO);
         const findLatestGameDangCho = await GameXoSoMB.findOne({
@@ -181,6 +182,7 @@ class GameXSMBService {
           this.setStatusGame(STATUS_GAME.DANG_CHO);
           this.sendRoomXoSo({ key: `${this.KEY_GAME}:batDauGame` });
           this.sendRoomXoSo({ key: `${this.KEY_GAME}:admin:batDauGame`, data: { phien: this.getCurrentDate() } });
+          AdminSocketService.resetGameBetAlert({ room: this.KEY_GAME, phien: this.getCurrentDate() });
 
           // Dừng cược
           if (this.getTimerStopBet() <= 0) {

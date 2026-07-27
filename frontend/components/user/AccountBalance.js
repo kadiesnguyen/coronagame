@@ -4,6 +4,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { Box, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import UserNotificationBell from "./UserNotificationBell";
+
 const AccountBalance = () => {
   const dispatch = useDispatch();
   const { display: isDisplayBalance, balance } = useSelector((state) => state.balance);
@@ -12,23 +14,22 @@ const AccountBalance = () => {
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          gap: "10px",
-          alignItems: "center",
-          color: "#fff",
-          "& svg": { color: "#e5c05b", cursor: "pointer" },
-        }}
-      >
-        <Typography component={"div"} sx={{ color: "#fff", fontWeight: 600 }}>
-          Số dư: {isDisplayBalance ? convertJSXMoney(balance) : "******"}
-        </Typography>
-        {!isDisplayBalance && <VisibilityIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
-        {isDisplayBalance && <VisibilityOffIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
-      </Box>
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        gap: "8px",
+        alignItems: "center",
+        color: "#fff",
+        "& svg": { color: "#e5c05b", cursor: "pointer" },
+      }}
+    >
+      <Typography component={"div"} sx={{ color: "#fff", fontWeight: 600 }}>
+        Số dư: {isDisplayBalance ? convertJSXMoney(balance) : "******"}
+      </Typography>
+      {!isDisplayBalance && <VisibilityIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
+      {isDisplayBalance && <VisibilityOffIcon onClick={() => handleDisplayBalance(!isDisplayBalance)} />}
+      <UserNotificationBell size={36} />
+    </Box>
   );
 };
 export default AccountBalance;

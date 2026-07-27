@@ -8,7 +8,7 @@ import useGetDetailedNotification from "@/hooks/admin/useGetDetailedNotification
 import NotificationService from "@/services/admin/NotificationService";
 import { NextSeo } from "next-seo";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 
 const ChiTiet = ({ ID }) => {
   const BreadcrumbData = [

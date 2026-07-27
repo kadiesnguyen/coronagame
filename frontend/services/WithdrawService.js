@@ -4,10 +4,13 @@ class WithdrawService {
     const res = await api.get(`/v1/ruttien?results=${pageSize}&page=${page}`);
     return res;
   };
-  static createWithdraw = async ({ soTien, nganHang }) => {
+  static createWithdraw = async ({ soTien, tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode = "" }) => {
     const result = await api.post(`/v1/ruttien`, {
       soTien,
-      nganHang,
+      tenNganHang,
+      tenChuTaiKhoan,
+      soTaiKhoan,
+      bankCode,
     });
     return result;
   };

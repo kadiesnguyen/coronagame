@@ -1,13 +1,18 @@
 import useCatchRefreshTokenError from "@/hooks/useCatchRefreshTokenError";
 import useRegisterUserSocket from "@/hooks/useRegisterUserSocket";
 import { Box } from "@mui/material";
+import { useRouter } from "next/router";
 import Footer from "./homePage/Footer";
 import Header from "./homePage/Header";
 import useRegisterAdminSocket from "@/hooks/useRegisterAdminSocket";
+
 const Layout = ({ children }) => {
   useCatchRefreshTokenError();
   useRegisterUserSocket();
   useRegisterAdminSocket();
+  const router = useRouter();
+  // Game pages: leave room for sticky bet bar + mobile nav
+  const isGamePage = router.pathname.startsWith("/games/");
 
   return (
     <>
@@ -34,7 +39,8 @@ const Layout = ({ children }) => {
           <Box
             sx={{
               padding: "1rem",
-              paddingBottom: "10rem",
+              // Sticky bet bar (~12rem) + mobile nav — chỉ chừa cuối trang; bar ẩn khi vào lịch sử
+              paddingBottom: isGamePage ? "24rem" : "10rem",
               position: "relative",
             }}
           >

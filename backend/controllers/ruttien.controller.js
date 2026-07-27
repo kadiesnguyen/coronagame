@@ -1,7 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const { MIN_MONEY_WITHDRAW } = require("../configs/withdraw.config");
 const LichSuRut = require("../models/LichSuRut");
-const LienKetNganHang = require("../models/LienKetNganHang");
 const { UnauthorizedError, BadRequestError } = require("../utils/app_error");
 const catchAsync = require("../utils/catch_async");
 const { convertMoney } = require("../utils/convertMoney");
@@ -13,6 +12,9 @@ const UserSocketService = require("../services/user.socket.service");
 const TelegramService = require("../services/telegram.service");
 const { TYPE_SEND_MESSAGE } = require("../configs/telegram.config");
 const NguoiDung = require("../models/NguoiDung");
+const AdminSocketService = require("../services/admin.socket.service");
+const { normalizeWithdrawBankList } = require("../utils/withdraw_bank");
+
 class RutTienController {
   static getDanhSach = catchAsync(async (req, res, next) => {
     const page = req.query.page * 1 || 1;
@@ -21,7 +23,8 @@ class RutTienController {
     let sortValue = ["-createdAt"];
     sortValue = sortValue.join(" ");
     const { _id: userId } = req.user;
-    const list = await LichSuRut.find({ nguoiDung: userId }).skip(skip).limit(results).sort(sortValue).populate("nganHang").lean();
+    let list = await LichSuRut.find({ nguoiDung: userId }).skip(skip).limit(results).sort(sortValue).lean();
+    list = await normalizeWithdrawBankList(list);
     return new OkResponse({
       data: list,
       metadata: {
@@ -32,10 +35,11 @@ class RutTienController {
       },
     }).send(res);
   });
+
   static createRutTien = catchAsync(async (req, res, next) => {
     const { _id: userId, money, taiKhoan } = req.user;
-    const { soTien, nganHang } = req.body;
-    if (!soTien || !nganHang) {
+    const { soTien, tenNganHang, tenChuTaiKhoan, soTaiKhoan, bankCode } = req.body;
+    if (!soTien || !tenNganHang?.trim() || !tenChuTaiKhoan?.trim() || !soTaiKhoan?.trim()) {
       throw new UnauthorizedError("Vui lòng nhập đầy đủ thông tin");
     }
     if (!_.isNumber(soTien)) {
@@ -44,12 +48,13 @@ class RutTienController {
     if (soTien < MIN_MONEY_WITHDRAW) {
       throw new UnauthorizedError("Số tiền rút tối thiểu phải là " + convertMoney(MIN_MONEY_WITHDRAW));
     }
-    const findThongTinNganHang = await LienKetNganHang.findOne({
-      _id: nganHang,
-    });
-    if (!findThongTinNganHang) {
-      throw new UnauthorizedError("Không tìm thấy thông tin ngân hàng của bạn");
-    }
+
+    const nganHangSnapshot = {
+      tenNganHang: String(tenNganHang).trim(),
+      tenChuTaiKhoan: String(tenChuTaiKhoan).trim(),
+      soTaiKhoan: String(soTaiKhoan).trim(),
+      bankCode: String(bankCode || "").trim(),
+    };
 
     let retries = 3;
     while (retries > 0) {
@@ -83,7 +88,7 @@ class RutTienController {
             [
               {
                 nguoiDung: userId,
-                nganHang,
+                nganHang: nganHangSnapshot,
                 soTien,
               },
             ],
@@ -91,7 +96,6 @@ class RutTienController {
               session,
             }
           );
-          // Tru tien User
           const updateUserMoney = await NguoiDung.findOneAndUpdate(
             {
               taiKhoan,
@@ -108,7 +112,7 @@ class RutTienController {
             isErrorUpdateMoneyConcurrency = true;
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại sau");
           }
-          const thongTinNganHang = `${findThongTinNganHang.tenNganHang} - ${findThongTinNganHang.tenChuTaiKhoan} - ${findThongTinNganHang.soTaiKhoan}`;
+          const thongTinNganHang = `${nganHangSnapshot.tenNganHang} - ${nganHangSnapshot.tenChuTaiKhoan} - ${nganHangSnapshot.soTaiKhoan}`;
           await BienDongSoDuServiceFactory.createBienDong({
             type: TYPE_BALANCE_FLUCTUATION.WITHDRAW,
             payload: {
@@ -122,11 +126,20 @@ class RutTienController {
               session,
             },
           });
-          // Update số dư tài khoản realtime
           UserSocketService.updateUserBalance({ user: taiKhoan, updateBalance: -soTien });
-          // Send notification Telegram
           const noiDungBot = `${taiKhoan} vừa gửi yêu cầu rút tiền về ${thongTinNganHang} với số tiền ${convertMoney(soTien)}`;
           TelegramService.sendNotification({ content: noiDungBot, type: TYPE_SEND_MESSAGE.WITHDRAW });
+          const created = insertLichSuRut[0];
+          AdminSocketService.notifyNewRequest({
+            id: String(created._id),
+            type: "withdraw",
+            taiKhoan,
+            soTien,
+            href: "/admin/withdraw",
+            title: "Yêu cầu rút tiền",
+            message: `${taiKhoan} gửi yêu cầu rút ${convertMoney(soTien)}`,
+            createdAt: created.createdAt || new Date().toISOString(),
+          });
         });
         break;
       } catch (error) {

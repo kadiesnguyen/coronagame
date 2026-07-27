@@ -4,7 +4,7 @@ import { NextSeo } from "next-seo";
 const ChiTiet = () => {
   return (
     <>
-      <NextSeo title="Chỉnh sửa cài đặt Tawk.to" />
+      <NextSeo title="Cài đặt CSKH" />
 
       <Layout>
         <TawkTo />

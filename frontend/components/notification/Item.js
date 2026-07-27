@@ -1,7 +1,9 @@
+import { resolveMediaUrl } from "@/utils/branding";
 import { Box, Typography } from "@mui/material";
 import Link from "next/link";
 
 const Item = ({ item }) => {
+  const coverUrl = resolveMediaUrl(item.hinhAnh);
   return (
     <>
       <Link href={`/notifications/${item._id}`}>
@@ -26,7 +28,7 @@ const Item = ({ item }) => {
               backgroundPosition: "center center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
-              backgroundImage: `url(${item.hinhAnh})`,
+              backgroundImage: coverUrl ? `url(${coverUrl})` : "none",
             }}
           ></Box>
           <Box

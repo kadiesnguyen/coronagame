@@ -30,8 +30,9 @@ const heThongSchema = new mongoose.Schema(
 
     cskhConfigs: {
       tawk: {
-        propertyId: { type: String, default: "property_id" },
-        widgetId: { type: String, default: "default" },
+        link: { type: String, default: "" },
+        propertyId: { type: String, default: "" },
+        widgetId: { type: String, default: "" },
       },
       telegram: {
         tenNguoiDung: { type: String, default: "" },
@@ -76,8 +77,25 @@ const heThongSchema = new mongoose.Schema(
         keno10P: {
           tiLeCLTX: {
             type: mongoose.Types.Decimal128,
-            default: 1.98,
+            default: 2.1,
             get: getTileValue,
+          },
+          tiLeVip: {
+            vip1: {
+              type: mongoose.Types.Decimal128,
+              default: 2.1,
+              get: getTileValue,
+            },
+            vip2: {
+              type: mongoose.Types.Decimal128,
+              default: 2.2,
+              get: getTileValue,
+            },
+            vip3: {
+              type: mongoose.Types.Decimal128,
+              default: 2.3,
+              get: getTileValue,
+            },
           },
           autoGame: {
             type: Boolean,
@@ -172,6 +190,16 @@ const heThongSchema = new mongoose.Schema(
         minMoney: { type: Number, default: 1000000000 },
         maxMoney: { type: Number, default: null },
       },
+    },
+    branding: {
+      logoUrl: { type: String, default: "" },
+      banners: [
+        {
+          url: { type: String, required: true },
+          desc: { type: String, default: "" },
+          status: { type: Boolean, default: true },
+        },
+      ],
     },
   },
   {

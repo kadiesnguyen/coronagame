@@ -29,6 +29,22 @@ class SystemService {
     const res = await api.put(`/v1/admin/he-thong/vip-levels`, { vipLevels });
     return res;
   };
+  static getBrandingConfig = async () => {
+    const res = await api.get(`/v1/admin/he-thong/branding`);
+    return res;
+  };
+  static updateBrandingConfig = async ({ logoUrl, banners }) => {
+    const res = await api.put(`/v1/admin/he-thong/branding`, { logoUrl, banners });
+    return res;
+  };
+  static uploadBrandingAsset = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api.post(`/v1/admin/he-thong/branding/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res;
+  };
 }
 
 export default SystemService;

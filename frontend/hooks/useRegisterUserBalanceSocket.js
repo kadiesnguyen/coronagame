@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import { setBalance, updateBalance } from "../redux/actions/balance";
 
 const useRegisterUserBalanceSocket = ({ value }) => {

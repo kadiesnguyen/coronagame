@@ -1,3 +1,4 @@
+import { openCskh } from "@/utils/openCskh";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
@@ -11,6 +12,7 @@ import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
 const FooterContainer = styled(Box)(({ theme }) => ({
   background: "linear-gradient(180deg, #101d33 0%, #0a1220 100%)",
   borderTop: "1px solid rgba(212, 175, 55, 0.25)",
@@ -40,6 +42,7 @@ const FooterItem = styled(Box)(({ theme }) => ({
     color: "#e5c05b",
   },
 }));
+
 const listItem = [
   {
     key: "notifications",
@@ -52,8 +55,9 @@ const listItem = [
     key: "deposit",
     icon: <AddBusinessOutlinedIcon />,
     activeIcon: <AddBusinessIcon />,
-    url: "/deposit",
+    url: null,
     title: "Nạp tiền",
+    openCskh: true,
   },
   {
     key: "home",
@@ -92,6 +96,7 @@ const handleConvertPath = (pathname) => {
   }
   return "";
 };
+
 const Footer = () => {
   const router = useRouter();
   const value = handleConvertPath(router.pathname);
@@ -99,45 +104,35 @@ const Footer = () => {
   return (
     <>
       <FooterContainer className="footer">
-        {listItem.map((item, i) => {
-          if (item.key !== "home") {
-            return (
-              <Link href={item.url} key={item.key}>
-                <FooterItem className={"footer-item"}>
-                  {item.key === value && <Box className="icon_footer active">{item.activeIcon}</Box>}
-                  {item.key !== value && <Box className="icon_footer">{item.icon}</Box>}
-                  <Box
-                    className="title_footer"
-                    sx={{
-                      fontSize: "1.5rem",
-                    }}
-                  >
-                    {item.title}
-                  </Box>
-                </FooterItem>
-              </Link>
-            );
-          } else {
-            return (
-              <Link href={item.url} key={item.key}>
-                <FooterItem className={"footer-item"}>
-                  {item.key === value && <Box className="icon_footer active">{item.activeIcon}</Box>}
-                  {item.key !== value && <Box className="icon_footer">{item.icon}</Box>}
+        {listItem.map((item) => {
+          const content = (
+            <FooterItem
+              className={"footer-item"}
+              onClick={item.openCskh ? () => openCskh() : undefined}
+            >
+              {item.key === value && <Box className="icon_footer active">{item.activeIcon}</Box>}
+              {item.key !== value && <Box className="icon_footer">{item.icon}</Box>}
+              {item.key === "home" && <div className="footer-center-bg"></div>}
+              <Box
+                className="title_footer"
+                sx={{
+                  fontSize: "1.5rem",
+                  marginTop: item.key === "home" ? "2rem" : 0,
+                }}
+              >
+                {item.title}
+              </Box>
+            </FooterItem>
+          );
 
-                  <div className="footer-center-bg"></div>
-                  <Box
-                    className="title_footer"
-                    sx={{
-                      fontSize: "1.5rem",
-                      marginTop: "2rem",
-                    }}
-                  >
-                    {item.title}
-                  </Box>
-                </FooterItem>
-              </Link>
-            );
+          if (item.openCskh) {
+            return <Box key={item.key} sx={{ flex: "1 1", display: "flex" }}>{content}</Box>;
           }
+          return (
+            <Link href={item.url} key={item.key} style={{ flex: "1 1", display: "flex" }}>
+              {content}
+            </Link>
+          );
         })}
       </FooterContainer>
     </>

@@ -3,7 +3,7 @@ import SocketContext from "@/context/socket";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { memo, useContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 const BoxContainer = styled(Box)(({ theme }) => ({
   background: "#00b977",
   borderRadius: "10px",

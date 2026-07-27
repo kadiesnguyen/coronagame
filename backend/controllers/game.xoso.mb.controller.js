@@ -252,6 +252,7 @@ class GameXoSoMBController {
 
         // Send event refetch users dashboard
         AdminSocketService.sendRoomAdmin({ key: "admin:refetch-data-game-transactionals-dashboard" });
+        AdminSocketService.notifyGameBet({ room: this.KEY_GAME, phien: findPhien.ngay });
 
         // Update số dư tài khoản realtime
         UserSocketService.updateUserBalance({ user: findUser.taiKhoan, updateBalance: -tongTienCuoc });

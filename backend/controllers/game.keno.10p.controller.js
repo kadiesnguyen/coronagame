@@ -1,13 +1,17 @@
 const { LOAI_GAME } = require("../configs/game.config");
 const GameKeno10P = require("../models/GameKeno10P");
+const HeThong = require("../models/HeThong");
 const LichSuDatCuocKeno10P = require("../models/LichSuDatCuocKeno10P");
 const GameKeno10PSocketService = require("../services/game.socket.service/game.keno10p.socket.service");
+const catchAsync = require("../utils/catch_async");
+const { OkResponse } = require("../utils/successResponse");
+const { DEFAULT_KENO10P_TI_LE_VIP, normalizeTiLeVip, resolveTiLeByVipLevel } = require("../utils/vip");
 const GameKenoController = require("./game.keno.controller");
 
 class GameKeno10PController extends GameKenoController {
   constructor() {
     const CONFIG = {
-      TYPE_GAME: "Keno10P",
+      TYPE_GAME: "Keno 10P",
       ROOM: LOAI_GAME.KENO10P,
       ADMIN_ROOM: "admin_keno10p",
       KEY_SYSTEM_DB: "keno10P",
@@ -25,6 +29,22 @@ class GameKeno10PController extends GameKenoController {
       CONFIG,
     });
   }
+
+  getTiLeGame = catchAsync(async (req, res) => {
+    const results = await HeThong.findOne({ systemID: 1 });
+    const config = results?.gameConfigs?.kenoConfigs?.keno10P;
+    const tiLeVip = normalizeTiLeVip(config?.tiLeVip ?? DEFAULT_KENO10P_TI_LE_VIP);
+    const vipLevel = Number(req.query.vipLevel);
+    if ([1, 2, 3].includes(vipLevel)) {
+      return new OkResponse({
+        data: resolveTiLeByVipLevel(vipLevel, tiLeVip, config?.tiLeCLTX),
+      }).send(res);
+    }
+    return new OkResponse({
+      data: tiLeVip,
+    }).send(res);
+  });
+
   /**
    *
    * @returns {GameKeno10PController}

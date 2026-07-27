@@ -16,7 +16,7 @@ import { NextSeo } from "next-seo";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/utils/toast";
 import * as Yup from "yup";
 const DangKy = () => {
   const { data: session, status } = useSession();

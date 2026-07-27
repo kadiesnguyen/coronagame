@@ -8,12 +8,11 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Provider } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import "simplebar-react/dist/simplebar.min.css";
 
-import { Toaster } from "react-hot-toast";
+import ClientAlertHost from "../components/ClientAlertHost";
 import RefreshTokenHandler from "../components/RefreshTokenHandler";
+import SessionTokenBridge from "../components/SessionTokenBridge";
 import ThemeLayout from "../components/ThemeLayout";
 import SocketProvider from "../providers/SocketProvider";
 import { store } from "../redux/reducers/store";
@@ -34,6 +33,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <>
       <SessionProvider session={session} refetchOnWindowFocus={false} refetchInterval={interval}>
+        <SessionTokenBridge />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <Provider store={store}>
@@ -43,32 +43,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Component {...pageProps} />
                 </LocalizationProvider>
-                <ToastContainer
-                  position="top-center"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss={false}
-                  draggable
-                  pauseOnHover={false}
-                />
-                <Toaster
-                  position="top-center"
-                  reverseOrder={false}
-                  gutter={8}
-                  containerClassName=""
-                  containerStyle={{}}
-                  toastOptions={{
-                    // Define default options
-                    className: "",
-                    duration: 5000,
-                    style: {
-                      fontSize: "1.5rem",
-                    },
-                  }}
-                />
+                <ClientAlertHost />
               </ThemeLayout>
             </SocketProvider>
           </Provider>

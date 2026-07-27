@@ -1,5 +1,7 @@
 "use strict";
 
+const { isAdminSocket } = require("../../utils/socket_auth");
+
 const HeThong = require("../../models/HeThong");
 
 class GameXucXacSocketService {
@@ -28,11 +30,25 @@ class GameXucXacSocketService {
     });
 
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:join-room-admin`, () => {
-      const { role } = global._io;
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       this.socket.join(this.CONFIG.ADMIN_ROOM);
+
+      if (!this.GAME_DATA) {
+        this.socket.disconnect();
+        return;
+      }
+      const settingGameSync = this.GAME_DATA.getSettingGame && this.GAME_DATA.getSettingGame();
+      const dataGameSync = this.GAME_DATA.getDataGame();
+      if (dataGameSync) {
+        this.socket.emit(`${this.CONFIG.KEY_SOCKET}:admin:timer`, {
+          current_time: dataGameSync.timer ?? 0,
+          phien: dataGameSync.phien,
+        });
+        this.socket.emit(`${this.CONFIG.KEY_SOCKET}:admin:hienThiPhien`, { phien: dataGameSync.phien });
+      }
+      // keep original flow below
 
       if (!this.GAME_DATA) {
         this.socket.disconnect();
@@ -53,9 +69,7 @@ class GameXucXacSocketService {
       }
     });
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:admin:set-ket-qua-dieu-chinh`, (ketQua) => {
-      const { role } = global._io;
-
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       if (!this.GAME_DATA) {
@@ -65,9 +79,7 @@ class GameXucXacSocketService {
       this.GAME_DATA.setModifiedResult(ketQua);
     });
     this.socket.on(`${this.CONFIG.KEY_SOCKET}:admin:set-random-ket-qua-dieu-chinh`, () => {
-      const { role } = global._io;
-
-      if (role !== "admin") {
+      if (!isAdminSocket(this.socket)) {
         return;
       }
       if (!this.GAME_DATA) {

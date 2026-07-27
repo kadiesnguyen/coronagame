@@ -8,8 +8,33 @@ const ThongBao = require("../../models/ThongBao");
 const { BadRequestError } = require("../../utils/app_error");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
+const { deleteLocalUpload } = require("../../configs/upload.local.config");
+
+const NOTIF_UPLOAD_FOLDER = "notifications";
 
 class ThongBaoAdminController {
+  static uploadHinhAnh = catchAsync(async (req, res) => {
+    if (!req.file) {
+      throw new BadRequestError("Vui lòng chọn file ảnh");
+    }
+    const url = `/uploads/${NOTIF_UPLOAD_FOLDER}/${req.file.filename}`;
+    return new OkResponse({
+      message: "Upload thành công",
+      data: { url },
+    }).send(res);
+  });
+
+  static deleteHinhAnhFile = catchAsync(async (req, res) => {
+    const { url } = req.body;
+    if (!url || !String(url).startsWith(`/uploads/${NOTIF_UPLOAD_FOLDER}/`)) {
+      throw new BadRequestError("Đường dẫn ảnh không hợp lệ");
+    }
+    deleteLocalUpload(url, NOTIF_UPLOAD_FOLDER);
+    return new OkResponse({
+      message: "Đã xóa ảnh trên server",
+    }).send(res);
+  });
+
   static getChiTietThongBao = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const data = await ThongBao.findOne({ _id: id }).select("-__v").lean();
@@ -65,6 +90,10 @@ class ThongBaoAdminController {
       throw new BadRequestError("Thông báo không tồn tại");
     }
 
+    if (result.hinhAnh && result.hinhAnh !== hinhAnh) {
+      deleteLocalUpload(result.hinhAnh, NOTIF_UPLOAD_FOLDER);
+    }
+
     await NhatKyHoatDong.insertNhatKyHoatDong({
       taiKhoan: req.user.taiKhoan,
       userId: req.user._id,
@@ -86,6 +115,10 @@ class ThongBaoAdminController {
     const checkIsExists = await ThongBao.findOneAndDelete({ _id: id });
     if (!checkIsExists) {
       throw new BadRequestError("Thông báo không tồn tại");
+    }
+
+    if (checkIsExists.hinhAnh) {
+      deleteLocalUpload(checkIsExists.hinhAnh, NOTIF_UPLOAD_FOLDER);
     }
 
     await NhatKyHoatDong.insertNhatKyHoatDong({

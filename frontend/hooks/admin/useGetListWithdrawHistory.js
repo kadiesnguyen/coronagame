@@ -3,13 +3,14 @@ import { transformData } from "@/utils/transformData";
 import { useEffect } from "react";
 import { useInfiniteQuery } from "react-query";
 const ITEMS_OF_PAGE = 10;
-const useGetListWithdrawHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId = "" }) => {
+const useGetListWithdrawHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId = "", statusGroup = "" }) => {
   const getData = async (pageParam) => {
     try {
       const response = await WithdrawService.getListWithdrawHistory({
         pageSize,
         page: pageParam,
         userId,
+        statusGroup,
       });
       const data = response.data;
       return data;
@@ -18,7 +19,7 @@ const useGetListWithdrawHistory = ({ page = 1, pageSize = ITEMS_OF_PAGE, userId 
     }
   };
   const getListQuery = useInfiniteQuery(
-    ["get-list-withdraw-history", "admin", { page, pageSize, userId }],
+    ["get-list-withdraw-history", "admin", { page, pageSize, userId, statusGroup }],
     ({ pageParam = page }) => getData(pageParam),
     {
       getNextPageParam: (_lastPage, pages) => {

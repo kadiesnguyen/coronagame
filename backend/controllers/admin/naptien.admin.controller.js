@@ -45,19 +45,25 @@ class NapTienAdminController {
     if (!data) {
       throw new BadRequestError("Lịch sử nạp không tồn tại");
     }
+    if (data.tinhTrang !== STATUS_DEPOSIT.PENDING) {
+      throw new BadRequestError("Đơn đã xử lý, không thể đổi trạng thái");
+    }
 
     const session = await mongoose.startSession();
 
     await session.withTransaction(async () => {
       try {
         const updateLichSuNap = await LichSuNap.findOneAndUpdate(
-          { _id: id },
+          { _id: id, tinhTrang: STATUS_DEPOSIT.PENDING },
           { tinhTrang, noiDung },
           {
             session,
             new: false,
           }
         );
+        if (!updateLichSuNap) {
+          throw new BadRequestError("Đơn đã xử lý, không thể đổi trạng thái");
+        }
 
         // Hoàn tất thì cộng tiền cho người dùng
         if (updateLichSuNap.tinhTrang === STATUS_DEPOSIT.PENDING && tinhTrang === STATUS_DEPOSIT.SUCCESS) {
@@ -102,40 +108,64 @@ class NapTienAdminController {
       }
     });
 
+    const isSuccess = tinhTrang === STATUS_DEPOSIT.SUCCESS;
+    const isCancel = tinhTrang === STATUS_DEPOSIT.CANCEL;
+    if (isSuccess || isCancel) {
+      UserSocketService.notifyUser({
+        taiKhoan: data.nguoiDung.taiKhoan,
+        payload: {
+          id: `deposit:${id}:${tinhTrang}`,
+          type: "deposit",
+          status: tinhTrang,
+          href: "/deposit-history",
+          title: isSuccess ? "Nạp tiền thành công" : "Nạp tiền bị từ chối",
+          message: isSuccess
+            ? `Đơn nạp ${convertMoney(data.soTien)} đã được duyệt.`
+            : `Đơn nạp ${convertMoney(data.soTien)} đã bị từ chối.${noiDung ? ` ${noiDung}` : ""}`,
+          soTien: data.soTien,
+        },
+      });
+    }
+
     return new OkResponse({
       message: "Cập nhật thành công",
     }).send(res);
   });
 
-  static countAllLichSuNap = catchAsync(async (req, res, next) => {
+  static buildListQuery = (req) => {
     const userId = req.query.userId || "";
-    let query = {};
-    if (userId) {
-      query = {
-        nguoiDung: userId,
-      };
+    const statusGroup = req.query.statusGroup || "";
+    const tinhTrang = req.query.tinhTrang || "";
+    const query = {};
+    if (userId) query.nguoiDung = userId;
+    if (tinhTrang) {
+      query.tinhTrang = tinhTrang;
+    } else if (statusGroup === "pending") {
+      query.tinhTrang = STATUS_DEPOSIT.PENDING;
+    } else if (statusGroup === "history") {
+      query.tinhTrang = { $in: [STATUS_DEPOSIT.SUCCESS, STATUS_DEPOSIT.CANCEL] };
     }
+    return query;
+  };
+
+  static countAllLichSuNap = catchAsync(async (req, res, next) => {
+    const query = NapTienAdminController.buildListQuery(req);
     const countList = await LichSuNap.countDocuments(query);
     return new OkResponse({
       data: countList,
       metadata: {
-        userId,
+        userId: req.query.userId || "",
+        statusGroup: req.query.statusGroup || "",
       },
     }).send(res);
   });
   static getDanhSachLichSuNap = catchAsync(async (req, res, next) => {
-    const userId = req.query.userId || "";
     const page = req.query.page * 1 || 1;
     const results = req.query.results * 1 || 10;
     const skip = (page - 1) * results;
     let sortValue = ["-createdAt"];
     sortValue = sortValue.join(" ");
-    let query = {};
-    if (userId) {
-      query = {
-        nguoiDung: userId,
-      };
-    }
+    const query = NapTienAdminController.buildListQuery(req);
     const list = await LichSuNap.find(query).select("-__v").skip(skip).limit(results).sort(sortValue).lean().populate({
       path: "nguoiDung",
       select: "taiKhoan",
@@ -147,7 +177,8 @@ class NapTienAdminController {
         page,
         limitItems: results,
         sort: sortValue,
-        userId,
+        userId: req.query.userId || "",
+        statusGroup: req.query.statusGroup || "",
       },
     }).send(res);
   });

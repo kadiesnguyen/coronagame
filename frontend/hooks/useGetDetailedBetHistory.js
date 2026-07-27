@@ -16,14 +16,19 @@ const useGetDetailedBetHistory = ({ typeGame = "keno1p", phien, vipLevel }) => {
     }
   };
 
-  const { data, error, isLoading, isError, refetch } = useQuery(["get-detailed-bet-history", { typeGame, phien, vipLevel }], () =>
-    getData()
+  // Redux game slices init phien=0 before socket sync — never hit /lich-su-cuoc/0
+  const hasValidPhien = Number(phien) > 0;
+  const { data, error, isLoading, isError, refetch } = useQuery(
+    ["get-detailed-bet-history", { typeGame, phien, vipLevel }],
+    () => getData(),
+    { enabled: hasValidPhien, retry: false }
   );
   useEffect(() => {
-    if (isError) {
+    // 404 = phiên chưa tồn tại / chưa có cược — không crash cả trang game
+    if (isError && error?.response?.status !== 404) {
       throw new Error(error);
     }
-  }, [isError]);
+  }, [isError, error]);
 
   return {
     data,

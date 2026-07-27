@@ -448,6 +448,7 @@ class GameXucXacService {
     const phien = await this.createPhien({ currentPhien });
     this.broadcastGameUpdateForUser(`batDauGame`);
     this.broadcastGameUpdateForAdmin(`admin:batDauGame`, { phien });
+    AdminSocketService.resetGameBetAlert({ room: this.KEY_GAME.KEY_SOCKET, phien });
     this.broadcastGameUpdateForAdmin(`admin:refetch-data-game`);
 
     return { currentPhien, phien };

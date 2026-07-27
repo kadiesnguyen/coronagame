@@ -40,13 +40,23 @@ const SidebarMobile = (props) => {
       icon: <FaUserAlt style={{ fontSize: "1.7rem", fontWeight: "inherit", width: "30px" }} />,
     },
     {
-      path: "/admin/settings/ruttien",
+      path: "/admin/withdraw",
       title: "Yêu cầu rút tiền",
       icon: <FaMoneyCheck style={{ fontSize: "1.7rem", fontWeight: "inherit", width: "30px" }} />,
     },
     {
-      path: "/admin/settings/naptien",
-      title: "Yêu cầu nạp tiền",
+      path: "/admin/withdraw/history",
+      title: "Lịch sử rút",
+      icon: <FaMoneyCheck style={{ fontSize: "1.7rem", fontWeight: "inherit", width: "30px" }} />,
+    },
+    {
+      path: "/admin/deposit",
+      title: "Yêu cầu nạp",
+      icon: <FaMoneyCheckAlt style={{ fontSize: "1.7rem", fontWeight: "inherit", width: "30px" }} />,
+    },
+    {
+      path: "/admin/settings/deposit",
+      title: "Lịch sử nạp",
       icon: <FaMoneyCheckAlt style={{ fontSize: "1.7rem", fontWeight: "inherit", width: "30px" }} />,
     },
   ];

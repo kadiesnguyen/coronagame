@@ -79,7 +79,7 @@ const ListActivities = ({ ID }) => {
           },
 
           "& .MuiPaper-root ": {
-            color: "#000000",
+            color: "#ffffff",
           },
         }}
       >
@@ -110,15 +110,15 @@ const ListActivities = ({ ID }) => {
             },
           }}
           sx={{
-            color: "#000000",
+            color: "#ffffff",
             "& .MuiDataGrid-paper": {
-              color: "#000000",
+              color: "#ffffff",
             },
             "& .MuiToolbar-root": {
-              color: "#000000",
+              color: "#ffffff",
             },
             "& .MuiMenuItem-root": {
-              color: "#000000",
+              color: "#ffffff",
             },
           }}
         />

@@ -2,8 +2,8 @@ import BreadcrumbBar from "@/components/admin/BreadcrumbBar";
 import Layout from "@/components/admin/Layout";
 import ChiTietPhien from "@/components/admin/games/xoso/mb/ChiTietPhien";
 import LichSuCuoc from "@/components/admin/games/xoso/LichSuCuoc";
-import LichSuCuocCharts from "@/components/admin/games/xoso/LichSuCuocCharts";
 import { LOAI_GAME, convertLoaiGame } from "@/configs/game.config";
+import { Box } from "@mui/material";
 import { NextSeo } from "next-seo";
 const ChiTiet = ({ ID }) => {
   const TYPE_GAME = LOAI_GAME.XOSOMB;
@@ -32,9 +32,10 @@ const ChiTiet = ({ ID }) => {
 
       <Layout>
         <BreadcrumbBar data={BreadcrumbData} />
-        <ChiTietPhien ID={ID} TYPE_GAME={TYPE_GAME} />
-        <LichSuCuocCharts ID={ID} TYPE_GAME={TYPE_GAME} />
-        <LichSuCuoc ID={ID} TYPE_GAME={TYPE_GAME} />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", minWidth: 0, overflow: "hidden" }}>
+          <ChiTietPhien ID={ID} TYPE_GAME={TYPE_GAME} />
+          <LichSuCuoc ID={ID} TYPE_GAME={TYPE_GAME} />
+        </Box>
       </Layout>
     </>
   );

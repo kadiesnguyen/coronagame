@@ -1,11 +1,11 @@
+require("./configs/load-env").loadEnv();
+
 const express = require("express");
-const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const useragent = require("express-useragent");
-dotenv.config({ path: "./config.env" });
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc"); // Import the UTC plugin
 const timezone = require("dayjs/plugin/timezone"); // Import the timezone plugin
@@ -14,7 +14,6 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 dayjs.tz.setDefault(process.env.TZ || "Asia/Ho_Chi_Minh");
-// dotenv.config({ path: "./docker.config.env" });
 const app = express();
 const morgan = require("morgan");
 
@@ -47,7 +46,8 @@ const TelegramService = require("./services/telegram.service");
 //MIDDLEWARE
 app.use(
   cors({
-    origin: clientOrigins?.length > 1 ? clientOrigins : clientEndpoint,
+    // Always prefer the parsed list so admin + client origins both work
+    origin: clientOrigins?.length ? clientOrigins : clientEndpoint,
   })
 );
 

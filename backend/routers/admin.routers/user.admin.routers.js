@@ -4,7 +4,11 @@ const authController = require("../../controllers/auth_controller");
 const router = express.Router();
 
 router.route("/get-so-luong-user").get(authController.protect, authController.reStrictTo("admin"), AdminController.countAllUser);
+router.route("/admins").get(authController.protect, authController.reStrictTo("admin"), AdminController.getDanhSachAdmins);
 router.route("/list-bank").get(authController.protect, authController.reStrictTo("admin"), AdminController.getDanhSachNganHangUser);
+router
+  .route("/list-bank/:id")
+  .put(authController.protect, authController.reStrictTo("admin"), AdminController.updateNganHangUser);
 router.route("/deposit-history/get-all").get(authController.protect, authController.reStrictTo("admin"), AdminController.countAllLichSuNap);
 router.route("/deposit-history").get(authController.protect, authController.reStrictTo("admin"), AdminController.getLichSuNapUser);
 router
