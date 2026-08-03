@@ -1,7 +1,7 @@
 const express = require("express");
 const AdminController = require("../../controllers/admin/hethong.admin.controller");
 const authController = require("../../controllers/auth_controller");
-const { uploadBranding } = require("../../configs/upload.local.config");
+const { uploadBranding, uploadMedia } = require("../../configs/upload.local.config");
 const router = express.Router();
 
 router.route("/bot-telegram").get(authController.protect, authController.reStrictTo("admin"), AdminController.getBotTelegramConfig);
@@ -15,5 +15,9 @@ router.route("/branding").put(authController.protect, authController.reStrictTo(
 router
   .route("/branding/upload")
   .post(authController.protect, authController.reStrictTo("admin"), uploadBranding.single("file"), AdminController.uploadBrandingAsset);
+router.route("/media").get(authController.protect, authController.reStrictTo("admin"), AdminController.listMediaLibrary);
+router
+  .route("/media/upload")
+  .post(authController.protect, authController.reStrictTo("admin"), uploadMedia.single("file"), AdminController.uploadMediaAsset);
 
 module.exports = router;

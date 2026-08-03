@@ -28,6 +28,12 @@ class GameService {
     const res = await api.get(`/v1/admin/games/${typeGame}/lich-su/lich-su-cuoc/${id}`);
     return res;
   };
+  static doiCuaDatCuoc = async ({ typeGame, betId, datCuocIndex }) => {
+    const res = await api.post(`/v1/admin/games/${typeGame}/lich-su/lich-su-cuoc/${betId}/doi-cua`, {
+      datCuocIndex,
+    });
+    return res;
+  };
   static getDetailedGameHistory = async ({ typeGame, id }) => {
     const res = await api.get(`/v1/admin/games/${typeGame}/${id}`);
     return res;

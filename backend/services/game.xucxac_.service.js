@@ -21,8 +21,8 @@ const AdminSocketService = require("./admin.socket.service");
 const BullMQService = require("./bullmq.service");
 const XucXacGameState = require("./state.game.xucxac");
 const { createBroadcastMiddleware } = require("../middlewares/broadcast.logger");
-const dayjs = require("dayjs");
 const { DEFAULT_XUCXAC10P_TI_LE_VIP, resolveTiLeByVipLevel } = require("../utils/vip");
+const { waitForPlayableWallSlot } = require("../utils/wallClockPeriod");
 
 let CURRENT_GAME = {
   _id: null,
@@ -468,7 +468,7 @@ class GameXucXacService {
     this.broadcastGameUpdateForAdmin(`admin:hienThiPhien`, { phien });
   }
 
-  async runGameCycle(currentTime, phien) {
+  async runGameCycle(currentTime, phien, periodEndMs) {
     return new Promise((resolve) => {
       const timer = setInterval(() => {
         if (!this.SETTING_GAME.IS_PLAY_GAME) {
@@ -477,7 +477,9 @@ class GameXucXacService {
           return;
         }
 
-        currentTime -= 1;
+        currentTime = periodEndMs
+          ? Math.max(0, Math.ceil((periodEndMs - Date.now()) / 1000))
+          : currentTime - 1;
         this.setRemainTime(currentTime);
 
         this.broadcastGameUpdateForUser(`timer`, { current_time: currentTime });
@@ -533,38 +535,18 @@ class GameXucXacService {
   startGame = async () => {
     try {
       while (this.SETTING_GAME.IS_PLAY_GAME) {
-        // 1. Tính toán thời gian chính xác cho phiên tiếp theo
-        const now = dayjs();
-        const nextTime = now.add(this.SETTING_GAME.TIMER, "second").startOf("minute");
+        const { remainSeconds, periodEnd } = await waitForPlayableWallSlot(this.SETTING_GAME.TIMER);
 
-        // 2. Khởi tạo game mới
         const gameData = await this.initializeNewGame();
         const { phien } = gameData;
 
-        // 3. Đồng bộ timer với thời gian thực
-        let currentTime = this.SETTING_GAME.TIMER;
+        let currentTime = remainSeconds;
         await this.syncGameTimer(currentTime, phien);
-
-        // 4. Chạy game cycle
-        await this.runGameCycle(currentTime, phien);
-
-        // 5. Xử lý kết thúc game
+        await this.runGameCycle(currentTime, phien, periodEnd.valueOf());
         await this.handleGameEnd(phien);
-
-        // 6. Broadcast các sự kiện kết thúc
         this.broadcastEndGameEvents(phien);
-
-        // 7. Thực hiện trả thưởng và đợi hoàn thành
         await this.traThuong();
-
-        // 8. Broadcast hoàn tất game
         this.broadcastCompleteGameEvents(phien);
-
-        // 10. Đợi đến đúng thời điểm bắt đầu phiên mới
-        const timeToNext = nextTime.valueOf() - dayjs().valueOf();
-        if (timeToNext > 0) {
-          await new Promise((resolve) => setTimeout(resolve, timeToNext));
-        }
       }
     } catch (err) {
       this.SETTING_GAME.IS_PLAY_GAME = false;

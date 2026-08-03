@@ -1,10 +1,12 @@
 import useCatchRefreshTokenError from "@/hooks/useCatchRefreshTokenError";
+import useRegisterAdminSocket from "@/hooks/useRegisterAdminSocket";
 import useRegisterUserSocket from "@/hooks/useRegisterUserSocket";
+import { scrubProvideSupportTextLinks } from "@/utils/provideSupport";
 import { Box } from "@mui/material";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import Footer from "./homePage/Footer";
 import Header from "./homePage/Header";
-import useRegisterAdminSocket from "@/hooks/useRegisterAdminSocket";
 
 const Layout = ({ children }) => {
   useCatchRefreshTokenError();
@@ -13,6 +15,10 @@ const Layout = ({ children }) => {
   const router = useRouter();
   // Game pages: leave room for sticky bet bar + mobile nav
   const isGamePage = router.pathname.startsWith("/games/");
+
+  useEffect(() => {
+    scrubProvideSupportTextLinks();
+  }, [router.pathname]);
 
   return (
     <>

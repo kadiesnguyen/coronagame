@@ -1,10 +1,11 @@
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import OutlinedInput from "@/components/input/OutlinedInput";
 import useGetBrandingConfig from "@/hooks/admin/useGetBrandingConfig";
 import SystemService from "@/services/admin/SystemService";
 import { DEFAULT_BANNERS, DEFAULT_LOGO_URL, resolveMediaUrl } from "@/utils/branding";
+import { toast } from "@/utils/toast";
 import { Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { toast } from "@/utils/toast";
 import BreadcrumbBar from "../BreadcrumbBar";
 
 const BreadcrumbsData = [
@@ -18,49 +19,13 @@ const BrandingSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
   const [banners, setBanners] = useState([]);
+  const [picker, setPicker] = useState(null); // { mode: 'logo' | 'banner-add' | 'banner-edit', index?: number }
 
   useEffect(() => {
     if (!data) return;
     setLogoUrl(data.logoUrl || "");
     setBanners(data.banners?.length ? data.banners : []);
   }, [data]);
-
-  const uploadFile = async (file) => {
-    const res = await SystemService.uploadBrandingAsset(file);
-    return res?.data?.data?.url;
-  };
-
-  const handleUploadLogo = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    try {
-      setIsSaving(true);
-      const url = await uploadFile(file);
-      setLogoUrl(url);
-      toast.success("Upload logo thành công — nhớ bấm Lưu");
-    } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Upload logo thất bại");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUploadBanner = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    try {
-      setIsSaving(true);
-      const url = await uploadFile(file);
-      setBanners((prev) => [...prev, { url, desc: "", status: true }]);
-      toast.success("Upload banner thành công — nhớ bấm Lưu");
-    } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Upload banner thất bại");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -96,6 +61,24 @@ const BrandingSettings = () => {
     }
   };
 
+  const handlePick = (url) => {
+    if (!picker) return;
+    if (picker.mode === "logo") {
+      setLogoUrl(url);
+      toast.success("Đã chọn logo — nhớ bấm Lưu");
+      return;
+    }
+    if (picker.mode === "banner-add") {
+      setBanners((prev) => [...prev, { url, desc: "", status: true }]);
+      toast.success("Đã thêm banner — nhớ bấm Lưu");
+      return;
+    }
+    if (picker.mode === "banner-edit" && typeof picker.index === "number") {
+      setBanners((prev) => prev.map((b, i) => (i === picker.index ? { ...b, url } : b)));
+      toast.success("Đã đổi ảnh banner — nhớ bấm Lưu");
+    }
+  };
+
   const previewLogo = resolveMediaUrl(logoUrl || DEFAULT_LOGO_URL);
   const previewBanners = banners.length
     ? banners
@@ -108,7 +91,7 @@ const BrandingSettings = () => {
         Logo & Banner Slider
       </h1>
       <Typography sx={{ marginBottom: "16px", color: "text.secondary" }}>
-        Mặc định dùng logo Corona + 2 banner hiện tại. Upload tùy biến rồi bấm Lưu để áp dụng.
+        Chọn ảnh từ thư viện media hoặc upload mới, rồi bấm Lưu để áp dụng.
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "720px" }}>
@@ -124,17 +107,18 @@ const BrandingSettings = () => {
           >
             <img src={previewLogo} alt="logo preview" style={{ height: 44, width: "auto", maxWidth: 240 }} />
           </Box>
-          <Button component="label" sx={{ width: "fit-content", minHeight: "46px" }}>
-            Upload logo
-            <input hidden type="file" accept="image/*" onChange={handleUploadLogo} />
+          <Button onClick={() => setPicker({ mode: "logo" })} sx={{ width: "fit-content", minHeight: "46px" }}>
+            Chọn logo
           </Button>
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <Typography sx={{ fontWeight: 700 }}>Banner slider trang chủ</Typography>
-          <Button component="label" sx={{ width: "fit-content", minHeight: "46px" }}>
+          <Button
+            onClick={() => setPicker({ mode: "banner-add" })}
+            sx={{ width: "fit-content", minHeight: "46px" }}
+          >
             Thêm banner
-            <input hidden type="file" accept="image/*" onChange={handleUploadBanner} />
           </Button>
 
           {previewBanners.map((item, index) => (
@@ -166,7 +150,8 @@ const BrandingSettings = () => {
                     }
                     fullWidth
                   />
-                  <Box sx={{ display: "flex", gap: "8px" }}>
+                  <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <Button onClick={() => setPicker({ mode: "banner-edit", index })}>Đổi ảnh</Button>
                     <Button
                       onClick={() =>
                         setBanners((prev) =>
@@ -191,7 +176,7 @@ const BrandingSettings = () => {
           ))}
           {!banners.length && (
             <Typography sx={{ color: "text.secondary" }}>
-              Đang dùng banner mặc định. Upload banner mới để thay thế danh sách mặc định.
+              Đang dùng banner mặc định. Thêm banner từ thư viện để thay thế danh sách mặc định.
             </Typography>
           )}
         </Box>
@@ -205,6 +190,13 @@ const BrandingSettings = () => {
           </Button>
         </Box>
       </Box>
+
+      <MediaPickerDialog
+        open={!!picker}
+        onClose={() => setPicker(null)}
+        onSelect={handlePick}
+        title={picker?.mode === "logo" ? "Chọn logo" : "Chọn banner"}
+      />
 
       <Backdrop open={isLoading || isSaving}>
         <CircularProgress />

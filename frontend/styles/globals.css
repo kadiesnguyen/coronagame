@@ -62,9 +62,12 @@ textarea {
   color: var(--text);
 }
 
-/* Hide ProvideSupport auto text-link (ps_h=6AIb); CSKH dùng nút/iframe riêng */
-#6AIb,
-[id="6AIb"] {
+/* Hide ProvideSupport auto text-link junk (breaks Footer CSKH label) */
+/* IDs starting with digit: use attribute selector, not #6AIb */
+[id="6AIb"],
+[id^="psLink"],
+a[href*="providesupport.com"],
+a[href*="vm.providesupport.com"] {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -74,4 +77,6 @@ textarea {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

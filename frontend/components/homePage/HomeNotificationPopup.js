@@ -1,10 +1,7 @@
 import useGetListNotifications from "@/hooks/useGetListNotifications";
-import { resolveMediaUrl } from "@/utils/branding";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pagination } from "swiper";
@@ -16,9 +13,11 @@ const SIZE = "min(90vw, 360px)";
 
 const HomeNotificationPopup = () => {
   const { status } = useSession();
-  const router = useRouter();
   const { data, isLoading } = useGetListNotifications({ limitItems: 20 });
-  const items = useMemo(() => (Array.isArray(data) ? data.filter((x) => x?._id && x?.hinhAnh) : []), [data]);
+  const items = useMemo(
+    () => (Array.isArray(data) ? data.filter((x) => x?._id && (x?.noiDung || x?.tieuDe)) : []),
+    [data]
+  );
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -36,11 +35,6 @@ const HomeNotificationPopup = () => {
   }, [status, isLoading, items.length]);
 
   const handleClose = () => setOpen(false);
-
-  const openDetail = (id) => {
-    setOpen(false);
-    router.push(`/notifications/${id}`);
-  };
 
   if (!mounted || !open || items.length === 0) return null;
 
@@ -102,7 +96,7 @@ const HomeNotificationPopup = () => {
             backgroundColor: "#0b1528",
             "& .swiper": { width: "100%", height: "100%" },
             "& .swiper-wrapper": { height: "100%" },
-            "& .swiper-slide": { height: "100%", width: "100%" },
+            "& .swiper-slide": { height: "100%", width: "100%", overflow: "hidden" },
             "& .swiper-pagination-bullet": { background: "#fff", opacity: 0.45 },
             "& .swiper-pagination-bullet-active": { background: "#d4af37", opacity: 1 },
           }}
@@ -112,44 +106,48 @@ const HomeNotificationPopup = () => {
             pagination={{ clickable: true }}
             spaceBetween={0}
             slidesPerView={1}
+            nested
             style={{ width: "100%", height: "100%" }}
           >
-            {items.map((item) => {
-              const src = resolveMediaUrl(item.hinhAnh);
-              return (
-                <SwiperSlide key={item._id} style={{ height: "100%" }}>
+            {items.map((item) => (
+              <SwiperSlide key={item._id} style={{ height: "100%" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "100%",
+                    height: "100%",
+                    p: "16px",
+                    pb: "28px",
+                    color: "#fff",
+                    textAlign: "left",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    WebkitOverflowScrolling: "touch",
+                    overscrollBehavior: "contain",
+                    gap: "12px",
+                    boxSizing: "border-box",
+                  }}
+                  onTouchStart={(e) => e.stopPropagation()}
+                >
+                  <Typography sx={{ color: "#e5c05b", fontWeight: 700, fontSize: "1.6rem", flexShrink: 0 }}>
+                    {item.tieuDe || "Thông báo"}
+                  </Typography>
                   <Box
-                    component="button"
-                    type="button"
-                    onClick={() => openDetail(item._id)}
-                    aria-label={`Đọc thông báo ${item.tieuDe || ""}`}
+                    className="content-html"
                     sx={{
-                      display: "block",
-                      width: "100%",
-                      height: "100%",
-                      border: 0,
-                      p: 0,
-                      m: 0,
-                      cursor: "pointer",
-                      background: "transparent",
-                      position: "relative",
-                      overflow: "hidden",
+                      color: "#d7deee",
+                      fontSize: "1.35rem",
+                      lineHeight: 1.5,
+                      "& img": { maxWidth: "100%", height: "auto", display: "block", borderRadius: "8px" },
+                      "& p": { margin: "0 0 8px" },
+                      "& a": { color: "#e5c05b" },
                     }}
-                  >
-                    {src ? (
-                      <Image
-                        src={src}
-                        alt={item.tieuDe || "Thông báo"}
-                        fill
-                        unoptimized
-                        sizes="360px"
-                        style={{ objectFit: "cover", objectPosition: "center" }}
-                      />
-                    ) : null}
-                  </Box>
-                </SwiperSlide>
-              );
-            })}
+                    dangerouslySetInnerHTML={{ __html: item.noiDung || "" }}
+                  />
+                </Box>
+              </SwiperSlide>
+            ))}
           </Swiper>
         </Box>
 

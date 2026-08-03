@@ -9,6 +9,7 @@ const TelegramService = require("../../services/telegram.service");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
 const { DEFAULT_VIP_LEVELS, normalizeVipLevels } = require("../../utils/vip");
+const { listUploadFolder } = require("../../configs/upload.local.config");
 
 class HeThongAdminController {
   static getBotTelegramConfig = catchAsync(async (req, res, next) => {
@@ -234,6 +235,27 @@ class HeThongAdminController {
       throw new BadRequestError("Vui lòng chọn file ảnh");
     }
     const url = `/uploads/branding/${req.file.filename}`;
+    return new OkResponse({
+      message: "Upload thành công",
+      data: { url },
+    }).send(res);
+  });
+
+  static listMediaLibrary = catchAsync(async (req, res) => {
+    const items = ["media", "branding", "notifications"]
+      .flatMap((folder) => listUploadFolder(folder))
+      .sort((a, b) => b.mtimeMs - a.mtimeMs);
+    return new OkResponse({
+      data: items,
+      metadata: { results: items.length },
+    }).send(res);
+  });
+
+  static uploadMediaAsset = catchAsync(async (req, res) => {
+    if (!req.file) {
+      throw new BadRequestError("Vui lòng chọn file ảnh");
+    }
+    const url = `/uploads/media/${req.file.filename}`;
     return new OkResponse({
       message: "Upload thành công",
       data: { url },

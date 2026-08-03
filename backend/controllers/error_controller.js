@@ -58,6 +58,24 @@ const sendErrorProd = (err, res) => {
   }
 };
 
+/** Only unexpected 5xx — skip 404/401/400 noise (bot scanners, bad clients). */
+function shouldNotifyTelegram(err) {
+  if (!err) return false;
+  if (err.isOperational && (err.statusCode || 500) < 500) return false;
+  return (err.statusCode || 500) >= 500;
+}
+
+function formatTelegramError(err, req) {
+  const method = req?.method || "?";
+  const url = req?.originalUrl || "?";
+  const msg = String(err?.message || "Unknown error").slice(0, 200);
+  const stackTop = String(err?.stack || "")
+    .split("\n")
+    .slice(0, 6)
+    .join("\n");
+  return `Lỗi server ${err?.statusCode || 500}\n${method} ${url}\n${msg}\n${stackTop}`.slice(0, 900);
+}
+
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
@@ -82,8 +100,12 @@ module.exports = (err, req, res, next) => {
     if (error.name === "MulterError") {
       error = handleMulterError(error);
     }
-    TelegramService.sendNotification({ content: `Lỗi từ server!!: ${err?.message} - ${err?.stack}` });
-    console.log(err);
+
+    // Notify only after transforms — CastError/Validation → 4xx must not spam Telegram.
+    if (shouldNotifyTelegram(error)) {
+      TelegramService.sendNotification({ content: formatTelegramError(error, req) });
+      console.log(err);
+    }
 
     sendErrorProd(error, res);
   }

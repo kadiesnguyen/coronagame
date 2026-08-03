@@ -18,6 +18,7 @@ Ad-hoc `rsync backend/` or `frontend/` from a laptop copies local `config.env` /
    - `/www/wwwroot/coronacasino/secrets/frontend.env.local`
 4. Backend loads secrets via `configs/load-env.js` (+ `CONFIG_ENV_PATH` in `ecosystem.config.cjs`). Overwriting in-tree `config.env` must not change live endpoints.
 5. If CORS shows `xosoclient` / `cbvnsjeikd` — fix **secrets**, not a one-off in-tree file, then `pm2 startOrReload ecosystem.config.cjs --update-env`.
+6. **Never** rsync-delete `backend/public/uploads/` (logo/banner/notification files). `deploy-prod.sh` must `--exclude public/uploads/`.
 
 ## Domains (prod)
 

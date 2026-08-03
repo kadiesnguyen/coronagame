@@ -1,11 +1,13 @@
 const { TYPE_ACTIVITY, ACTION_ACTIVITY } = require("../../configs/activity.config");
+const { STATUS_BET_GAME, STATUS_HISTORY_GAME } = require("../../configs/game.xucxac");
 const HeThong = require("../../models/HeThong");
 const GameXucXac10P = require("../../models/GameXucXac10P");
 const LichSuDatCuocXucXac10P = require("../../models/LichSuDatCuocXucXac10P");
 const NhatKyHoatDong = require("../../models/NhatKyHoatDong");
 const GameXucXac10PSocketService = require("../../services/game.socket.service/game.xucxac10p.socket.service");
-const { BadRequestError, UnauthorizedError } = require("../../utils/app_error");
+const { BadRequestError, UnauthorizedError, NotFoundError } = require("../../utils/app_error");
 const catchAsync = require("../../utils/catch_async");
+const { swapCuocDoi } = require("../../utils/swapCuocDoi");
 const { OkResponse } = require("../../utils/successResponse");
 const { DEFAULT_XUCXAC10P_TI_LE_VIP, normalizeTiLeVip } = require("../../utils/vip");
 const GameXucXacAdminController = require("./game.xucxac.admin.controller");
@@ -82,6 +84,51 @@ class GameXucXac10PAdminController extends GameXucXacAdminController {
     return new OkResponse({
       data: normalized,
       message: "Cập nhật tỉ lệ VIP thành công",
+    }).send(res);
+  });
+
+  doiCuaDatCuoc = catchAsync(async (req, res) => {
+    const { betId } = req.params;
+    const datCuocIndex = Number(req.body?.datCuocIndex);
+    if (!Number.isInteger(datCuocIndex) || datCuocIndex < 0) {
+      throw new BadRequestError("datCuocIndex không hợp lệ");
+    }
+
+    const bet = await LichSuDatCuocXucXac10P.findById(betId);
+    if (!bet) throw new NotFoundError("Không tìm thấy đơn cược");
+    if (bet.tinhTrang !== STATUS_HISTORY_GAME.DANG_CHO) {
+      throw new BadRequestError("Chỉ đổi cửa khi đơn cược đang chờ");
+    }
+    const door = bet.datCuoc?.[datCuocIndex];
+    if (!door) throw new BadRequestError("Không tìm thấy cửa cược");
+    if (door.trangThai !== STATUS_BET_GAME.DANG_CHO) {
+      throw new BadRequestError("Chỉ đổi cửa khi cửa cược đang chờ");
+    }
+
+    const next = swapCuocDoi(door.chiTietCuoc);
+    if (!next) throw new BadRequestError("Loại cược không đổi được");
+
+    const before = door.chiTietCuoc;
+    door.chiTietCuoc = next;
+    await bet.save();
+
+    this.CONFIG.METHOD.SEND_ROOM_ADMIN_XUCXAC({
+      key: `${this.CONFIG.ROOM}:admin:refetch-data-lich-su-cuoc-game`,
+      data: { phien: bet.phien },
+    });
+
+    await NhatKyHoatDong.insertNhatKyHoatDong({
+      taiKhoan: req.user.taiKhoan,
+      userId: req.user._id,
+      typeActivity: TYPE_ACTIVITY.ADMIN,
+      actionActivity: ACTION_ACTIVITY.ADMIN.SWAP_BET_CUOC,
+      description: `Trượt cửa xucxac10p ${before}→${next}`,
+      metadata: { betId, datCuocIndex, before, after: next, phien: bet.phien },
+    });
+
+    return new OkResponse({
+      data: bet,
+      message: `Đã đổi ${before} → ${next}`,
     }).send(res);
   });
 

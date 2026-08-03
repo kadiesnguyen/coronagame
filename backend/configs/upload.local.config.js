@@ -6,8 +6,9 @@ const multer = require("multer");
 
 const brandingDir = path.join(__dirname, "../public/uploads/branding");
 const notificationDir = path.join(__dirname, "../public/uploads/notifications");
+const mediaDir = path.join(__dirname, "../public/uploads/media");
 
-for (const dir of [brandingDir, notificationDir]) {
+for (const dir of [brandingDir, notificationDir, mediaDir]) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -36,6 +37,37 @@ const makeUploader = (dir, prefix) =>
 
 const uploadBranding = makeUploader(brandingDir, "branding");
 const uploadNotification = makeUploader(notificationDir, "notification");
+const uploadMedia = makeUploader(mediaDir, "media");
+
+const IMAGE_EXTS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
+
+/** List image files under public/uploads/{folder}. */
+const listUploadFolder = (folder) => {
+  const dir = path.join(__dirname, "../public/uploads", folder);
+  if (!fs.existsSync(dir)) return [];
+  try {
+    return fs
+      .readdirSync(dir)
+      .filter((name) => IMAGE_EXTS.has(path.extname(name).toLowerCase()))
+      .map((name) => {
+        const full = path.join(dir, name);
+        let mtimeMs = 0;
+        try {
+          mtimeMs = fs.statSync(full).mtimeMs;
+        } catch {
+          mtimeMs = 0;
+        }
+        return {
+          url: `/uploads/${folder}/${name}`,
+          name,
+          folder,
+          mtimeMs,
+        };
+      });
+  } catch {
+    return [];
+  }
+};
 
 /** Chỉ xóa file nằm trong public/uploads/{folder}/ — tránh path traversal. */
 const deleteLocalUpload = (url, folder) => {
@@ -59,7 +91,10 @@ const deleteLocalUpload = (url, folder) => {
 module.exports = {
   uploadBranding,
   uploadNotification,
+  uploadMedia,
   uploadDir: brandingDir,
   notificationDir,
+  mediaDir,
+  listUploadFolder,
   deleteLocalUpload,
 };

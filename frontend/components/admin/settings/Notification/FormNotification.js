@@ -1,22 +1,23 @@
+import MediaPickerDialog from "@/components/admin/MediaPickerDialog";
 import ErrorMessageLabel from "@/components/input/ErrorMessageLabel";
 import OutlinedInput from "@/components/input/OutlinedInput";
 import NotificationService from "@/services/admin/NotificationService";
 import { resolveMediaUrl } from "@/utils/branding";
+import { toast } from "@/utils/toast";
 import { yupResolver } from "@hookform/resolvers/yup";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
 import { Backdrop, Box, Button, CircularProgress, FormControl, IconButton, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "@/utils/toast";
 import * as Yup from "yup";
 
 const FormNotification = ({ data, handleOnSubmit }) => {
   const editorRef = useRef();
-  const fileInputRef = useRef(null);
   const initialHinhAnh = data?.hinhAnh ?? "";
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [editorLoaded, setEditorLoaded] = useState(false);
   const { CKEditor, ClassicEditor } = editorRef.current || {};
 
@@ -45,45 +46,21 @@ const FormNotification = ({ data, handleOnSubmit }) => {
     setEditorLoaded(true);
   }, []);
 
-  const deleteTempUpload = async (url) => {
-    if (!url || !url.startsWith("/uploads/notifications/")) return;
-    if (url === initialHinhAnh) return;
-    try {
-      await NotificationService.deleteHinhAnhFile(url);
-    } catch (_err) {
-      // ponytail: best-effort cleanup
-    }
-  };
-
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    try {
-      setIsUploading(true);
-      const prev = hinhAnh;
-      const res = await NotificationService.uploadHinhAnh(file);
-      const url = res?.data?.data?.url;
-      if (!url) throw new Error("Upload thất bại");
-      await deleteTempUpload(prev);
-      setValue("hinhAnh", url, { shouldValidate: true, shouldDirty: true });
-      toast.success("Upload ảnh thành công");
-    } catch (err) {
-      toast.error(err?.response?.data?.message ?? "Upload ảnh thất bại");
-    } finally {
-      setIsUploading(false);
-    }
+  const handlePickImage = (url) => {
+    setValue("hinhAnh", url, { shouldValidate: true, shouldDirty: true });
+    toast.success("Đã chọn ảnh");
   };
 
   const handleRemoveImage = async () => {
     if (!hinhAnh) return;
     try {
       setIsUploading(true);
-      if (hinhAnh.startsWith("/uploads/notifications/")) {
+      // Only hard-delete orphan notification uploads; media library files stay
+      if (hinhAnh.startsWith("/uploads/notifications/") && hinhAnh !== initialHinhAnh) {
         await NotificationService.deleteHinhAnhFile(hinhAnh);
       }
       setValue("hinhAnh", "", { shouldValidate: true, shouldDirty: true });
-      toast.success("Đã xóa ảnh trên server");
+      toast.success("Đã bỏ ảnh");
     } catch (err) {
       toast.error(err?.response?.data?.message ?? "Xóa ảnh thất bại");
     } finally {
@@ -161,13 +138,6 @@ const FormNotification = ({ data, handleOnSubmit }) => {
               defaultValue={initialHinhAnh}
               render={() => (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                    hidden
-                    onChange={handleUpload}
-                  />
                   {previewUrl ? (
                     <Box
                       sx={{
@@ -210,7 +180,7 @@ const FormNotification = ({ data, handleOnSubmit }) => {
                     </Box>
                   ) : (
                     <Box
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => setPickerOpen(true)}
                       sx={{
                         width: "100%",
                         maxWidth: 420,
@@ -229,7 +199,7 @@ const FormNotification = ({ data, handleOnSubmit }) => {
                       }}
                     >
                       <PhotoCameraOutlinedIcon sx={{ fontSize: 32 }} />
-                      <Typography sx={{ fontSize: "1.3rem" }}>Bấm để chọn ảnh upload</Typography>
+                      <Typography sx={{ fontSize: "1.3rem" }}>Bấm để chọn ảnh từ thư viện</Typography>
                     </Box>
                   )}
                   {previewUrl ? (
@@ -237,7 +207,7 @@ const FormNotification = ({ data, handleOnSubmit }) => {
                       type="button"
                       variant="outlined"
                       startIcon={<PhotoCameraOutlinedIcon />}
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => setPickerOpen(true)}
                       sx={{
                         alignSelf: "flex-start",
                         minHeight: 44,
@@ -296,6 +266,13 @@ const FormNotification = ({ data, handleOnSubmit }) => {
           </Box>
         </Box>
       </form>
+
+      <MediaPickerDialog
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handlePickImage}
+        title="Chọn hình đại diện"
+      />
     </>
   );
 };

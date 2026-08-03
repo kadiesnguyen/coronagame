@@ -45,6 +45,18 @@ class SystemService {
     });
     return res;
   };
+  static listMediaLibrary = async () => {
+    const res = await api.get(`/v1/admin/he-thong/media`);
+    return res;
+  };
+  static uploadMediaAsset = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api.post(`/v1/admin/he-thong/media/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res;
+  };
 }
 
 export default SystemService;

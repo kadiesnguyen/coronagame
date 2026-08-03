@@ -22,6 +22,8 @@ RSYNC_EXCLUDES=(
   --exclude 'ckeditor5-*/node_modules'
   --exclude 'docs/superpowers'
   --exclude 'info.md'
+  # Never wipe runtime uploads (logo/banner/notification images)
+  --exclude 'public/uploads/'
 )
 
 echo "==> Preflight: refuse local env with legacy domains"

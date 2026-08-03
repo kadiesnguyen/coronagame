@@ -4,6 +4,9 @@ const authController = require("../../controllers/auth_controller");
 const router = express.Router();
 
 router
+  .route("/lich-su-cuoc/:betId/doi-cua")
+  .post(authController.protect, authController.reStrictTo("admin"), GameXucXac10PAdminController.doiCuaDatCuoc);
+router
   .route("/lich-su-cuoc/:phien")
   .get(authController.protect, authController.reStrictTo("admin"), GameXucXac10PAdminController.getLichSuCuocGameChiTiet);
 router

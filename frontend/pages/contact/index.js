@@ -1,23 +1,16 @@
 import Layout from "@/components/Layout";
 import LoadingBox from "@/components/homePage/LoadingBox";
 import useGetTawkToConfig from "@/hooks/useGetTawkToConfig";
-import {
-  ensureProvideSupportLoaded,
-  getProvideSupportChatUrl,
-  openProvideSupportChat,
-  resolveChatScript,
-} from "@/utils/provideSupport";
-import { Box, Button, Typography } from "@mui/material";
+import { getProvideSupportChatUrl, scrubProvideSupportTextLinks } from "@/utils/provideSupport";
+import { Box, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { NextSeo } from "next-seo";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 const Contact = () => {
   const { status } = useSession();
   const { data, isLoading } = useGetTawkToConfig();
-  const chatScript = useMemo(() => resolveChatScript(data?.link), [data?.link]);
-  const chatUrl = useMemo(() => getProvideSupportChatUrl(data?.link || chatScript), [data?.link, chatScript]);
-  const [ready, setReady] = useState(false);
+  const chatUrl = useMemo(() => getProvideSupportChatUrl(data?.link), [data?.link]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -26,30 +19,10 @@ const Contact = () => {
   }, [status]);
 
   useEffect(() => {
-    if (status !== "authenticated" || isLoading) return;
-
-    let cancelled = false;
-
-    const boot = async () => {
-      await ensureProvideSupportLoaded(chatScript);
-      if (cancelled) return;
-      setReady(true);
-      // Try native ProvideSupport window; iframe below always shows chat in-page
-      void openProvideSupportChat();
-    };
-
-    void boot();
-
-    const onReopen = () => {
-      void openProvideSupportChat();
-    };
-    window.addEventListener("cskh:open", onReopen);
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener("cskh:open", onReopen);
-    };
-  }, [status, isLoading, chatScript]);
+    scrubProvideSupportTextLinks();
+    const t = setInterval(scrubProvideSupportTextLinks, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <>
@@ -67,24 +40,9 @@ const Contact = () => {
             alignItems: "stretch",
           }}
         >
-          <Typography sx={{ color: "#b8c0d4", fontSize: "1.4rem" }}>
-            Chat CSKH ngay bên dưới. Nếu cửa sổ nổi không hiện, dùng khung chat trên trang.
-          </Typography>
-          <Button
-            onClick={() => openProvideSupportChat()}
-            disabled={!ready}
-            sx={{
-              alignSelf: "flex-start",
-              minHeight: "48px",
-              backgroundColor: "#d4af37",
-              color: "#0b1528",
-              fontWeight: 700,
-              "&:hover": { backgroundColor: "#e5c05b" },
-            }}
-          >
-            Mở cửa sổ chat
-          </Button>
+          <Typography sx={{ color: "#b8c0d4", fontSize: "1.4rem" }}>Chat CSKH ngay bên dưới.</Typography>
           <Box
+            data-corona-ps-chat="1"
             sx={{
               width: "100%",
               minHeight: "70vh",
