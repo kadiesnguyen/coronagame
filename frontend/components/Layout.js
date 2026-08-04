@@ -2,6 +2,7 @@ import useCatchRefreshTokenError from "@/hooks/useCatchRefreshTokenError";
 import useRegisterAdminSocket from "@/hooks/useRegisterAdminSocket";
 import useRegisterUserSocket from "@/hooks/useRegisterUserSocket";
 import { scrubProvideSupportTextLinks } from "@/utils/provideSupport";
+import { hideSaleSmartlyUi } from "@/utils/saleSmartly";
 import { Box } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -18,6 +19,10 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     scrubProvideSupportTextLinks();
+    // Home/khác: chỉ ẩn bubble bằng CSS/hideIcon — KHÔNG chatClose (Detect cần widget active)
+    if (router.pathname !== "/contact") {
+      hideSaleSmartlyUi({ closeChat: false });
+    }
   }, [router.pathname]);
 
   return (

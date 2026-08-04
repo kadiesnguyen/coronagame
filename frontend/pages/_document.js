@@ -1,5 +1,13 @@
 import { Head, Html, Main, NextScript } from "next/document";
 
+/**
+ * SaleSmartly install code in <body> (exact src, no defer) so Detect Installation
+ * can find an active widget. Bubble hidden via CSS + hideIcon on non-/contact pages.
+ * Do not pre-create window.ssq (loader aborts if ssq already exists).
+ */
+const SALESMARTLY_SRC =
+  "https://plugin-code.salesmartly.com/js/project_787640_815005_1785157395.js";
+
 export default function Document() {
   return (
     <Html>
@@ -23,6 +31,8 @@ export default function Document() {
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
       <body>
+        {/* Exact install snippet — sync load so document.currentScript works in their loader */}
+        <script src={SALESMARTLY_SRC} />
         <Main />
         <NextScript />
       </body>

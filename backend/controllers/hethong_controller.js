@@ -22,9 +22,17 @@ exports.getConfigTawk = catchAsync(async (req, res, next) => {
     systemID: 1,
   }).select("cskhConfigs.tawk");
   const tawk = results?.cskhConfigs?.tawk ?? {};
-  const link =
+  const DEFAULT_SS =
+    '<script src="https://plugin-code.salesmartly.com/js/project_787640_815005_1785157395.js" defer></script>';
+  const stored =
     tawk.link ||
-    (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "");
+    (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "") ||
+    "";
+  // Migrate empty / legacy ProvideSupport default → SaleSmartly widget
+  const link =
+    !stored || /providesupport\.com/i.test(stored) || /1pwnw71rbyasn0gk3p7lzo2mzy/i.test(stored)
+      ? DEFAULT_SS
+      : stored;
   return new OkResponse({
     data: { link },
   }).send(res);

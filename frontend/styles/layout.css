@@ -486,9 +486,14 @@ table tbody tr:hover {
 #scroll-container {
   border-radius: 5px;
   overflow: hidden;
+  white-space: nowrap;
+  height: 24px;
+  line-height: 24px;
 }
 
 #scroll-text {
+  white-space: nowrap !important;
+  display: inline-block;
   /* animation properties */
   transform: translateX(100%);
   animation: my-animation 15s linear infinite;

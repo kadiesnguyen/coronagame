@@ -1,18 +1,20 @@
 /**
- * CSKH chat script helpers — ProvideSupport.com
- * Re-exports for existing imports.
+ * CSKH chat script helpers — SaleSmartly (primary) + ProvideSupport fallback.
  */
-import { ensureProvideSupportLoaded } from "@/utils/provideSupport";
+import { ensureCskhLoaded } from "@/utils/cskh";
 
 export {
-  DEFAULT_CHAT_SCRIPT,
-  ensureProvideSupportLoaded as ensureChatScriptLoaded,
+  DEFAULT_CSKH_SCRIPT as DEFAULT_CHAT_SCRIPT,
+  ensureCskhLoaded as ensureChatScriptLoaded,
+  openCskhChat as openProvideSupportChat,
+} from "@/utils/cskh";
+
+export {
   extractProvideSupportHash,
   getProvideSupportChatUrl,
-  openProvideSupportChat,
   resolveChatScript,
 } from "@/utils/provideSupport";
 
 export function injectChatScripts(html) {
-  return ensureProvideSupportLoaded(html).then(() => () => undefined);
+  return ensureCskhLoaded(html).then(() => () => undefined);
 }

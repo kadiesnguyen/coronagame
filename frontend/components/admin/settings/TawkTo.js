@@ -1,7 +1,7 @@
 import OutlinedInput from "@/components/input/OutlinedInput";
 import useGetTawkToConfig from "@/hooks/admin/useGetTawkToConfig";
 import SystemService from "@/services/admin/SystemService";
-import { DEFAULT_CHAT_SCRIPT } from "@/utils/provideSupport";
+import { DEFAULT_CSKH_SCRIPT } from "@/utils/cskh";
 import { toast } from "@/utils/toast";
 import { Backdrop, Box, Button, CircularProgress, FormControl, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -28,7 +28,7 @@ const TawkTo = () => {
     try {
       setIsLoadingState(true);
       const res = await SystemService.updateTawkToConfig({
-        tawkToConfigs: { link: link.trim() || DEFAULT_CHAT_SCRIPT },
+        tawkToConfigs: { link: link.trim() || DEFAULT_CSKH_SCRIPT },
       });
       refetch();
       toast.success(res?.data?.message);
@@ -67,13 +67,13 @@ const TawkTo = () => {
         {!isLoading && (
           <>
             <Typography sx={{ alignSelf: "stretch" }}>
-              Dán mã ProvideSupport (Text Chat Link / script). Trang CSKH sẽ nhúng chat trong app (iframe + cửa sổ
-              ProvideSupport) — không mở tab mới.
+              Dán mã SaleSmartly (khuyến nghị) hoặc ProvideSupport. SaleSmartly hiện bubble chat trên web; bấm CSKH sẽ mở
+              cửa sổ chat.
             </Typography>
             <FormControl fullWidth>
-              <Typography>Script ProvideSupport</Typography>
+              <Typography>Script CSKH (SaleSmartly)</Typography>
               <OutlinedInput
-                placeholder="<!-- BEGIN ProvideSupport... -->"
+                placeholder='<script src="https://plugin-code.salesmartly.com/js/project_....js"></script>'
                 size="small"
                 type="text"
                 name="link"
@@ -85,7 +85,7 @@ const TawkTo = () => {
               />
             </FormControl>
             <Typography sx={{ alignSelf: "stretch", fontSize: "1.3rem", opacity: 0.85 }}>
-              Mặc định: account hash 1pwnw71rbyasn0gk3p7lzo2mzy (ProvideSupport).
+              Mặc định: SaleSmartly project_787640_815005_1785157395.js
             </Typography>
             <Button onClick={handleClickChange}>Lưu thay đổi</Button>
           </>

@@ -16,7 +16,7 @@ const Deposit = () => {
     }
   }, [status]);
 
-  // Nạp tiền = mở trang chat CSKH trong app
+  // Nạp tiền → trang CSKH (chỉ ở đó mới load chat)
   useEffect(() => {
     if (status !== "authenticated" || openedRef.current) return;
     openedRef.current = true;
@@ -39,7 +39,7 @@ const Deposit = () => {
           }}
         >
           <Typography sx={{ color: "#b8c0d4", fontSize: "1.5rem" }}>
-            Nạp tiền được hỗ trợ qua CSKH. Hệ thống sẽ mở cửa sổ chat trên trang.
+            Nạp tiền được hỗ trợ qua CSKH. Bấm nút để sang trang chat.
           </Typography>
           <Button
             onClick={() => openCskh()}

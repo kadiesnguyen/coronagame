@@ -80,3 +80,17 @@ a[href*="vm.providesupport.com"] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* SaleSmartly: ẩn bubble trên mọi trang trừ /contact.
+   Không dùng display:none trên host — Detect cần custom element vẫn "active". */
+body:not(.corona-cskh-active) salesmartly-chat-widget {
+  position: fixed !important;
+  width: 1px !important;
+  height: 1px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  z-index: -1 !important;
+}

@@ -27,9 +27,16 @@ class HeThongAdminController {
       throw new BadRequestError("Không tìm thấy dữ liệu hệ thống");
     }
     const tawk = heThong?.cskhConfigs?.tawk ?? {};
-    const link =
+    const DEFAULT_SS =
+      '<script src="https://plugin-code.salesmartly.com/js/project_787640_815005_1785157395.js" defer></script>';
+    const stored =
       tawk.link ||
-      (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "");
+      (tawk.propertyId && tawk.widgetId ? `https://tawk.to/chat/${tawk.propertyId}/${tawk.widgetId}` : "") ||
+      "";
+    const link =
+      !stored || /providesupport\.com/i.test(stored) || /1pwnw71rbyasn0gk3p7lzo2mzy/i.test(stored)
+        ? DEFAULT_SS
+        : stored;
     return new OkResponse({
       data: { link },
     }).send(res);
@@ -84,15 +91,17 @@ class HeThongAdminController {
     }
     const link = String(tawkToConfigs.link || "").trim();
     if (!link) {
-      throw new BadRequestError("Vui lòng nhập script CSKH (ProvideSupport)");
+      throw new BadRequestError("Vui lòng nhập script CSKH (SaleSmartly / ProvideSupport)");
     }
-    const isProvideSupport =
+    const isValidCskh =
+      /salesmartly\.com/i.test(link) ||
       /providesupport\.com/i.test(link) ||
+      /plugin-code\.salesmartly\.com/i.test(link) ||
       /<script/i.test(link) ||
       /^\(function/i.test(link) ||
       /^https?:\/\//i.test(link);
-    if (!isProvideSupport) {
-      throw new BadRequestError("Dán mã ProvideSupport (script / Text Chat Link) hoặc URL https://...");
+    if (!isValidCskh) {
+      throw new BadRequestError("Dán script SaleSmartly hoặc ProvideSupport (hoặc URL https://...)");
     }
     const heThong = await HeThong.findOneAndUpdate(
       { systemID: 1 },

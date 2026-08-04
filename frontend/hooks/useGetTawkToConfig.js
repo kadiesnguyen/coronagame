@@ -1,29 +1,30 @@
 import SystemService from "@/services/SystemService";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
-const useGetTawkToConfig = () => {
+
+const useGetTawkToConfig = ({ throwOnError = true } = {}) => {
   const getData = async () => {
-    try {
-      const response = await SystemService.getTawkToConfig();
-      const data = response.data.data;
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await SystemService.getTawkToConfig();
+    return response.data.data;
   };
 
-  const { data, error, isLoading, isError } = useQuery(["get-tawk-to-config"], () => getData());
+  const { data, error, isLoading, isError, refetch } = useQuery(["get-tawk-to-config"], getData, {
+    retry: 1,
+  });
+
   useEffect(() => {
-    if (isError) {
+    if (throwOnError && isError) {
       throw new Error(error);
     }
-  }, [isError]);
+  }, [throwOnError, isError, error]);
 
   return {
     data,
     isLoading,
     isError,
     error,
+    refetch,
   };
 };
+
 export default useGetTawkToConfig;
